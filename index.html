@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Winnica Podkarpacka - Wina z Serca Polski</title>
+  <meta name="description" content="Odkryj wyjątkowe wina z Podkarpacia. Tradycyjne metody produkcji, degustacje w pięknej scenerii i sklep online z regionalnymi winami.">
+  <meta name="keywords" content="winnica, wina podkarpackie, degustacje wina, sklep z winem, wino czerwone, wino białe, wino różowe">
+  <meta property="og:title" content="Winnica Podkarpacka - Wina z Serca Polski">
+  <meta property="og:description" content="Tradycyjne wina z Podkarpacia, degustacje, wydarzenia i sklep online.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./attached_assets/generated_images/Podkarpacie_vineyard_hero_image_dc5178a5.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/custom.css">
+</head>
+<body class="min-h-screen bg-background text-foreground">
+  <svg aria-hidden="true" class="hidden">
+    <symbol id="icon-wine" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 22h8"></path>
+      <path d="M7 10h10"></path>
+      <path d="M12 15v7"></path>
+      <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"></path>
+    </symbol>
+    <symbol id="icon-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="21" r="1"></circle>
+      <circle cx="19" cy="21" r="1"></circle>
+      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+    </symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" x2="20" y1="12" y2="12"></line>
+      <line x1="4" x2="20" y1="6" y2="6"></line>
+      <line x1="4" x2="20" y1="18" y2="18"></line>
+    </symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18"></path>
+      <path d="m6 6 12 12"></path>
+    </symbol>
+    <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6 9 17l-5-5"></path>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 2v4"></path>
+      <path d="M16 2v4"></path>
+      <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+      <path d="M3 10h18"></path>
+    </symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </symbol>
+    <symbol id="icon-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </symbol>
+    <symbol id="icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+    </symbol>
+    <symbol id="icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+    </symbol>
+    <symbol id="icon-facebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+    </symbol>
+    <symbol id="icon-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+    </symbol>
+    <symbol id="icon-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+      <path d="M3 6h18"></path>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"></path>
+    </symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"></path>
+      <path d="M12 5v14"></path>
+    </symbol>
+  </svg>
+
+  <div class="min-h-screen flex flex-col">
+    <nav class="sticky top-0 z-50 bg-primary border-b border-primary-border">
+      <div class="max-w-7xl mx-auto px-5">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-primary-foreground"><use href="#icon-wine"></use></svg>
+            <span class="font-serif text-xl font-semibold text-primary-foreground">Winnica Podkarpacka</span>
+          </div>
+          <div class="hidden md:flex items-center gap-1">
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#o-nas">O Nas</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#nasze-wina">Nasze Wina</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#sklep">Sklep</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#degustacje">Degustacje</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#wydarzenia">Wydarzenia</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#kontakt">Kontakt</button>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <button id="style-trigger" class="w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+                <svg class="w-5 h-5"><use href="#icon-palette"></use></svg>
+              </button>
+              <div id="style-menu" class="hidden absolute right-0 mt-2 w-56 rounded-md border border-card-border bg-card shadow-md">
+                <div class="px-3 py-2 text-sm font-semibold">Wybierz styl</div>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="classic">
+                  <div>
+                    <div class="font-medium">Classic Burgundy</div>
+                    <div class="text-xs text-muted-foreground">Elegancki bordowy z akcentami złota</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="modern">
+                  <div>
+                    <div class="font-medium">Modern Minimal</div>
+                    <div class="text-xs text-muted-foreground">Minimalistyczny z czystymi liniami</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="rustic">
+                  <div>
+                    <div class="font-medium">Rustic Natural</div>
+                    <div class="text-xs text-muted-foreground">Naturalny z ciepłymi tonami</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+              </div>
+            </div>
+            <button id="cart-button" class="relative w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+              <svg class="w-5 h-5"><use href="#icon-cart"></use></svg>
+              <span id="cart-count" class="hidden absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-ring text-primary text-xs font-semibold flex items-center justify-center"></span>
+            </button>
+            <button id="mobile-menu-toggle" class="md:hidden w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+              <svg class="w-5 h-5"><use href="#icon-menu"></use></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="mobile-menu" class="hidden md:hidden bg-primary border-t border-primary-border">
+        <div class="px-5 py-3 space-y-1">
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#o-nas">O Nas</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#nasze-wina">Nasze Wina</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#sklep">Sklep</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#degustacje">Degustacje</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#wydarzenia">Wydarzenia</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#kontakt">Kontakt</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="flex-1">
+      <section class="relative h-[600px] md:h-[700px] w-full overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('./attached_assets/generated_images/Podkarpacie_vineyard_hero_image_dc5178a5.png')"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        <div class="relative h-full flex flex-col items-center justify-center text-center px-5 max-w-4xl mx-auto">
+          <div class="flex items-center gap-3 mb-5">
+            <svg class="w-10 h-10 text-primary-foreground"><use href="#icon-wine"></use></svg>
+            <h1 class="font-serif text-4xl md:text-6xl font-bold text-primary-foreground">Winnica Podkarpacka</h1>
+          </div>
+          <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Tradycyjne wina z serca Polski</p>
+          <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
+          <div class="flex flex-wrap gap-5 justify-center">
+            <button class="btn-ghost" data-scroll="#sklep">Przejdź do sklepu</button>
+            <button class="btn-ghost" data-scroll="#degustacje">Degustacje</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="o-nas" class="py-20 bg-secondary/20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">O Naszej Winnicy</h2>
+              <div class="space-y-5 text-muted-foreground">
+                <p>Winnica Podkarpacka to rodzinne gospodarstwo winiarskie położone w malowniczym regionie Podkarpacia. Od ponad 15 lat z pasją tworzymy wina, które odzwierciedlają unikalny charakter naszego terenu.</p>
+                <p>Nasze winnice rozciągają się na ponad 12 hektarach wzgórz o południowej ekspozycji, gdzie szczególny mikroklimat i gleby wapienne tworzą idealne warunki dla uprawy wybranych odmian winorośli.</p>
+                <p>Łączymy tradycyjne metody produkcji z nowoczesnymi technologiami, dbając o każdy detal procesu - od uprawy winogron po butelkowanie. Naszą misją jest tworzenie win najwyższej jakości, które zachwycają smakiem i odzwierciedlają bogactwo podkarpackiego terroir.</p>
+              </div>
+              <div class="grid grid-cols-3 gap-8 mt-12">
+                <div>
+                  <div class="text-3xl font-bold text-primary mb-2">15+</div>
+                  <div class="text-sm text-muted-foreground">Lat doświadczenia</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-bold text-primary mb-2">12</div>
+                  <div class="text-sm text-muted-foreground">Hektarów winnic</div>
+                </div>
+                <div>
+                  <div class="text-3xl font-bold text-primary mb-2">20+</div>
+                  <div class="text-sm text-muted-foreground">Rodzajów win</div>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-md border border-card-border overflow-hidden">
+              <div class="aspect-video">
+                <img src="./attached_assets/generated_images/Winery_building_exterior_dc05ab58.png" alt="Budynek winnicy" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="nasze-wina" class="py-20 bg-secondary/20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="text-center mb-12">
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nasze Odmiany Winogron</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Uprawiamy starannie wyselekcjonowane odmiany winorośli, które idealnie odnajdują się w klimacie Podkarpacia</p>
+          </div>
+          <div class="space-y-12">
+            <article class="rounded-md border border-card-border overflow-hidden">
+              <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                  <div class="aspect-[4/3] overflow-hidden">
+                    <img src="./attached_assets/generated_images/Purple_wine_grapes_closeup_ca6fa125.png" alt="Cabernet Sauvignon" class="w-full h-full object-cover">
+                  </div>
+                </div>
+                <div class="p-8 flex flex-col justify-center">
+                  <h3 class="font-serif text-2xl font-bold mb-5">Cabernet Sauvignon</h3>
+                  <p class="text-muted-foreground mb-8">Klasyczna odmiana winorośli czerwonej, znana z głębokich, bogatych win o aromach czarnej porzeczki, czekolady i cedru. Idealna do długiego leżakowania.</p>
+                  <div class="space-y-2">
+                    <h4 class="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Charakterystyka:</h4>
+                    <ul class="space-y-2">
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Pełne ciało</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Wysokie taniny</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Aromaty ciemnych owoców</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="rounded-md border border-card-border overflow-hidden">
+              <div class="grid md:grid-cols-2 gap-8 md:flex-row-reverse">
+                <div class="md:order-2">
+                  <div class="aspect-[4/3] overflow-hidden">
+                    <img src="./attached_assets/generated_images/Green_wine_grapes_closeup_89e97405.png" alt="Chardonnay" class="w-full h-full object-cover">
+                  </div>
+                </div>
+                <div class="p-8 flex flex-col justify-center md:order-1">
+                  <h3 class="font-serif text-2xl font-bold mb-5">Chardonnay</h3>
+                  <p class="text-muted-foreground mb-8">Najpopularniejsza biała odmiana na świecie. Nasze wina Chardonnay charakteryzują się eleganckim bukietem kwiatowym z nutami cytrusów i dojrzałych owoców.</p>
+                  <div class="space-y-2">
+                    <h4 class="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Charakterystyka:</h4>
+                    <ul class="space-y-2">
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Średnie ciało</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Delikatna kwasowość</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Nuty masła i wanilii</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="rounded-md border border-card-border overflow-hidden">
+              <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                  <div class="aspect-[4/3] overflow-hidden">
+                    <img src="./attached_assets/generated_images/Purple_wine_grapes_closeup_ca6fa125.png" alt="Pinot Noir" class="w-full h-full object-cover">
+                  </div>
+                </div>
+                <div class="p-8 flex flex-col justify-center">
+                  <h3 class="font-serif text-2xl font-bold mb-5">Pinot Noir</h3>
+                  <p class="text-muted-foreground mb-8">Wymagająca odmiana tworząca wina o subtelnym charakterze. Delikatne aromaty czerwonych owoców, ziemi i przypraw tworzą wyjątkową kompozycję smakową.</p>
+                  <div class="space-y-2">
+                    <h4 class="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Charakterystyka:</h4>
+                    <ul class="space-y-2">
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Lekkie ciało</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Niska zawartość tanin</span></li>
+                      <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Elegancki profil</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="sklep" class="py-20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="text-center mb-12">
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Sklep z Winami</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Odkryj naszą kolekcję wyjątkowych win. Wszystkie produkty dostępne z dostawą do domu</p>
+          </div>
+          <div class="grid lg:grid-cols-4 gap-8">
+            <aside class="lg:col-span-1 bg-card border border-card-border rounded-md p-5">
+              <div class="flex items-center justify-between mb-5">
+                <h3 class="font-semibold text-lg">Filtry</h3>
+                <button id="clear-filters" class="hidden text-sm text-primary hover:underline gap-2 items-center">
+                  <svg class="w-4 h-4"><use href="#icon-close"></use></svg>
+                  Wyczyść
+                </button>
+              </div>
+              <div class="space-y-5">
+                <div>
+                  <label for="category-select" class="mb-3 block font-medium">Typ wina</label>
+                  <select id="category-select" class="w-full border border-input rounded-md h-11 px-3 bg-background">
+                    <option>Wszystkie</option>
+                    <option>Czerwone</option>
+                    <option>Białe</option>
+                    <option>Różowe</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-3 block font-medium">Zakres cen: <span id="price-min-label">0</span> - <span id="price-max-label">100</span> zł</label>
+                  <div class="range-wrapper">
+                    <input type="range" id="price-min" min="0" max="100" step="1" value="0" aria-label="Minimalna cena">
+                    <input type="range" id="price-max" min="0" max="100" step="1" value="100" aria-label="Maksymalna cena">
+                    <div id="range-highlight"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="promo-only" class="checkbox">
+                  <label for="promo-only" class="cursor-pointer">Tylko promocje</label>
+                </div>
+                <div id="active-filters" class="hidden flex flex-wrap gap-2 pt-3 border-t">
+                  <span id="filter-category" class="hidden inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 text-sm">
+                    <span></span>
+                    <button aria-label="Usuń filtr kategorii" class="text-muted-foreground hover:text-foreground">
+                      <svg class="w-3 h-3"><use href="#icon-close"></use></svg>
+                    </button>
+                  </span>
+                  <span id="filter-promo" class="hidden inline-flex items-center gap-2 rounded-md bg-secondary px-3 py-1 text-sm">
+                    Promocje
+                    <button aria-label="Usuń filtr promocji" class="text-muted-foreground hover:text-foreground">
+                      <svg class="w-3 h-3"><use href="#icon-close"></use></svg>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </aside>
+            <div class="lg:col-span-3">
+              <div id="no-products" class="hidden text-center py-12">
+                <p class="text-muted-foreground">Nie znaleziono produktów spełniających kryteria filtrowania</p>
+              </div>
+              <div id="products-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="1" data-category="Czerwone" data-price="79.95" data-promo="true" data-discount="15" data-name="Cabernet Sauvignon Reserve" data-image="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" data-price-net="65.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" alt="Cabernet Sauvignon Reserve" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Czerwone</span>
+                    <span class="absolute top-3 right-3 inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">-15%</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Cabernet Sauvignon Reserve</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Wytrawne wino czerwone o głębokim rubinowym kolorze. Aromaty dojrzałych owoców z nutami czarnej porzeczki i delikatnych przypraw.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2021</span><span>• 13.5% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <span class="text-sm text-muted-foreground line-through">94.06 zł</span>
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-ring">79.95 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 65.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="2" data-category="Białe" data-price="59.00" data-promo="false" data-discount="0" data-name="Chardonnay Premium" data-image="./attached_assets/generated_images/White_wine_bottle_product_c4657e58.png" data-price-net="48.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/White_wine_bottle_product_c4657e58.png" alt="Chardonnay Premium" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Białe</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Chardonnay Premium</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Eleganckie wino białe o złocistym kolorze. Bogaty bukiet kwiatowy z nutami cytrusów i dojrzałych owoców.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2022</span><span>• 12.0% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-foreground">59.00 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 48.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="3" data-category="Różowe" data-price="51.66" data-promo="true" data-discount="10" data-name="Rosé Selection" data-image="./attached_assets/generated_images/Rosé_wine_bottle_product_cde1e2da.png" data-price-net="42.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/Rosé_wine_bottle_product_cde1e2da.png" alt="Rosé Selection" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Różowe</span>
+                    <span class="absolute top-3 right-3 inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">-10%</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Rosé Selection</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Delikatne wino różowe o jasnoróżowej barwie. Świeży smak z nutami truskawek i malin, idealne na letnie wieczory.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2022</span><span>• 11.5% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <span class="text-sm text-muted-foreground line-through">57.40 zł</span>
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-ring">51.66 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 42.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="4" data-category="Czerwone" data-price="67.65" data-promo="false" data-discount="0" data-name="Merlot Classic" data-image="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" data-price-net="55.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" alt="Merlot Classic" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Czerwone</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Merlot Classic</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Klasyczne wino czerwone o aksamitnej strukturze. Pełne ciało z aromatami śliwek i wiśni.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2021</span><span>• 13.0% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-foreground">67.65 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 55.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="5" data-category="Białe" data-price="63.96" data-promo="true" data-discount="20" data-name="Riesling Premium" data-image="./attached_assets/generated_images/White_wine_bottle_product_c4657e58.png" data-price-net="52.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/White_wine_bottle_product_c4657e58.png" alt="Riesling Premium" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Białe</span>
+                    <span class="absolute top-3 right-3 inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">-20%</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Riesling Premium</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Aromatyczne wino białe o kwiatowym bukiecie. Lekko słodkie z balansem kwasowości.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2022</span><span>• 11.0% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <span class="text-sm text-muted-foreground line-through">79.95 zł</span>
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-ring">63.96 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 52.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+                <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="6" data-category="Czerwone" data-price="88.56" data-promo="false" data-discount="0" data-name="Pinot Noir Estate" data-image="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" data-price-net="72.00">
+                  <div class="relative aspect-[3/4] bg-secondary/30">
+                    <img src="./attached_assets/generated_images/Red_wine_bottle_product_ed3cb6f6.png" alt="Pinot Noir Estate" class="w-full h-full object-contain p-8">
+                    <span class="absolute top-3 left-3 inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold">Czerwone</span>
+                  </div>
+                  <div class="p-5">
+                    <h3 class="font-serif text-xl font-semibold mb-2">Pinot Noir Estate</h3>
+                    <p class="text-muted-foreground text-sm mb-3 line-clamp-2">Wykwintne wino czerwone o subtelnym charakterze. Nuty czerwonych owoców i delikatne taniny.</p>
+                    <div class="flex items-baseline gap-2 text-sm text-muted-foreground"><span>Rocznik 2020</span><span>• 13.5% alk.</span></div>
+                  </div>
+                  <div class="p-5 pt-0 flex items-center justify-between gap-3">
+                    <div class="flex flex-col">
+                      <div class="flex items-baseline gap-2"><span class="text-2xl font-bold text-foreground">88.56 zł</span></div>
+                      <span class="text-xs text-muted-foreground">netto: 72.00 zł</span>
+                    </div>
+                    <button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="wydarzenia" class="py-20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="text-center mb-12">
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Wydarzenia i Degustacje</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Dołącz do naszych wyjątkowych wydarzeń i poznaj świat wina od podszewki</p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <article class="rounded-md border border-ring overflow-hidden p-8 space-y-5">
+              <div class="flex items-start justify-between">
+                <h3 class="font-serif text-xl font-bold">Degustacja Win Regionalnych</h3>
+                <span class="inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">Nadchodzące</span>
+              </div>
+              <div class="space-y-3 text-muted-foreground">
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-calendar"></use></svg><span>15 listopada 2025</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-clock"></use></svg><span>17:00 - 19:00</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-users"></use></svg><span>Max 20 osób</span></div>
+              </div>
+              <p class="text-muted-foreground">Profesjonalna degustacja naszych najlepszych win z przewodnikiem sommelier. Poznaj tajniki produkcji i historię winnicy.</p>
+              <div class="flex items-center justify-between pt-5 border-t">
+                <span class="font-semibold text-lg">120 zł/os</span>
+                <button class="btn-primary">Zapisz się</button>
+              </div>
+            </article>
+            <article class="rounded-md border border-ring overflow-hidden p-8 space-y-5">
+              <div class="flex items-start justify-between">
+                <h3 class="font-serif text-xl font-bold">Wieczór z Winem i Muzyką</h3>
+                <span class="inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">Nadchodzące</span>
+              </div>
+              <div class="space-y-3 text-muted-foreground">
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-calendar"></use></svg><span>22 listopada 2025</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-clock"></use></svg><span>19:00 - 22:00</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-users"></use></svg><span>Max 30 osób</span></div>
+              </div>
+              <p class="text-muted-foreground">Wyjątkowy wieczór z degustacją win, muzyką na żywo i lokalnymi przysmakam. Idealna okazja na spędzenie czasu z bliskimi.</p>
+              <div class="flex items-center justify-between pt-5 border-t">
+                <span class="font-semibold text-lg">150 zł/os</span>
+                <button class="btn-primary">Zapisz się</button>
+              </div>
+            </article>
+            <article class="rounded-md border border-card-border overflow-hidden p-8 space-y-5">
+              <div class="flex items-start justify-between">
+                <h3 class="font-serif text-xl font-bold">Warsztaty Sommelierskie</h3>
+                <span class="inline-flex items-center rounded-md bg-secondary px-3 py-1 text-xs font-semibold text-muted-foreground">Zakończone</span>
+              </div>
+              <div class="space-y-3 text-muted-foreground">
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-calendar"></use></svg><span>6 grudnia 2025</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-clock"></use></svg><span>14:00 - 17:00</span></div>
+                <div class="flex items-center gap-2"><svg class="w-4 h-4"><use href="#icon-users"></use></svg><span>Max 15 osób</span></div>
+              </div>
+              <p class="text-muted-foreground">Naucz się profesjonalnie degustować wino! Warsztaty prowadzone przez certyfikowanego sommeliera.</p>
+              <div class="flex items-center justify-between pt-5 border-t">
+                <span class="font-semibold text-lg">180 zł/os</span>
+                <button class="btn-primary">Zapisz się</button>
+              </div>
+            </article>
+          </div>
+          <div class="rounded-md border border-card-border overflow-hidden">
+            <div class="grid md:grid-cols-2">
+              <div class="aspect-video md:aspect-auto">
+                <img src="./attached_assets/generated_images/Wine_tasting_room_interior_e87dc07b.png" alt="Sala degustacyjna" class="w-full h-full object-cover">
+              </div>
+              <div class="p-8 flex flex-col justify-center">
+                <h3 class="font-serif text-2xl font-bold mb-5" id="degustacje">Prywatne Degustacje</h3>
+                <p class="text-muted-foreground mb-8">Zorganizuj wyjątkowe wydarzenie w naszej winnicy! Oferujemy indywidualne degustacje dla grup, firmowe imprezy integracyjne oraz wesela w otoczeniu winnic.</p>
+                <ul class="space-y-2 mb-8">
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Elastyczne godziny i terminy</span></li>
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Profesjonalny sommelier</span></li>
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Catering lokalnych produktów</span></li>
+                </ul>
+                <button class="btn-primary" data-scroll="#kontakt">Skontaktuj się z nami</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="kontakt" class="py-20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="text-center mb-12">
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Kontakt</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Zapraszamy do kontaktu. Chętnie odpowiemy na wszystkie pytania</p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-12">
+            <div class="space-y-8">
+              <div class="rounded-md border border-card-border bg-card">
+                <div class="p-8">
+                  <h3 class="font-semibold text-lg mb-8">Dane kontaktowe</h3>
+                  <div class="space-y-5">
+                    <div class="flex items-start gap-5">
+                      <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-primary"><use href="#icon-map-pin"></use></svg></div>
+                      <div>
+                        <div class="font-medium mb-1">Adres</div>
+                        <div class="text-muted-foreground text-sm">ul. Winnicza 12<br>38-700 Ustrzyki Dolne<br>Podkarpackie, Polska</div>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-5">
+                      <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-primary"><use href="#icon-phone"></use></svg></div>
+                      <div>
+                        <div class="font-medium mb-1">Telefon</div>
+                        <div class="text-muted-foreground text-sm">+48 123 456 789</div>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-5">
+                      <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-primary"><use href="#icon-mail"></use></svg></div>
+                      <div>
+                        <div class="font-medium mb-1">Email</div>
+                        <div class="text-muted-foreground text-sm">kontakt@winnicapodkarpacka.pl</div>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-5">
+                      <div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-primary"><use href="#icon-clock"></use></svg></div>
+                      <div>
+                        <div class="font-medium mb-1">Godziny otwarcia</div>
+                        <div class="text-muted-foreground text-sm">Pn-Pt: 10:00 - 18:00<br>Sb: 10:00 - 15:00<br>Nd: Zamknięte</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-md border border-card-border overflow-hidden">
+                <div class="aspect-video w-full">
+                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2560.123!2d22.5831!3d49.4304!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDnCsDI1JzQ5LjQiTiAyMsKwMzQnNTkuMiJF!5e0!3m2!1spl!2spl!4v1234567890" width="100%" height="100%" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa lokalizacji winnicy"></iframe>
+                </div>
+              </div>
+            </div>
+            <div class="rounded-md border border-card-border bg-card">
+              <div class="p-8">
+                <h3 class="font-semibold text-lg mb-8">Wyślij wiadomość</h3>
+                <form id="contact-form" class="space-y-5">
+                  <div>
+                    <label for="name" class="font-medium">Imię i nazwisko</label>
+                    <input id="name" name="name" required placeholder="Jan Kowalski" class="mt-2 w-full h-11 rounded-md border border-input px-3 bg-background">
+                  </div>
+                  <div>
+                    <label for="email" class="font-medium">Email</label>
+                    <input id="email" name="email" type="email" required placeholder="jan@example.com" class="mt-2 w-full h-11 rounded-md border border-input px-3 bg-background">
+                  </div>
+                  <div>
+                    <label for="phone" class="font-medium">Telefon</label>
+                    <input id="phone" name="phone" type="tel" placeholder="+48 123 456 789" class="mt-2 w-full h-11 rounded-md border border-input px-3 bg-background">
+                  </div>
+                  <div>
+                    <label for="message" class="font-medium">Wiadomość</label>
+                    <textarea id="message" name="message" rows="5" required placeholder="Twoja wiadomość..." class="mt-2 w-full rounded-md border border-input px-3 py-3 bg-background"></textarea>
+                  </div>
+                  <button type="submit" class="btn-primary w-full">Wyślij wiadomość</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bg-primary text-primary-foreground">
+      <div class="max-w-7xl mx-auto px-5 py-12">
+        <div class="grid md:grid-cols-4 gap-12 mb-12">
+          <div>
+            <div class="flex items-center gap-2 mb-5">
+              <svg class="w-6 h-6"><use href="#icon-wine"></use></svg>
+              <span class="font-serif text-xl font-semibold">Winnica Podkarpacka</span>
+            </div>
+            <p class="text-primary-foreground/80 text-sm mb-5">Tradycyjne wina z serca Polski, produkowane z pasją od 2009 roku.</p>
+            <div class="flex gap-3">
+              <button class="footer-icon"><svg class="w-5 h-5"><use href="#icon-facebook"></use></svg></button>
+              <button class="footer-icon"><svg class="w-5 h-5"><use href="#icon-instagram"></use></svg></button>
+              <button class="footer-icon"><svg class="w-5 h-5"><use href="#icon-mail"></use></svg></button>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-5">Szybkie Linki</h3>
+            <ul class="space-y-3 text-sm text-primary-foreground/80">
+              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#o-nas">O Nas</button></li>
+              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#nasze-wina">Nasze Wina</button></li>
+              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#sklep">Sklep</button></li>
+              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#wydarzenia">Wydarzenia</button></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-5">Kontakt</h3>
+            <ul class="space-y-3 text-sm text-primary-foreground/80">
+              <li>ul. Winnicza 12<br>38-700 Ustrzyki Dolne</li>
+              <li>Tel: +48 123 456 789</li>
+              <li>kontakt@winnicapodkarpacka.pl</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-5">Newsletter</h3>
+            <p class="text-primary-foreground/80 text-sm mb-5">Zapisz się do newslettera i otrzymuj informacje o nowościach i promocjach</p>
+            <div class="flex gap-2">
+              <input type="email" placeholder="Twój email" class="w-full h-11 px-3 rounded-md bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50">
+              <button class="px-4 h-11 rounded-md bg-primary-foreground text-primary font-semibold">Zapisz</button>
+            </div>
+          </div>
+        </div>
+        <div class="h-px bg-primary-foreground/20 mb-8"></div>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-5 text-sm text-primary-foreground/80">
+          <p>© 2024 Winnica Podkarpacka. Wszelkie prawa zastrzeżone.</p>
+          <div class="flex gap-8">
+            <button class="hover:text-primary-foreground transition-colors">Polityka Prywatności</button>
+            <button class="hover:text-primary-foreground transition-colors">Regulamin</button>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="cart-overlay" class="cart-overlay"></div>
+  <aside id="cart-panel" class="cart-panel">
+    <div class="p-6 border-b border-border flex items-center justify-between">
+      <div class="flex items-center gap-2 font-semibold text-lg">
+        <svg class="w-5 h-5"><use href="#icon-bag"></use></svg>
+        <span>Koszyk</span>
+        <span id="cart-items-count" class="text-muted-foreground">(0)</span>
+      </div>
+      <button id="close-cart" class="w-9 h-9 inline-flex items-center justify-center rounded-md hover:bg-muted">
+        <svg class="w-5 h-5"><use href="#icon-close"></use></svg>
+      </button>
+    </div>
+    <div id="cart-empty" class="flex-1 flex flex-col items-center justify-center text-center py-12 text-muted-foreground">
+      <svg class="w-16 h-16 mb-5"><use href="#icon-bag"></use></svg>
+      <p class="font-semibold text-lg mb-2 text-foreground">Koszyk jest pusty</p>
+      <p class="text-sm">Dodaj produkty do koszyka, aby kontynuować zakupy</p>
+    </div>
+    <div id="cart-items" class="flex-1 overflow-y-auto hidden"></div>
+    <div id="cart-summary" class="hidden border-t border-border p-6 space-y-3">
+      <div class="flex justify-between text-sm"><span class="text-muted-foreground">Wartość netto:</span><span id="cart-subtotal">0.00 zł</span></div>
+      <div class="flex justify-between text-sm"><span class="text-muted-foreground">VAT (23%):</span><span id="cart-tax">0.00 zł</span></div>
+      <div class="h-px bg-border"></div>
+      <div class="flex justify-between font-semibold text-lg"><span>Razem:</span><span id="cart-total">0.00 zł</span></div>
+      <button id="checkout" class="btn-primary w-full">Przejdź do płatności</button>
+    </div>
+  </aside>
+
+  <script src="./assets/js/main.js" defer></script>
+</body>
+</html>
