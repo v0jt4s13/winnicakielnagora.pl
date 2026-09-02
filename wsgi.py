@@ -221,7 +221,12 @@ def panel_api(akcja: str):
         try:
             cennik.zapisz(dane)
         except OSError as blad:
-            return _json({"ok": False, "komunikat": f"Nie udało się zapisać: {blad}"}, 500)
+            # Najczestszy powod na produkcji: katalog wskazany przez CENNIK_SCIEZKA
+            # nie istnieje albo nalezy do innego uzytkownika niz proces gunicorna.
+            return _json({"ok": False, "komunikat":
+                          f"Nie udało się zapisać do {cennik.CENNIK}: {blad}. "
+                          "Sprawdź, czy katalog istnieje i czy użytkownik aplikacji ma "
+                          "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wina"]),
                       "kopia": str(cennik.KOPIA.relative_to(cennik.PROJEKT))})
 

@@ -243,10 +243,15 @@ async function zapisz() {
     });
     const wynik = await odp.json();
     if (!odp.ok) {
+      // Walidacja odsyla `bledy`, awaria zapisu — `komunikat`. Bez tej drugiej galezi
+      // blad uprawnien do pliku pokazywal sie jako pusta lista.
       const lista = (wynik.bledy || [])
         .map((b) => `<li>${b.pozycja === null ? "cały plik" : `pozycja ${b.pozycja + 1}`}: ${Produkty.escape(b.komunikat)}</li>`)
         .join("");
-      pokazKomunikat(`Serwer odrzucił zapis:<ul>${lista}</ul>`, "blad");
+      const tresc = lista
+        ? `Serwer odrzucił zapis:<ul>${lista}</ul>`
+        : `Nie udało się zapisać (HTTP ${odp.status}): ${Produkty.escape(wynik.komunikat || "serwer nie podał powodu")}`;
+      pokazKomunikat(tresc, "blad");
       return;
     }
     oznaczZmiane(false);

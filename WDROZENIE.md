@@ -83,8 +83,13 @@ Uwagi:
   i nadać prawo zapisu użytkownikowi `winnicakielnagora`:
 
   ```bash
-  sudo -u winnicakielnagora mkdir -p /opt/apps/app_winnicakielnagora.pl/dane
+  sudo mkdir -p /opt/apps/app_winnicakielnagora.pl/dane
+  sudo chown winnicakielnagora:www-data /opt/apps/app_winnicakielnagora.pl/dane
+  sudo chmod 750 /opt/apps/app_winnicakielnagora.pl/dane
   ```
+
+  Bez prawa zapisu panel wczyta cennik, ale **zapis skończy się błędem 500**. Aplikacja poda
+  wtedy w komunikacie ścieżkę, do której nie mogła pisać.
 
 - Hash generuje `python3 tools/panel/haslo.py`. **Hasła nie zapisuj nigdzie** — do konfiguracji
   trafia wyłącznie hash.
