@@ -275,3 +275,46 @@ przekierowaniem z HTTP. Jeśli nie — nie włączaj `PANEL_UZYTKOWNIK` ani `PAN
 Warto też rozważyć ograniczenie `/tools/panel/` po adresie IP na poziomie proxy — wtedy nawet
 wyciek hasła nie wystarczy, żeby wejść.
 
+### 28. PILNE: katalog `.git` publicznie dostępny na serwerze dev
+
+Stan na 2026-09-02, sprawdzony na żywo:
+
+```
+https://ops02.jdblayer.com/winnicakielnagora.pl/.git/config      → 200
+https://ops02.jdblayer.com/winnicakielnagora.pl/wsgi.py          → 200
+https://ops02.jdblayer.com/winnicakielnagora.pl/cennik.py        → 200
+https://ops02.jdblayer.com/winnicakielnagora.pl/TODO.md          → 200
+```
+
+Każdy może pobrać całą historię repozytorium. Lista dozwolonych plików z `wsgi.py`
+(`PLIKI_PUBLICZNE`, `KATALOGI_PUBLICZNE`) **nie działa na serwerze** — pliki są wydawane
+z pominięciem aplikacji.
+
+Do zrobienia natychmiast, niezależnie od reszty: zablokować `.git`, `*.py` i `*.md`
+na poziomie proxy, żeby nie zależało to wyłącznie od kodu aplikacji.
+
+### 29. Serwer nie wykonuje tras z `wsgi.py`
+
+Dowody z tego samego sprawdzenia:
+
+- `/tools/panel/api/wczytaj` → domyślna strona 404 **Werkzeuga**, nie nasza
+- `/wina/monarch` (ładny adres) → 404, choć `wsgi.py` to obsługuje
+- `/nie-ma-takiej-strony` → 404 Werkzeuga zamiast naszego `404.html`
+- `index.html` na serwerze jest **aktualny**, więc pliki się wdrażają
+
+Wniosek: pliki są świeże, ale proces nie uruchamia aktualnego `wsgi.py` albo nie został
+przeładowany. Do sprawdzenia: czym dokładnie startuje gunicorn, z jakiego katalogu, czy
+restartuje się po wdrożeniu i czy proxy nie serwuje katalogu z pominięciem aplikacji.
+
+Drugi możliwy trop — dev stoi pod podścieżką `/winnicakielnagora.pl/`, a trasy Flaska są
+zapisane od korzenia. Dodana warstwa `ObetnijPrzedrostek` honoruje `SCRIPT_NAME`, a gdyby
+proxy go nie wysyłało, można ustawić `SCIEZKA_BAZOWA=winnicakielnagora.pl`.
+
+### 30. Uruchamianie lokalnego serwera panelu z przeglądarki — odrzucone
+
+Pomysł: przycisk w panelu startujący `tools/panel/serwer.py` do czasu wylogowania.
+**Odrzucone 2026-09-02** z trzech powodów: na produkcji API jest w `wsgi.py`, więc lokalny
+serwer nie jest do niczego potrzebny; uruchamianie procesów z żądania HTTP zamienia błąd
+w uwierzytelnianiu w zdalne wykonanie kodu; a przy Basic Auth nie istnieje moment
+„wylogowania", w którym dałoby się taki proces zatrzymać.
+

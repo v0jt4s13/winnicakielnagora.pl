@@ -17,7 +17,7 @@ PROJEKT = Path(__file__).resolve().parent.parent
 # --- atrapa Flaska ----------------------------------------------------------
 class _App:
     def __init__(self, *_, **__):
-        pass
+        self.wsgi_app = lambda environ, start_response: None
 
     def route(self, *_, **__):
         return lambda funkcja: funkcja

@@ -52,13 +52,26 @@ async function wczytaj() {
     }
     renderWszystko();
   } catch (blad) {
-    pokazKomunikat(
-      `Nie udało się wczytać cennika: ${Produkty.escape(blad.message)}.<br>` +
-        "Jeśli otworzyłeś tę stronę przez zwykły serwer plików, panel nie ma skąd wziąć " +
-        "danych — uruchom <code>python3 tools/panel/serwer.py</code> i wejdź na " +
-        "<code>http://127.0.0.1:8765</code>.",
-      "blad"
-    );
+    // Najczestszy przypadek: zamiast JSON-a przyszedl HTML, czyli pod adresem api/
+    // nie ma trasy i odpowiedzial serwer plikow albo strona bledu.
+    const zamiastJson = /Unexpected token|not valid JSON|<!doctype/i.test(blad.message);
+    const lokalnie = ["localhost", "127.0.0.1"].includes(location.hostname);
+    let rada;
+    if (!zamiastJson) {
+      rada = "";
+    } else if (lokalnie) {
+      rada =
+        "<br>Wygląda na to, że otworzyłeś panel przez zwykły serwer plików. Uruchom " +
+        "<code>python3 tools/panel/serwer.py</code> i wejdź na <code>http://127.0.0.1:8765</code>.";
+    } else {
+      rada =
+        `<br>Adres <code>${location.pathname.replace(/panel\.html$/, "api/wczytaj")}</code> ` +
+        "zwrócił stronę HTML zamiast danych, czyli aplikacja nie obsłużyła tej trasy. " +
+        "Sprawdź, czy serwer uruchamia aktualne <code>wsgi.py</code> i czy został przeładowany " +
+        "po ostatnim wdrożeniu. Panel na produkcji <strong>nie potrzebuje</strong> " +
+        "<code>tools/panel/serwer.py</code> — API jest w <code>wsgi.py</code>.";
+    }
+    pokazKomunikat(`Nie udało się wczytać cennika: ${Produkty.escape(blad.message)}${rada}`, "blad");
   }
 }
 

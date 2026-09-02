@@ -19,7 +19,8 @@ PROJEKT = Path(__file__).resolve().parent.parent
 
 
 class _App:
-    def __init__(self, *a, **k): pass
+    def __init__(self, *a, **k):
+        self.wsgi_app = lambda environ, start_response: None
     def route(self, *a, **k): return lambda f: f
 
 

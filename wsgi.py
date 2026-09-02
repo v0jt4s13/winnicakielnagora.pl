@@ -12,7 +12,32 @@ BASE = Path(__file__).parent
 STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po buildzie, inaczej katalog repo
 STATIC_ROOT = next((p for p in STATIC_CANDIDATES if p.exists()), BASE)
 
-app = Flask(__name__, static_folder=str(STATIC_ROOT), static_url_path="")
+app = Flask(__name__, static_folder=None)  # statyki wydajemy sami, przez serve()
+
+
+# Witryna bywa serwowana pod podsciezka (dev stoi pod /winnicakielnagora.pl/). Jesli proxy
+# nie obcina przedrostka, trasy zapisane od korzenia nie dopasuja sie do niczego. Ta warstwa
+# obcina go sama, gdy ustawisz SCIEZKA_BAZOWA; honoruje tez SCRIPT_NAME, ktory wysyla
+# wiekszosc poprawnie skonfigurowanych proxy.
+SCIEZKA_BAZOWA = "/" + os.environ.get("SCIEZKA_BAZOWA", "").strip().strip("/")
+
+
+class ObetnijPrzedrostek:
+    def __init__(self, aplikacja):
+        self.aplikacja = aplikacja
+
+    def __call__(self, environ, start_response):
+        przedrostek = environ.get("SCRIPT_NAME") or (
+            SCIEZKA_BAZOWA if SCIEZKA_BAZOWA != "/" else ""
+        )
+        sciezka = environ.get("PATH_INFO", "")
+        if przedrostek and sciezka.startswith(przedrostek):
+            environ["PATH_INFO"] = sciezka[len(przedrostek):] or "/"
+            environ["SCRIPT_NAME"] = przedrostek
+        return self.aplikacja(environ, start_response)
+
+
+app.wsgi_app = ObetnijPrzedrostek(app.wsgi_app)
 
 
 # Katalogiem statycznym jest caly katalog repozytorium, wiec bez tej listy publicznie
