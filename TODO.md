@@ -349,3 +349,20 @@ Sprawdzone z zewnątrz:
 
 Od tej chwili `data/wina.json` w repozytorium jest **wersją startową** — produkcja żyje
 własnym plikiem (`TODO.md` #26).
+
+### 34. Cennik z produkcji nie wraca do repozytorium
+
+Panel działa i Właściciel zapisał już zmianę wyłącznie na serwerze (2026-09-02:
+`seyval-blanc-2022` → `seyval-blanc-2023`). Wersja startowa w `data/wina.json` zaczyna się
+rozjeżdżać z produkcją — tak jak przewiduje wariant A z #26, ale warto mieć na to nawyk.
+
+Zgranie produkcji do repozytorium:
+
+```bash
+scp ops02:/opt/apps/app_winnicakielnagora.pl/dane/wina.json data/wina.json
+```
+
+Do rozważenia później: zadanie w `production_tasks.json`, które raz na dobę kopiuje plik
+w bezpieczne miejsce — dziś jedyną kopią jest `wina.json.bak` obok oryginału, więc skasowanie
+katalogu `dane/` zabiera i cennik, i kopię.
+

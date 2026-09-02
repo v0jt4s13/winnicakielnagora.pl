@@ -63,6 +63,10 @@ def main() -> int:
         sprawdz("zapis trafil na sciezke robocza",
                 json.loads(cennik.CENNIK.read_text(encoding="utf-8"))["wina"] == [])
         sprawdz("powstala kopia zapasowa", cennik.KOPIA.exists())
+        sprawdz("cennik ma prawa 640, nie 600 po mkstemp",
+                oct(cennik.CENNIK.stat().st_mode)[-3:] == "640")
+        sprawdz("kopia zapasowa ma te same prawa",
+                oct(cennik.KOPIA.stat().st_mode)[-3:] == "640")
 
         # 5) ponowny zasiew nie nadpisuje istniejacego pliku
         cennik.zapewnij_plik()

@@ -44,6 +44,9 @@ def zapewnij_plik() -> None:
 
 SZKIELET = {"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "wina": []}
 
+# Wlasciciel i grupa moga czytac, reszta nie. Grupa to zwykle www-data.
+PRAWA_PLIKU = 0o640
+
 POLA_WYMAGANE = ("id", "nazwa", "odmiana_slug", "kategoria", "pojemnosc_ml",
                  "cena_brutto", "rabat_procent", "dostepne", "opis", "zdjecie")
 POLA_OPCJONALNE = ("rocznik", "alkohol")
@@ -159,11 +162,15 @@ def zapisz(dane: dict) -> None:
     CENNIK.parent.mkdir(parents=True, exist_ok=True)
     if CENNIK.exists():
         KOPIA.write_bytes(CENNIK.read_bytes())
+        os.chmod(KOPIA, PRAWA_PLIKU)
     tresc = json.dumps(dane, ensure_ascii=False, indent=2) + "\n"
     uchwyt, tymczasowy = tempfile.mkstemp(dir=str(CENNIK.parent), suffix=".tmp")
     try:
         with os.fdopen(uchwyt, "w", encoding="utf-8") as plik:
             plik.write(tresc)
+        # mkstemp tworzy plik z prawami 600, a os.replace je zachowuje. Bez tego cennik
+        # po pierwszym zapisie stawal sie czytelny wylacznie dla wlasciciela procesu.
+        os.chmod(tymczasowy, PRAWA_PLIKU)
         os.replace(tymczasowy, CENNIK)
     except BaseException:
         Path(tymczasowy).unlink(missing_ok=True)
