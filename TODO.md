@@ -172,27 +172,16 @@ Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pytho
 - **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać przy
   wklejaniu czegokolwiek poza notatkami o winie.
 
-### 21. Kategorie Dornfeldera i Monarcha w cenniku
+### ~~21. Kategorie Dornfeldera i Monarcha~~ — ZAMKNIĘTE 2026-09-03
 
-W `data/wina.json` obie pozycje mają `kategoria: "Białe"`, a to odmiany czerwone — tak też
-opisuje je sekcja „Nasze odmiany" i Twój opis winnicy („na wina czerwone i różowe odmian
-Monarch i Dornfelder"). Skutek: filtr „Czerwone" w sklepie pokazuje tylko jedną pozycję,
-a karta Dornfeldera ma etykietę „Białe" przy zdjęciu czerwonego wina.
+Poprawione przez Właściciela w panelu. Na produkcji: Dornfelder, Monarch i Swenson Red
+mają „Czerwone", pozostałe cztery odmiany „Białe" — czyli **3 czerwone i 4 białe**,
+zgodnie z opisem winnicy z materiałów źródłowych.
 
-Opis Monarcha wygenerowany w panelu poszedł za tą kategorią i mówi „to białe wino”.
-Jeśli z tych odmian faktycznie powstaje białe wino (co jest możliwe), warto to w opisie
-napisać wprost. Jeśli to pomyłka przy wprowadzaniu — zmiana kategorii w panelu zajmie chwilę.
-**Nie ruszałem tych danych.**
+Do potwierdzenia drobiazg: Właściciel napisał „4 czerwone i 3 białe", co jest odwrotnością
+stanu w danych. Jeśli któreś wino ma się jeszcze przenieść — poprawka zajmuje chwilę
+w panelu.
 
-### ~~22. „Swenson Red" czy „Svenson Red"~~ — ZAMKNIĘTE 2026-09-02
-
-Ujednolicone na **Swenson Red** (zgodnie z Wikipedią wskazaną w materiałach). Zmienione:
-kafelek odmiany, `wina/swenson-red.html`, tytuł, `canonical`, Open Graph, JSON-LD,
-`sitemap.xml`, nazwy zdjęć w `attached_assets/photos/`, mapowanie w `tools/optimize-photos.py`
-oraz pola `odmiana_slug` i `zdjecie` w `data/wina.json`.
-
-Stary adres `/wina/svenson-red.html` zwraca teraz 404. Nie robiłem przekierowania, bo strona
-nie jest jeszcze online — gdyby była, trzeba by je dodać.
 
 ### 23. Sklep obiecuje dostawę, której nie ma
 
@@ -350,7 +339,7 @@ Sprawdzone z zewnątrz:
 Od tej chwili `data/wina.json` w repozytorium jest **wersją startową** — produkcja żyje
 własnym plikiem (`TODO.md` #26).
 
-### 34. Cennik z produkcji nie wraca do repozytorium
+### 34. Cennik z produkcji nie wraca do repozytorium — niski priorytet
 
 Panel działa i Właściciel zapisał już zmianę wyłącznie na serwerze (2026-09-02:
 `seyval-blanc-2022` → `seyval-blanc-2023`). Wersja startowa w `data/wina.json` zaczyna się
@@ -362,7 +351,8 @@ Zgranie produkcji do repozytorium:
 scp ops02:/opt/apps/app_winnicakielnagora.pl/dane/wina.json data/wina.json
 ```
 
-Do rozważenia później: zadanie w `production_tasks.json`, które raz na dobę kopiuje plik
-w bezpieczne miejsce — dziś jedyną kopią jest `wina.json.bak` obok oryginału, więc skasowanie
-katalogu `dane/` zabiera i cennik, i kopię.
+Właściciel uznał to za mało istotne (2026-09-03). Zostaje jako notatka: jedyną kopią
+produkcyjnego cennika jest `wina.json.bak` leżący obok oryginału, więc skasowanie katalogu
+`dane/` zabiera i cennik, i kopię. Gdyby kiedyś miało to zaboleć — zadanie w
+`production_tasks.json` kopiujące plik raz na dobę rozwiązuje sprawę.
 
