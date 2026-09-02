@@ -66,8 +66,8 @@ def main() -> int:
     # --- naglowki cache -------------------------------------------------------
     przypadki = [
         ("/", "no-cache", "HTML musi byc swiezy"),
-        ("/assets/css/style.css", "max-age=3600", "CSS"),
-        ("/assets/js/main.js", "max-age=3600", "JS"),
+        ("/assets/css/style.css", "no-cache", "CSS bez max-age — patrz TODO #35"),
+        ("/assets/js/main.js", "no-cache", "JS bez max-age"),
         ("/attached_assets/photos/winnica-panorama-01.jpg", "max-age=2592000", "zdjecia"),
         ("/data/wina.json", "no-store", "cennik zmieniany panelem"),
     ]

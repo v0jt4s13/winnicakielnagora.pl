@@ -81,9 +81,13 @@ CACHE_WG_ROZSZERZENIA = {
     ".svg": "public, max-age=2592000",
     ".ico": "public, max-age=2592000",
     ".woff2": "public, max-age=2592000",
-    ".css": "public, max-age=3600",
-    ".js": "public, max-age=3600",
 }
+
+# CSS i JS celowo BEZ max-age. Nazwy plikow nie zawieraja skrotu tresci, wiec kazde
+# max-age oznacza, ze po wdrozeniu czesc uzytkownikow siedzi na starym wygladzie —
+# przy aktywnie zmienianym projekcie to realny problem, sprawdzony na wlasnej skorze.
+# send_from_directory wysyla ETag, wiec powrot to warunkowe zadanie i 304 bez ciala.
+# Dluzszy cache dopiero razem ze stemplowaniem wersji (?v=skrot) — TODO.md #35.
 
 
 def _mozna_skompresowac(odpowiedz) -> bool:

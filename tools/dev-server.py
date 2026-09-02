@@ -22,7 +22,9 @@ class ObslugaWitryny(SimpleHTTPRequestHandler):
         if not plik_404.is_file():
             return super().send_error(code, message, explain)
 
-        tresc = plik_404.read_bytes()
+        tresc = plik_404.read_text(encoding="utf-8").replace(
+            '<base href="./">', '<base href="/">', 1
+        ).encode("utf-8")
         self.send_response(HTTPStatus.NOT_FOUND)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(tresc)))

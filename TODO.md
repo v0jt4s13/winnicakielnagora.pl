@@ -366,3 +366,25 @@ produkcyjnego cennika jest `wina.json.bak` leżący obok oryginału, więc skaso
 `dane/` zabiera i cennik, i kopię. Gdyby kiedyś miało to zaboleć — zadanie w
 `production_tasks.json` kopiujące plik raz na dobę rozwiązuje sprawę.
 
+### 35. Długi cache dla CSS i JS wymaga stemplowania wersji
+
+`Cache-Control` dla CSS i JS zostaje na `no-cache` (ETag → 304, jedna runda bez ciała).
+Próba `max-age=3600` skończyła się tym, że przeglądarka pokazywała stary `custom.css`
+i strona 404 renderowała się bez stylów — a projektant zmienia CSS na bieżąco.
+
+Żeby bezpiecznie wydłużyć cache, adres musi się zmieniać razem z treścią:
+`tools/stempluj-zasoby.py` liczący skrót z każdego pliku CSS/JS i przepisujący odnośniki
+w HTML na `...style.css?v=ab12cd34`. HTML jest `no-cache`, więc nowa strona natychmiast
+wskazuje nowe adresy. Do tego test pilnujący, że skróty w HTML zgadzają się z plikami.
+
+Obrazy i fonty mają już `max-age=2592000` — ich nazwy są stabilne.
+
+### 36. Style strony 404 weszły do repozytorium moim commitem
+
+`assets/css/custom.css` dostało 41 reguł `error-page` w commicie `10e0209`, czyli moim —
+to była niezacommitowana praca projektanta, którą zgarnąłem przez `git add -A`. Sama praca
+jest w porządku i strona wygląda dobrze, ale autorstwo w historii jest mylące.
+
+Ten sam błąd popełniłem wcześniej ze zrzutami audytu. Wniosek na przyszłość: przed
+`git add -A` sprawdzać `git status` i commitować wybiórczo, gdy ktoś pracuje równolegle.
+
