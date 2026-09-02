@@ -7,3 +7,5 @@
 # materialy zrodlowe (580 MB zdjec i filmow) - do repo trafiaja tylko zoptymalizowane
 # kopie w attached_assets/photos/, generowane przez tools/optimize-photos.py
 docs/
+# kopia zapasowa robiona przez panel redakcyjny
+data/wina.json.bak

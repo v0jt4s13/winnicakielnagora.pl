@@ -1,0 +1,162 @@
+/* Panel ma wlasny, neutralny wyglad — celowo NIE korzysta z motywow witryny
+   ani z custom.css. Jedynym wyjatkiem jest podglad karty, ktory laduje
+   style.css, zeby wygladac dokladnie jak sklep. */
+
+:root {
+  --tlo: #f6f6f4;
+  --karta: #ffffff;
+  --tekst: #23201d;
+  --przygaszony: #6b6560;
+  --ramka: #ddd8d2;
+  --akcent: #6d1f2e;
+  --akcent-tekst: #ffffff;
+  --ostrzezenie: #8a5a00;
+  --blad: #a11b2b;
+  --sukces: #1f6b3a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 0 4rem;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+.pasek {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--karta);
+  border-bottom: 1px solid var(--ramka);
+}
+
+.pasek h1 { margin: 0; font-size: 1.25rem; }
+.sciezka { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--przygaszony); }
+.pasek-akcje { display: flex; align-items: center; gap: 0.6rem; }
+
+.stan { font-size: 0.85rem; color: var(--ostrzezenie); }
+.stan:empty { display: none; }
+
+.przycisk {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+  background: var(--karta);
+  color: var(--tekst);
+  font: inherit;
+  cursor: pointer;
+}
+.przycisk:hover { border-color: var(--przygaszony); }
+.przycisk.glowny { background: var(--akcent); border-color: var(--akcent); color: var(--akcent-tekst); }
+.przycisk.niebezpieczny { color: var(--blad); }
+.przycisk:disabled { opacity: 0.45; cursor: default; }
+
+.komunikat {
+  max-width: 1100px;
+  margin: 0 auto 1.25rem;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  border-left: 4px solid var(--przygaszony);
+  background: var(--karta);
+}
+.komunikat.sukces { border-left-color: var(--sukces); }
+.komunikat.blad { border-left-color: var(--blad); }
+.komunikat.ostrzezenie { border-left-color: var(--ostrzezenie); }
+.komunikat ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+
+.sekcja {
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  background: var(--karta);
+  border: 1px solid var(--ramka);
+  border-radius: 8px;
+}
+.sekcja h2 { margin: 0; font-size: 1.05rem; }
+.naglowek-sekcji {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.licznik { font-weight: normal; color: var(--przygaszony); }
+.podpowiedz { margin: -0.5rem 0 1rem; font-size: 0.85rem; color: var(--przygaszony); }
+.pusto { margin: 0; color: var(--przygaszony); }
+
+.lista { list-style: none; margin: 0; padding: 0; }
+.lista li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid var(--ramka);
+  cursor: pointer;
+}
+.lista li:last-child { border-bottom: 0; }
+.lista li:hover { background: var(--tlo); }
+.lista li.wybrana { background: var(--tlo); box-shadow: inset 3px 0 0 var(--akcent); }
+.lista .nazwa { flex: 1 1 auto; font-weight: 600; }
+.lista .meta { color: var(--przygaszony); font-size: 0.85rem; }
+.lista .cena { font-variant-numeric: tabular-nums; }
+.lista .kropka { font-size: 0.8rem; }
+.lista .dostepna { color: var(--sukces); }
+.lista .niedostepna { color: var(--przygaszony); }
+.lista .promocja { color: var(--ostrzezenie); }
+
+.formularz {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+.formularz label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; color: var(--przygaszony); }
+.formularz input, .formularz select, .formularz textarea {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+  background: var(--karta);
+  color: var(--tekst);
+  font: inherit;
+}
+.formularz input:focus, .formularz select:focus, .formularz textarea:focus {
+  outline: 2px solid var(--akcent);
+  outline-offset: 1px;
+}
+.formularz small { color: var(--przygaszony); font-size: 0.75rem; }
+.formularz .pole-szerokie { grid-column: 1 / -1; }
+.formularz .pole-checkbox { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--tekst); }
+.formularz .pole-checkbox input { width: auto; }
+.formularz .blad-pola { color: var(--blad); font-size: 0.75rem; }
+.formularz .niepoprawne input,
+.formularz .niepoprawne select,
+.formularz .niepoprawne textarea { border-color: var(--blad); }
+
+.podglad { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--ramka); }
+.podglad h3 { margin: 0 0 0.8rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--przygaszony); }
+.podglad-ramka { max-width: 320px; }
+
+.znaczniki { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; padding: 0; }
+.znaczniki li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ramka);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.znaczniki button { border: 0; background: none; color: var(--przygaszony); cursor: pointer; font-size: 1rem; line-height: 1; }
+.znaczniki button:hover { color: var(--blad); }
+.dodaj-kategorie { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dodaj-kategorie input { padding: 0.5rem 0.6rem; border: 1px solid var(--ramka); border-radius: 6px; font: inherit; }

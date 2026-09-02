@@ -552,26 +552,28 @@ dochodzi `frontend/theming`.
 
 **Etap 1 — nie wymaga zdjęcia żadnej blokady**
 
-- [ ] Inject standards
-- [ ] Poprawki faktów w `#o-nas` (Kielnarowa, 1 ha, 2020/2024, 7 odmian), stopce i `<title>`
-- [ ] Podmiana zdjęć AI na prawdziwe w `index.html` (bez plików z członem `-osoby-`)
-- [ ] `wina/souvignier-gris.html` — wzorzec dla pozostałych
-- [ ] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder, Svenson Red
-- [ ] `wina/soki.html` — strona zbiorcza soków
-- [ ] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
-- [ ] Przegląd w przeglądarce we wszystkich trzech motywach
+- [x] Inject standards
+- [x] Poprawki faktów w `#o-nas` (Kielnarowa, 1 ha, 2020/2024, 7 odmian), stopce i `<title>`
+- [x] Podmiana zdjęć AI na prawdziwe w `index.html` (bez plików z członem `-osoby-`)
+- [x] `wina/souvignier-gris.html` — wzorzec dla pozostałych
+- [x] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder, Svenson Red
+- [x] `wina/soki.html` — strona zbiorcza soków
+- [x] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
+- [ ] Przegląd w przeglądarce we wszystkich trzech motywach — **do zrobienia przez Właściciela**,
+      rozszerzenie Chrome nie było podłączone (sprawdzone inaczej: HTTP 200 dla wszystkich
+      adresów, poprawny JSON-LD i XML, 20 testów logiki cen w `tools/test-produkty.js`)
 
 **Etap 2 — mechanizm sklepu (nie wymaga danych; działa na pustym JSON)**
 
 - [x] Aktualizacja `.ai/GUARDRAILS.md` i zastąpienie standardu `content/product-card`
       przez `content/wina-json` — zrobione 2026-09-02 po zgodzie Właściciela
-- [ ] `data/wina.json` — struktura z pustą tablicą `wina`
-- [ ] `assets/js/produkty.js` — `policzCeny`, `renderProductCard`, `formatujCene` (kontrakt wyżej)
-- [ ] `main.js`: `initShop()` — fetch, walidacja, render, obsługa błędu i pustej listy
-- [ ] `main.js`: opcje `<select>` i zakres suwaka cen z danych (zamyka `TODO.md` #2)
-- [ ] `main.js`: `initFilters()` i koszyk uruchamiane po renderze
-- [ ] `index.html`: usunięcie sześciu kart, wstawienie `#lista-produktow`, dodanie `produkty.js`
-- [ ] `main.js`: `initWineOffer()` — blok „Wina z tej odmiany" na stronach odmian
+- [x] `data/wina.json` — struktura z pustą tablicą `wina`
+- [x] `assets/js/produkty.js` — `policzCeny`, `renderProductCard`, `formatujCene` (kontrakt wyżej)
+- [x] `main.js`: `initShop()` — fetch, walidacja, render, obsługa błędu i pustej listy
+- [x] `main.js`: opcje `<select>` i zakres suwaka cen z danych (zamyka `TODO.md` #2)
+- [x] `main.js`: `initFilters()` i koszyk uruchamiane po renderze
+- [x] `index.html`: usunięcie sześciu kart, wstawienie `#lista-produktow`, dodanie `produkty.js`
+- [x] `main.js`: `initWineOffer()` — blok „Wina z tej odmiany" na stronach odmian
 - [ ] `/sync-standards`
 
 **Etap 2b — po zdjęciu blokady B1**
@@ -580,7 +582,7 @@ dochodzi `frontend/theming`.
 
 **Etap 3 — panel redakcyjny**
 
-- [ ] Implementacja wg `.ai/specs/SPEC-002-*` (odblokowuje wprowadzenie asortymentu przez
+- [x] Implementacja wg `.ai/specs/SPEC-002-*` (odblokowuje wprowadzenie asortymentu przez
       Właściciela, czyli zamyka B1)
 
 ## Changelog

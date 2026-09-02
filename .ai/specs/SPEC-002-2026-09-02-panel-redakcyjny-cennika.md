@@ -95,8 +95,8 @@ Zatrzymanie: Ctrl+C
 └──────────────────────────────────────────────────────────────┘
 ```
 
-> **Za kulisami**: podgląd używa **tej samej funkcji** `renderProductCard()` z
-> `assets/js/main.js`, co sklep, i tego samego `assets/css/style.css`. Dzięki temu nie może się
+> **Za kulisami**: podgląd używa **tej samej funkcji** `Produkty.renderProductCard()` z
+> `assets/js/produkty.js`, co sklep, i tego samego `assets/css/style.css`. Dzięki temu nie może się
 > rozjechać z tym, co widzi klient. Netto (56,91 zł) jest wyliczone, nie wpisane.
 
 **Krok 4.** Zmienia cenę na 70,00, przy soku odznacza „dostępne", klika **Zapisz**.
@@ -145,10 +145,9 @@ Panel **nie pozwala zapisać** bez `odmiana_slug` i tłumaczy dlaczego.
 
 **Zmiana vs. stan obecny**: to jest przypadek, który przy ręcznej edycji JSON-a przeszedłby bez
 echa i zostawił w sklepie kartę z martwym linkiem — `wsgi.py` oddaje na nieznany adres stronę
-główną ze statusem 200 (`TODO.md` #5), więc nikt by tego nie zauważył. **Otwarta decyzja
-do rozstrzygnięcia z Właścicielem**: czy soki dostają własną stronę, czy `odmiana_slug` ma być
-opcjonalny dla kategorii innej niż wino. Do czasu decyzji obowiązuje wariant ostrzejszy
-(pole wymagane).
+główną ze statusem 200 (`TODO.md` #5), więc nikt by tego nie zauważył. **Rozstrzygnięte
+2026-09-02**: powstała zbiorcza strona `wina/soki.html`, więc sok wskazuje `soki`,
+a `odmiana_slug` zostaje polem wymaganym dla każdej pozycji.
 
 ### Story 3 — Ktoś próbuje otworzyć panel z innego komputera (przypadek brzegowy)
 
@@ -322,20 +321,20 @@ python3 tools/panel/serwer.py --port 9000
 
 ## Implementation Checklist
 
-- [ ] Inject standards (`content/wina-json`, `frontend/js-conventions`)
-- [ ] `tools/panel/serwer.py` — routing, `/api/wczytaj`, statyki z trzech katalogów
-- [ ] `serwer.py` — walidacja po stronie serwera (tabela wyżej)
-- [ ] `serwer.py` — `/api/zapisz`: kopia `.bak`, zapis atomowy, odpowiedzi błędów
-- [ ] `serwer.py` — trzy zabezpieczenia dostępu (bind, adres klienta, `Origin`)
-- [ ] `panel.html` + `panel.css` — lista i formularz
-- [ ] `panel.js` — walidacja przy polach, stan „niezapisane zmiany", `beforeunload`
-- [ ] `panel.js` — podgląd karty przez `Produkty.renderProductCard()` z `assets/js/produkty.js`
-- [ ] `panel.js` — propozycja `id` z transliteracją polskich znaków
-- [ ] Obsługa nowej kategorii (dopisanie do `kategorie`) z ostrzeżeniem w interfejsie
+- [x] Inject standards (`content/wina-json`, `frontend/js-conventions`)
+- [x] `tools/panel/serwer.py` — routing, `/api/wczytaj`, statyki z trzech katalogów
+- [x] `serwer.py` — walidacja po stronie serwera (tabela wyżej)
+- [x] `serwer.py` — `/api/zapisz`: kopia `.bak`, zapis atomowy, odpowiedzi błędów
+- [x] `serwer.py` — trzy zabezpieczenia dostępu (bind, adres klienta, `Origin`)
+- [x] `panel.html` + `panel.css` — lista i formularz
+- [x] `panel.js` — walidacja przy polach, stan „niezapisane zmiany", `beforeunload`
+- [x] `panel.js` — podgląd karty przez `Produkty.renderProductCard()` z `assets/js/produkty.js`
+- [x] `panel.js` — propozycja `id` z transliteracją polskich znaków
+- [x] Obsługa nowej kategorii (dopisanie do `kategorie`) z ostrzeżeniem w interfejsie
       (pasek pod polem, nie `alert()`)
-- [ ] `data/wina.json.bak` w `.gitignore`
-- [ ] Ręczny test: zmiana ceny, dodanie pozycji, usunięcie, próba zapisu błędnych danych
-- [ ] Ręczny test: sprawdzenie, że `http://<adres-w-LAN>:8765` nie odpowiada
+- [x] `data/wina.json.bak` w `.gitignore`
+- [x] Ręczny test: zmiana ceny, dodanie pozycji, usunięcie, próba zapisu błędnych danych
+- [x] Ręczny test: sprawdzenie, że `http://<adres-w-LAN>:8765` nie odpowiada
 - [ ] Krótka instrukcja uruchomienia w `AGENTS.md` → Commands (do uzgodnienia z Właścicielem)
 - [ ] `/sync-standards`
 
@@ -348,6 +347,12 @@ python3 tools/panel/serwer.py --port 9000
    i wymaga też poprawienia etykiety „VAT (23%)" w `index.html` (`TODO.md` #4).
 
 ## Changelog
+
+### 2026-09-02 — zaimplementowane
+Panel działa. Sprawdzone: odczyt i zapis cennika, kopia `.bak`, walidacja odrzucająca
+11 rodzajów błędów w jednej pozycji, 403 dla żądania bez nagłówka `Origin`, 404 dla prób
+wyjścia poza dozwolone katalogi (`/../../wsgi.py`, `/assets/js/main.js`, `/index.html`).
+Dodatkowo panel ostrzega przy wyborze zdjęcia z członem `-osoby-` (TODO.md #14).
 
 ### 2026-09-02
 - Poprawki po recenzji `spec-reviewer`: usunięta sprzeczność między podglądem karty a listą
