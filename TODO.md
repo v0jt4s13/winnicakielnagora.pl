@@ -24,14 +24,13 @@ Karty renderuje `Produkty.renderProductCard()`; oba atrybuty zniknęły.
 
 Stawka pochodzi z `data/wina.json`, etykieta koszyka budowana jest z niej (`#cart-tax-label`).
 
-### 5. `wsgi.py` nigdy nie zwraca 404
+### ~~5. `wsgi.py` nigdy nie zwraca 404~~ — ZAMKNIĘTE 2026-09-02
 
-- **Gdzie**: `wsgi.py` → `serve()`
-- **Problem**: każda nieznana ścieżka dostaje `index.html` ze statusem 200. Literówka w linku
-  albo martwe odwołanie do grafiki nigdy się samo nie ujawni — także dla wyszukiwarek, którym
-  taki fallback pokazuje duplikaty strony głównej pod każdym błędnym adresem.
-- **Co zrobić**: zwracać 404 dla ścieżek z rozszerzeniem pliku, a fallback zostawić tylko dla
-  ścieżek „stronowych". Dochodzi do tego rozstrzygnięcie adresów stron win (patrz #11).
+Nieznany adres zwraca `404.html` z kodem 404. Przy okazji zawężono zbiór serwowanych plików
+(patrz niżej) i dodano obsługę adresów bez `.html`.
+
+**Uwaga na przyszłość:** `wsgi.py` ma teraz listę `KATALOGI_PUBLICZNE`. Nowy katalog, który
+ma być widoczny publicznie (np. `filmy/`), trzeba do niej dopisać — inaczej zwróci 404.
 
 ## Do decyzji Właściciela
 
@@ -64,10 +63,12 @@ z materiałów w `docs/`.
 
 ### 9. Dane kontaktowe
 
-Sekcja `#kontakt` i stopka podają dziś adres **ul. Winnicza 12, 38-700 Ustrzyki Dolne**,
-telefon **+48 123 456 789** i e-mail **kontakt@winnicapodkarpacka.pl** — wszystko zmyślone.
-Potrzebne: dokładny adres (wiadomo tylko, że Kielnarowa), telefon, e-mail, godziny otwarcia,
-ewentualnie NIP i dane do faktury, jeśli ma być sprzedaż.
+Zmyślone dane **zostały usunięte 2026-09-02** — sekcja mówi dziś „Kielnarowa, ok. 10 km od
+centrum Rzeszowa" i uczciwie zaznacza, że reszta będzie podana. Zniknęła też mapa Google, bo
+wskazywała współrzędne w okolicach Ustrzyk Dolnych; na jej miejscu jest zdjęcie winnicy.
+
+Nadal potrzebne: **dokładny adres, telefon, e-mail**, a jeśli ma być sprzedaż — także NIP
+i dane do faktury. Po uzupełnieniu warto przywrócić mapę i dodać `Organization` w JSON-LD.
 
 ### 10. Asortyment i cennik do `data/wina.json`
 
@@ -79,11 +80,11 @@ rocznik, zawartość alkoholu, pojemność, cena brutto, ewentualny rabat, opis,
 Dotyczy też **soków winogronowych** — z opisu winnicy wynika, że są w ofercie; do ustalenia,
 czy trafiają do cennika jako osobna kategoria, czy tylko do treści.
 
-### 11. Adresy stron odmian — ładniejsze URL-e bez `.html`
+### ~~11. Adresy stron odmian bez `.html`~~ — ZAMKNIĘTE 2026-09-02
 
-Strony działają pod `/wina/souvignier-gris.html`. Wariant bez rozszerzenia wymaga dopisania
-w `wsgi.py` próby dołożenia `.html` przed fallbackiem (patrz #5). Do decyzji — dziś działa,
-ale adres jest brzydszy.
+Na produkcji `/wina/monarch` działa tak samo jak `/wina/monarch.html`. Linki w HTML-u zostają
+z rozszerzeniem, bo `python3 -m http.server` używany lokalnie tej sztuczki nie zna — a `canonical`
+i tak wskazuje wariant z `.html`, więc nie ma duplikatu dla wyszukiwarek.
 
 ### ~~12. Svenson Red~~ — ZAMKNIĘTE 2026-09-02
 
@@ -92,9 +93,12 @@ Do poprawienia przy okazji: pisany opis winnicy w materiałach jej nie wymienia.
 
 ### 13. Wydarzenia i degustacje
 
-Sekcja `#wydarzenia` ma trzy zmyślone terminy (15 i 22 listopada 2025, 6 grudnia 2025) z cenami
-120–180 zł/os. Do decyzji: realne terminy i ceny, czy przepisanie sekcji na ofertę „na
-zamówienie" bez dat, której nie trzeba aktualizować co miesiąc.
+Trzy zmyślone terminy z cenami **zostały usunięte 2026-09-02**. Sekcja mówi teraz, że degustacje
+odbywają się po wcześniejszym umówieniu, i kieruje do formularza kontaktowego. Usunąłem też
+niepotwierdzone obietnice („profesjonalny sommelier", „catering lokalnych produktów", „wesela").
+
+Do decyzji: czy te usługi faktycznie są w ofercie i czy mają wrócić na stronę, oraz czy
+chcecie prowadzić kalendarz konkretnych wydarzeń.
 
 ## Materiały
 
