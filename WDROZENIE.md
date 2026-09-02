@@ -174,6 +174,17 @@ Interpretacja:
 Objaw: plik na dysku jest aktualny, `__pycache__` usunięty, `systemctl status` pokazuje
 „active (running)", a mimo to aplikacja zachowuje się jak sprzed kilku wdrożeń.
 
+**To się wydarzyło 2026-09-02.** Port trzymały procesy z poprzedniego dnia:
+
+```
+LISTEN 127.0.0.1:8004  users:(("python",pid=964),("python",pid=958),("python",pid=957),("python",pid=666))
+    666  Tue Sep  1 15:17:33  ...--bind 127.0.0.1:8004 wsgi:app            <- stary, trzyma port
+ 218135  Wed Sep  2 22:21:41  ...--bind 127.0.0.1:8004 --timeout 300 wsgi:app   <- nowy, bez portu
+```
+
+Rozpoznaje się to po **czasie startu** i po linii poleceń: unit dodaje `--timeout 300`,
+więc proces bez tego argumentu pochodzi sprzed zmiany konfiguracji.
+
 Przyczyna: **stary gunicorn nadal zajmuje port 8004**. Nowa usługa nie może się podpiąć,
 kończy się błędem „Address already in use" i wpada w pętlę restartów — `status` złapany
 zaraz po starcie zdąży jeszcze pokazać „running".
@@ -188,8 +199,29 @@ sudo systemctl status winnicakielnagora --no-pager
 sudo journalctl -u winnicakielnagora -n 50 --no-pager | grep -i "address already in use\|Traceback\|error"
 ```
 
-Naprawa: zabij osierocony proces (`sudo kill <PID>`, w razie potrzeby `-9`), potem
-`sudo systemctl restart winnicakielnagora` i sprawdź `/zdrowie`.
+Naprawa — najpierw ustal, czy stary proces nie należy do innego unitu, bo wtedy systemd
+wskrzesi go natychmiast:
+
+```bash
+cat /proc/666/cgroup                    # nazwa unitu albo brak przynaleznosci
+ps -o pid,ppid,lstart,cmd -p 666
+```
+
+Jeśli to sierota (`ppid=1`, cgroup bez unitu aplikacji):
+
+```bash
+sudo systemctl stop winnicakielnagora
+sudo kill 666                           # master; workery zgina razem z nim
+sleep 2 && sudo ss -ltnp | grep 8004    # ma byc pusto
+sudo systemctl start winnicakielnagora
+curl -s http://127.0.0.1:8004/winnicakielnagora.pl/zdrowie
+```
+
+Jeśli `cgroup` wskaże **inny unit** — to on uruchamia tę aplikację równolegle i trzeba go
+wyłączyć (`sudo systemctl disable --now <unit>`), inaczej problem wróci po restarcie maszyny.
+Stare procesy wystartowały o tej samej sekundzie co kilkanaście innych aplikacji, co wygląda
+na wspólny start przy bootowaniu — warto sprawdzić, czy nie ma drugiego mechanizmu
+uruchamiania (stary unit, `@reboot` w cronie, supervisor).
 
 Jeśli w logu jest `Traceback` zamiast błędu portu — aplikacja nie startuje z innego powodu
 i trzeba przeczytać wyjątek.
