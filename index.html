@@ -183,9 +183,9 @@
 
     <main class="flex-1">
       <section class="relative h-[600px] md:h-[700px] w-full overflow-hidden">
-        <!-- <img>, a nie tlo CSS: przegladarka odkrywa je w pierwszym kilobajcie HTML-a,
-             a nie dopiero po pobraniu i sparsowaniu style.css. To skraca lancuch LCP. -->
-        <img src="./attached_assets/photos/winnica-panorama-01.jpg" alt="" width="1600" height="1069" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover">
+        <!-- JS wybiera jeden kadr dla aktualnej pory w Europe/Warsaw; bez JS zostaje dzien. -->
+        <img id="hero-image" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" data-poranek-src="./attached_assets/photos/hero/poranek.png" data-dzien-src="./attached_assets/photos/hero/dzien.png" data-zachod-src="./attached_assets/photos/hero/zachod.png" data-noc-src="./attached_assets/photos/hero/noc.png" data-fallback-src="./attached_assets/photos/winnica-panorama-01.jpg" class="absolute inset-0 w-full h-full object-cover">
+        <noscript><img src="./attached_assets/photos/hero/dzien.png" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover"></noscript>
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
         <div class="relative h-full flex flex-col items-center justify-center text-center px-5 max-w-4xl mx-auto">
           <div class="flex items-center gap-3 mb-5">

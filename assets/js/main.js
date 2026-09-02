@@ -168,6 +168,62 @@ function initStyleSwitcher() {
   );
 }
 
+function heroPeriodForHour(hour) {
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return null;
+  if (hour >= 6 && hour < 12) return "poranek";
+  if (hour >= 12 && hour < 18) return "dzien";
+  if (hour >= 18 && hour < 22) return "zachod";
+  return "noc";
+}
+
+function wineryHour() {
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Warsaw",
+      hour: "numeric",
+      hourCycle: "h23"
+    }).formatToParts(new Date());
+    const hour = Number.parseInt(parts.find((part) => part.type === "hour")?.value, 10);
+    if (Number.isInteger(hour) && hour >= 0 && hour <= 23) return hour;
+  } catch (_) {
+    // Starsza przeglądarka może nie znać stref IANA — wtedy używamy czasu urządzenia.
+  }
+  return new Date().getHours();
+}
+
+function initHeroImage() {
+  const image = qs("#hero-image");
+  if (!image) return;
+
+  const fallbackSrc = image.dataset.fallbackSrc;
+  let selectedSrc = null;
+  let failedSrc = null;
+
+  image?.addEventListener("error", () => {
+    const currentSrc = image.getAttribute("src");
+    if (!currentSrc || currentSrc === fallbackSrc) return;
+    failedSrc = currentSrc;
+    if (fallbackSrc) image.setAttribute("src", fallbackSrc);
+  });
+
+  function updateImage() {
+    const period = heroPeriodForHour(wineryHour());
+    const nextSrc = period ? image.dataset[`${period}Src`] : null;
+    if (!nextSrc) return;
+
+    if (nextSrc !== selectedSrc) {
+      selectedSrc = nextSrc;
+      failedSrc = null;
+    }
+    if (nextSrc !== failedSrc && image.getAttribute("src") !== nextSrc) {
+      image.setAttribute("src", nextSrc);
+    }
+  }
+
+  updateImage();
+  window.setInterval(updateImage, 60_000);
+}
+
 function initNavigation() {
   const mobileToggle = qs("#mobile-menu-toggle");
   const mobileMenu = qs("#mobile-menu");
@@ -598,6 +654,7 @@ function initContactForm() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  initHeroImage();
   initStyleSwitcher();
   initNavigation();
   initContactForm();

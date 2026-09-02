@@ -17,7 +17,8 @@
 </head>
 <body class="min-h-screen bg-background text-foreground">
   <div class="error-page">
-    <img src="attached_assets/photos/winnica-panorama-01.jpg" alt="" width="1600" height="1069" fetchpriority="high" decoding="async" class="error-page__image">
+    <img id="hero-image" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" data-poranek-src="attached_assets/photos/hero/poranek.png" data-dzien-src="attached_assets/photos/hero/dzien.png" data-zachod-src="attached_assets/photos/hero/zachod.png" data-noc-src="attached_assets/photos/hero/noc.png" data-fallback-src="attached_assets/photos/winnica-panorama-01.jpg" class="error-page__image">
+    <noscript><img src="attached_assets/photos/hero/dzien.png" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" class="error-page__image"></noscript>
     <div class="error-page__veil" aria-hidden="true"></div>
 
     <header class="error-page__header">

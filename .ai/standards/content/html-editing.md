@@ -15,8 +15,9 @@
 - **Ikony to `<symbol>`**, nie inline SVG. Wszystkie leżą w ukrytym `<svg>` na początku `<body>`.
   Użycie: `<svg class="w-4 h-4"><use href="#icon-cart"></use></svg>`. Nowa ikona = nowy
   `<symbol id="icon-…">` w tym bloku, nie wklejony `<path>` w treści.
-- **Obrazy: ścieżki względne** (`./attached_assets/generated_images/…`) i zawsze `alt`
-  w języku polskim. Pliki trzymaj w `attached_assets/generated_images/` albo `assets/`.
+- **Obrazy: ścieżki względne** i zawsze `alt` w języku polskim (`alt=""` dla obrazu
+  czysto dekoracyjnego). Prawdziwe fotografie trzymaj w `attached_assets/photos/`, grafiki
+  generowane w `attached_assets/generated_images/`, a zasoby interfejsu w `assets/`.
 - **Treść jest po polsku i wpisana wprost** — nie ma i18n ani kluczy tłumaczeń. Nie wprowadzaj
   ich „na zapas".
 
