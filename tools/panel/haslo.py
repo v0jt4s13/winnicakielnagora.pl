@@ -34,9 +34,10 @@ def main() -> int:
     sol = secrets.token_bytes(16)
     hash_ = pbkdf2_hmac("sha256", haslo.encode("utf-8"), sol, ITERACJE)
 
-    print("\nDopisz do konfiguracji wdrozeniowej (nie do repozytorium):\n")
+    print("\nDopisz do production_projects/winnicakielnagora.env, w jednej linii")
+    print("EXTRA_SYSTEMD_ENV (nie do repozytorium projektu):\n")
     print(f"PANEL_UZYTKOWNIK={uzytkownik}")
-    print(f"PANEL_HASLO_HASH={sol.hex()}${hash_.hex()}")
+    print(f"PANEL_HASLO_HASH={sol.hex()}:{hash_.hex()}")
     print("\nPo restarcie aplikacji panel bedzie pod /tools/panel/panel.html")
     print("Bez tych dwoch zmiennych panel na produkcji nie istnieje (404).")
     return 0

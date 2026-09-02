@@ -94,9 +94,13 @@ def panel_wlaczony() -> bool:
 
 
 def _haslo_zgodne(uzytkownik: str, haslo: str) -> bool:
-    """Porownanie odporne na pomiar czasu. Format hasha: sol$hash (obie czesci szesnastkowo)."""
+    """Porownanie odporne na pomiar czasu. Format hasha: sol:hash (obie czesci szesnastkowo).
+
+    Separator to dwukropek, a nie dolar — hash przechodzi przez plik .env czytany przez
+    basha i przez Environment= w unicie systemd, gdzie "$" ma wlasne znaczenie.
+    """
     try:
-        sol_hex, oczekiwany_hex = PANEL_HASLO_HASH.split("$", 1)
+        sol_hex, oczekiwany_hex = PANEL_HASLO_HASH.split(":", 1)
         sol = bytes.fromhex(sol_hex)
     except ValueError:
         return False

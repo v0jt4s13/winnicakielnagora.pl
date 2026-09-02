@@ -39,6 +39,10 @@ Do tego trzecia zmienna, żeby wdrożenie nie kasowało cen wpisanych przez pane
 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json
 ```
 
+Na tym serwerze wszystkie trzy podaje się przez `EXTRA_SYSTEMD_ENV` w
+`production_projects/winnicakielnagora.env` — komplet kroków opisuje `WDROZENIE.md`
+w katalogu głównym projektu.
+
 Katalog `dane/` ma leżeć **poza** tym, co wdrożenie synchronizuje z repozytorium, i mieć prawo
 zapisu dla użytkownika gunicorna. Przy pierwszym żądaniu aplikacja skopiuje tam wersję startową
 z `data/wina.json`; potem plik żyje własnym życiem i żaden deploy go nie tknie.

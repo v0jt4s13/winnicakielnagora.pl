@@ -293,22 +293,19 @@ z pominięciem aplikacji.
 Do zrobienia natychmiast, niezależnie od reszty: zablokować `.git`, `*.py` i `*.md`
 na poziomie proxy, żeby nie zależało to wyłącznie od kodu aplikacji.
 
-### 29. Serwer nie wykonuje tras z `wsgi.py`
+### 29. Aplikacja nie działa jako usługa na serwerze dev
 
-Dowody z tego samego sprawdzenia:
+**Przyczyna ustalona 2026-09-02:** dla tej lokalizacji **nie jest uruchomiony gunicorn**, więc
+nginx wydaje pliki z pominięciem Flaska. Stąd wszystko naraz: dostępne `.git` i `wsgi.py`
+(#28), brak ładnych adresów, brak `/tools/panel/api/…`, obca strona 404.
 
-- `/tools/panel/api/wczytaj` → domyślna strona 404 **Werkzeuga**, nie nasza
-- `/wina/monarch` (ładny adres) → 404, choć `wsgi.py` to obsługuje
-- `/nie-ma-takiej-strony` → 404 Werkzeuga zamiast naszego `404.html`
-- `index.html` na serwerze jest **aktualny**, więc pliki się wdrażają
+Pełna instrukcja: **`WDROZENIE.md`**. W skrócie: sprawdzić, czy blok nginx dla prefiksu
+robi `proxy_pass` (a nie `alias`), uzupełnić `EXTRA_SYSTEMD_ENV` w
+`production_projects/winnicakielnagora.env` i uruchomić usługę przez `production_manager.sh`.
 
-Wniosek: pliki są świeże, ale proces nie uruchamia aktualnego `wsgi.py` albo nie został
-przeładowany. Do sprawdzenia: czym dokładnie startuje gunicorn, z jakiego katalogu, czy
-restartuje się po wdrożeniu i czy proxy nie serwuje katalogu z pominięciem aplikacji.
+Dopóki to nie zadziała, **żadne zabezpieczenie z `wsgi.py` nie obowiązuje** — lista dozwolonych
+plików i hasło do panelu są martwe, bo ruch tam nie dociera.
 
-Drugi możliwy trop — dev stoi pod podścieżką `/winnicakielnagora.pl/`, a trasy Flaska są
-zapisane od korzenia. Dodana warstwa `ObetnijPrzedrostek` honoruje `SCRIPT_NAME`, a gdyby
-proxy go nie wysyłało, można ustawić `SCIEZKA_BAZOWA=winnicakielnagora.pl`.
 
 ### 30. Uruchamianie lokalnego serwera panelu z przeglądarki — odrzucone
 

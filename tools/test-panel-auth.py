@@ -46,7 +46,7 @@ HASLO = "bardzo-tajne-haslo-2026"
 SOL = secrets.token_bytes(16)
 os.environ["PANEL_UZYTKOWNIK"] = "wlasciciel"
 os.environ["PANEL_HASLO_HASH"] = (
-    SOL.hex() + "$" + pbkdf2_hmac("sha256", HASLO.encode(), SOL, 240_000).hex()
+    SOL.hex() + ":" + pbkdf2_hmac("sha256", HASLO.encode(), SOL, 240_000).hex()
 )
 
 sys.path.insert(0, str(PROJEKT))
