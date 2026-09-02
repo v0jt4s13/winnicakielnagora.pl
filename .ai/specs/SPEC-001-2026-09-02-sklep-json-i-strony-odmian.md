@@ -35,6 +35,77 @@ Ta specyfikacja opisuje jedno i drugie oraz podmianę pozostałych atrap na dane
   Ta specyfikacja ich **nie rusza**, żeby nie utrwalać atrap.
 - Filmy z `docs/` — decyzja odłożona (`TODO.md` #16).
 
+## Blokady — przeczytaj przed rozpoczęciem
+
+Implementacja **nie może ruszyć w całości**, dopóki nie zostaną zdjęte trzy blokady. Każda
+z nich należy do Właściciela; sesja implementująca nie ma prawa ich rozstrzygnąć sama.
+
+| # | Blokada | Co blokuje | Gdzie |
+|---|---|---|---|
+| B1 | Brak asortymentu i cennika | `data/wina.json`, cała sekcja `#sklep`, bloki „Wina z tej odmiany" | `TODO.md` #10 |
+| B2 | Brak zgody na zmianę `.ai/GUARDRAILS.md` | przejście danych produktów z HTML do JSON (granica #1, BLOCK #3, decyzja „Dane produktów w HTML zamiast w bazie") | ta specyfikacja, „Wpływ na obowiązujące reguły" |
+| B3 | Status odmiany Svenson Red | `wina/svenson-red.html` i pozycja w JSON | `TODO.md` #12 |
+
+**Co da się zrobić mimo blokad** (i co należy zrobić najpierw): strony odmian dla sześciu
+potwierdzonych odmian, podmiana zdjęć AI na prawdziwe, poprawki faktów w `#o-nas`, stopce
+i `<title>`, `sitemap.xml`, `robots.txt`, znaczniki meta. Te prace nie dotykają
+`GUARDRAILS.md` ani danych o cenach.
+
+### Zasada dotycząca treści, których nie znamy
+
+Priorytet #1 z `.ai/GUARDRAILS.md` brzmi „Poprawność treści publicznej". W praktyce:
+
+- **Fakty o odmianie** (charakter, aromaty, odporność, typowe zastosowanie) wolno napisać
+  na podstawie źródeł publicznych wskazanych przez Właściciela — lista niżej.
+- **Fakty o tej konkretnej winnicy** (kiedy zasadzono daną odmianę, ile jest krzewów, kiedy
+  zbiór, jakie wino z niej powstaje) wolno napisać **wyłącznie** na podstawie sekcji
+  „Materiały źródłowe" poniżej. Czego tam nie ma — tego się nie pisze.
+- Jeśli w szablonie strony zostaje miejsce bez treści, wstaw komentarz HTML
+  `<!-- TODO: potwierdzić z Właścicielem -->` i dopisz pozycję do `TODO.md`.
+  **Nie wymyślaj faktów o winnicy, nawet prawdopodobnych.**
+
+## Materiały źródłowe
+
+Katalog `docs/` jest w `.gitignore` (580 MB), więc świeża sesja go nie zobaczy. Wszystko, co
+z niego potrzebne, jest przepisane tutaj.
+
+### Opis winnicy — jedyne potwierdzone fakty
+
+> Winnica Kielna Góra
+> Położona na stoku o południowym nachyleniu w Kielnarowej, 10 km od centrum Rzeszowa,
+> założona w 2024 roku, pierwsze nasadzenia w 2020 roku.
+> Niewielka, jednohektarowa.
+> Uprawiamy winogrona na wina białe: Souvignier Gris, St Pepin, Vidal Blanc, Seyval Blanc,
+> a także na wina czerwone i różowe odmian Monarch i Dornfelder.
+> Wytwarzamy również soki z białych winogron, 100% naturalne, bez żadnych dodatków.
+
+(cytat z `docs/materialy-do-wykorzystania/zbiory_i_winnica/Winnica Kielna Góra.txt`)
+
+Uwaga: **ten opis nie wymienia Svenson Red** — stąd blokada B3.
+
+### Źródła opisów odmian (wskazane przez Właściciela)
+
+| Odmiana | Źródło |
+|---|---|
+| Dornfelder | `https://pl.wikipedia.org/wiki/Dornfelder` |
+| Seyval Blanc | `https://pl.wikipedia.org/wiki/Seyval_blanc` |
+| Souvignier Gris | `https://en.wikipedia.org/wiki/Souvignier_gris` |
+| St. Pepin | `https://en.wikipedia.org/wiki/St._Pepin_(grape)` |
+| Vidal Blanc | `https://en.wikipedia.org/wiki/Vidal_blanc` |
+| Svenson Red | `https://en.wikipedia.org/wiki/Swenson_Red` |
+| Monarch | `https://www.rebschule-sester.de/en/variety-description/fungus-resistant-red-varieties/monarch/` |
+
+Adresy pochodzą z plików `.txt` dołączonych przez Właściciela do każdego folderu z materiałami —
+nie zostały wymyślone. Przed użyciem jako źródła treści **zweryfikuj każdy przez WebFetch**;
+jeśli któryś nie odpowiada, zapytaj Właściciela zamiast szukać zamiennika.
+
+### Domena produkcyjna
+
+`https://winnicakielnagora.pl` — potwierdzona przez Właściciela jako docelowa. **Projekt nie
+jest jeszcze dostępny online**; pod tym adresem stoi dziś placeholder. Domena występuje
+w `<link rel="canonical">`, Open Graph i `sitemap.xml`; przy zmianie trzeba ją podmienić
+w tych trzech miejscach oraz w `robots.txt`.
+
 ## Stan obecny (co trzeba znać przed zmianą)
 
 - `index.html` (~790 linii) to jedyna strona. Sekcje: `#o-nas`, `#nasze-wina`, `#sklep`,
@@ -228,9 +299,11 @@ data/wina.json ──fetch──> initShop()        ──> karty w #lista-produ
 6. **Zdjęcia z osobami są wyłączone z użycia** do czasu potwierdzenia zgód (`TODO.md` #14).
    Rozpoznaje się je po członie `-osoby-` w nazwie pliku.
 
-### Wpływ na obowiązujące reguły (do akceptacji Właściciela)
+### Wpływ na obowiązujące reguły (blokada B2 — zgoda NIE została jeszcze udzielona)
 
-Ta zmiana unieważnia dwie rzeczy zapisane wcześniej. **Nie zmieniam tych plików bez zgody:**
+Ta zmiana unieważnia dwie rzeczy zapisane wcześniej. **Dopóki w Changelogu tej specyfikacji nie
+ma wpisu potwierdzającego zgodę Właściciela, sesja implementująca nie rusza sklepu ani tych
+plików** — `GUARDRAILS.md` jest zbiorem reguł nienaruszalnych i sama specyfikacja go nie znosi:
 
 - `.ai/GUARDRAILS.md` → granica #1 („`main.js` NIGDY nie trzyma danych produktów. Źródłem prawdy
   są atrybuty `data-*` w `index.html`") i reguła BLOCK #3 (o sześciu miejscach z ceną) oraz
@@ -273,7 +346,7 @@ ale ich nie definiuje; ceny brutto są jedynymi zapisanymi — netto i rabat są
 | `id` | string | tak | unikalny; klucz w koszyku. Dwa te same `id` zleją się w jedną pozycję |
 | `nazwa` | string | tak | nazwa handlowa na karcie |
 | `odmiana_slug` | string | tak | musi odpowiadać plikowi `wina/<slug>.html` |
-| `kategoria` | string | tak | jedna z wartości z `kategorie` |
+| `kategoria` | string | tak | jedna z wartości z `kategorie`; patrz uwaga o zgodności niżej |
 | `rocznik` | number | nie | pomijany dla soków |
 | `alkohol` | number | nie | procent; pomijany dla soków |
 | `pojemnosc_ml` | number | tak | 750, 500, 1000… |
@@ -289,9 +362,18 @@ ale ich nie definiuje; ceny brutto są jedynymi zapisanymi — netto i rabat są
 - `cena_przed_rabatem = cena_brutto / (1 - rabat_procent / 100)` — pokazywana tylko gdy `rabat_procent > 0`
 - `promocja = rabat_procent > 0` — zastępuje dawne `data-promo`
 
+**Zgodność kategorii z filtrem.** Dziś filtr to `<select id="category-select">` z zaszytymi
+opcjami: `Wszystkie`, `Czerwone`, `Białe`, `Różowe` (dokładnie te napisy, z polskimi znakami),
+a `initFilters` porównuje je znak w znak z `card.dataset.category`. Dorzucenie kategorii `Soki`
+wymagałoby dziś ręcznej edycji HTML. Dlatego **opcje `<select>` mają być renderowane z tablicy
+`kategorie`** — `Wszystkie` jako pierwsza pozycja wstawiana przez JS, reszta z JSON-a. To
+usuwa drugie miejsce, w którym trzeba pamiętać o kategoriach.
+
 **Walidacja przy starcie** (`initShop`): brak pliku, błąd składni albo pusta lista → w miejscu
 sklepu pokazuje się komunikat „Nie udało się wczytać oferty. Skontaktuj się z nami" z linkiem do
 sekcji kontaktu, a błąd ląduje w `console.error`. Strona nie może zostać z pustą sekcją bez wyjaśnienia.
+Pozycja z `kategoria` spoza tablicy `kategorie` jest pomijana i zgłaszana w `console.warn` —
+literówka w danych nie może wysypać całego sklepu.
 
 ### Mapa odmian
 
@@ -303,10 +385,39 @@ sekcji kontaktu, a błąd ląduje w `console.error`. Strona nie może zostać z 
 | Seyval Blanc | `seyval-blanc` | Białe | `seyval-blanc-kieliszki-01` |
 | Monarch | `monarch` | Czerwone | `monarch-kieliszek-01`, `monarch-butelka-01` |
 | Dornfelder | `dornfelder` | Czerwone | `dornfelder-kiscie-01`, `dornfelder-kieliszek-01` |
-| Svenson Red | `svenson-red` | Czerwone | `svenson-red-kiscie-01/02` |
+| Svenson Red ⚠ | `svenson-red` | Czerwone | `svenson-red-kiscie-01/02` |
+
+⚠ **Svenson Red — nie twórz tej strony bez potwierdzenia** (blokada B3). Opis winnicy nie
+wymienia tej odmiany, mimo że na stronie głównej jest jej kafelek, a w materiałach są zdjęcia.
+Jeśli Właściciel potwierdzi uprawę — strona powstaje jak pozostałe. Jeśli zaprzeczy — usuwamy
+też kafelek z `#nasze-wina`, a zdjęcia zostają nieużywane.
 
 Zdjęcia ogólne: `winnica-panorama-01` (hero), `winnica-budynek-01`, `winnica-rzedy-01`,
 `winnica-butelka-biale-01`, `winnica-butelka-czerwone-01`.
+
+### Tytuły i opisy stron odmian
+
+Do wpisania w `<title>` i `<meta name="description">`. Opisy są robocze — wolno je poprawić,
+ale każdy musi zostać unikalny i mieścić się w 150–160 znakach.
+
+| Slug | `<title>` | `<meta name="description">` |
+|---|---|---|
+| `souvignier-gris` | Souvignier Gris — biała odmiana z Winnicy Kielna Góra | Odporna biała odmiana o aromatach brzoskwini i cytrusów, o świeżej kwasowości. Uprawiamy ją na południowym stoku w Kielnarowej pod Rzeszowem. |
+| `st-pepin` | St. Pepin — mrozoodporna biała odmiana z Kielnarowej | Hybryda bardzo odporna na mróz, o kwiatowo-miodowym profilu i niskiej kwasowości. Rośnie w naszej winnicy na południowym stoku pod Rzeszowem. |
+| `vidal-blanc` | Vidal Blanc — biała odmiana na wina słodkie i lodowe | Gruba skórka i wysoka kwasowość czynią z niej odmianę na wina słodkie i lodowe. Aromaty owoców tropikalnych i melona. Winnica Kielna Góra. |
+| `seyval-blanc` | Seyval Blanc — świeże białe wino z Podkarpacia | Hybryda o cytrusowo-ziołowym charakterze, porównywana do lekkiego sauvignon blanc. Uprawiana w Winnicy Kielna Góra pod Rzeszowem. |
+| `monarch` | Monarch — czerwona odmiana z Winnicy Kielna Góra | Ciemne jagody dają wina barwne i wyraziste, z nutami czarnej porzeczki. Odmiana odporna na choroby grzybowe, uprawiana w Kielnarowej. |
+| `dornfelder` | Dornfelder — soczyste czerwone wino z Kielnarowej | Odmiana znana z owocowych win o miękkich taninach i intensywnej barwie. Uprawiamy ją na jednohektarowej winnicy pod Rzeszowem. |
+| `svenson-red` ⚠ | Svenson Red — mrozoodporna czerwona odmiana | Wysoka odporność na mróz i lekkie, owocowe czerwone wina z nutami malin i wiśni. Winnica Kielna Góra w Kielnarowej pod Rzeszowem. |
+
+### JSON-LD — decyzja
+
+Na stronach odmian idzie **`WebPage` + `BreadcrumbList`**, bez `Product`. Powód: strona opisuje
+**odmianę winorośli**, a nie konkretny towar z ceną, a cena celowo nie jest w statycznym HTML
+(decyzja projektowa #1). `Product` bez `offers` jest wg wytycznych Google niekompletny, a `Product`
+z ceną wymagałby wpisania ceny na stałe w siedmiu plikach — czyli dokładnie tego, co ta zmiana
+likwiduje. Na stronie głównej dochodzi `Organization` z nazwą, adresem i logo (adres dopiero po
+uzupełnieniu danych kontaktowych, `TODO.md` #9).
 
 ## UI / UX
 
@@ -345,7 +456,7 @@ Wymagane w `<head>` każdej strony:
 <meta property="og:type" content="article">
 ```
 
-Plus JSON-LD typu `Product` (nazwa, opis, zdjęcie, `brand` = Winnica Kielna Góra) w `<script type="application/ld+json">`.
+Plus JSON-LD w `<script type="application/ld+json">` — typ i uzasadnienie w sekcji „JSON-LD — decyzja".
 
 **Dostępność i wydajność**: każdy `<img>` ma `alt` po polsku, `loading="lazy"` poza zdjęciem
 tytułowym, `width`/`height` dla uniknięcia skoku układu. Miniatury (`-sm`) w kartach i galerii,
@@ -381,24 +492,45 @@ zablokuje `fetch` i sklep się nie wczyta.
 
 ## Implementation Checklist
 
-- [ ] Inject standards (`content/html-editing`, `frontend/js-conventions`, `frontend/styling`)
-- [ ] `data/wina.json` — struktura + dane od Właściciela (blokuje: `TODO.md` #10)
+Standardy do wstrzyknięcia (sprawdzone w `.ai/standards/index.yml` — wszystkie istnieją):
+`content/html-editing`, `frontend/js-conventions`, `frontend/styling`. Przy pracy nad kolorami
+dochodzi `frontend/theming`.
+
+**Etap 1 — nie wymaga zdjęcia żadnej blokady**
+
+- [ ] Inject standards
+- [ ] Poprawki faktów w `#o-nas` (Kielnarowa, 1 ha, 2020/2024, 7 odmian), stopce i `<title>`
+- [ ] Podmiana zdjęć AI na prawdziwe w `index.html` (bez plików z członem `-osoby-`)
+- [ ] `wina/souvignier-gris.html` — wzorzec dla pozostałych
+- [ ] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder
+- [ ] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
+- [ ] Przegląd w przeglądarce we wszystkich trzech motywach
+
+**Etap 2 — po zdjęciu blokad B1 i B2**
+
+- [ ] Wpis w Changelogu potwierdzający zgodę na zmianę `GUARDRAILS.md`
+- [ ] `data/wina.json` — struktura + realne dane
 - [ ] `main.js`: `initShop()` — fetch, walidacja, render, obsługa błędu
 - [ ] `main.js`: `renderProductCard()` — te same klasy CSS, wyliczane netto/rabat, link do odmiany
-- [ ] `main.js`: zakres suwaka cen liczony z danych (zamyka `TODO.md` #2)
+- [ ] `main.js`: opcje `<select>` i zakres suwaka cen z danych (zamyka `TODO.md` #2)
 - [ ] `main.js`: `initFilters()` i koszyk uruchamiane po renderze
 - [ ] `index.html`: usunięcie sześciu kart, wstawienie `#lista-produktow`
-- [ ] `wina/souvignier-gris.html` (wzorzec dla pozostałych)
-- [ ] `wina/` — pozostałych 6 stron odmian
 - [ ] `main.js`: `initWineOffer()` — blok „Wina z tej odmiany" na stronach odmian
-- [ ] Podmiana zdjęć AI na prawdziwe w `index.html`
-- [ ] Poprawki faktów w `#o-nas`, stopce i `<title>`
-- [ ] `sitemap.xml`, `robots.txt`, meta i Open Graph
-- [ ] Przegląd w przeglądarce we wszystkich trzech motywach
-- [ ] Aktualizacja `.ai/GUARDRAILS.md` i `.ai/standards/content/product-card.md` (po akceptacji)
+- [ ] Aktualizacja `.ai/GUARDRAILS.md` i `.ai/standards/content/product-card.md`
 - [ ] `/sync-standards`
+
+**Etap 3 — po zdjęciu blokady B3**
+
+- [ ] `wina/svenson-red.html` albo usunięcie kafelka odmiany z `#nasze-wina`
 
 ## Changelog
 
 ### 2026-09-02
+- Poprawki po recenzji `spec-reviewer`: dodane sekcje „Blokady" (B1–B3), „Materiały źródłowe"
+  (opis winnicy i źródła opisów odmian przepisane do specyfikacji, bo `docs/` jest w `.gitignore`),
+  zasada postępowania z nieznaną treścią, tytuły i opisy meta dla wszystkich 7 odmian,
+  rozstrzygnięcie JSON-LD (`WebPage` + `BreadcrumbList` zamiast `Product`), wymóg renderowania
+  opcji filtra z `kategorie`, podział checklisty na etapy wg blokad.
+- Domena `winnicakielnagora.pl` potwierdzona przez Właściciela jako docelowa; projekt nie jest
+  jeszcze dostępny online.
 - Pierwsza wersja specyfikacji.
