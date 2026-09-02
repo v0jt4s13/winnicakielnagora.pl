@@ -1,5 +1,10 @@
 # Audyt strony Winnicy Kielna Góra — 2026-09-02
 
+> **Zrzuty ekranu nie są w repozytorium.** Pliki `.png` z tego katalogu są dowodem roboczym
+> i zostały wyłączone z gita (`audit/**/*.png` w `.gitignore`), żeby nie obciążać repozytorium
+> dziesięcioma megabajtami obrazów. Odwołania do obrazków poniżej działają tylko w lokalnej
+> kopii katalogu — na GitHubie pozostaną puste.
+
 ## Zakres
 
 Połączony audyt UX, responsywności, dostępności i technicznego SEO strony głównej oraz
