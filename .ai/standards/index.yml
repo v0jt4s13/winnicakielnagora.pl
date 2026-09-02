@@ -6,8 +6,8 @@
 content:
   html-editing:
     description: Zasady edycji index.html — punktowe zmiany, wcięcia, ikony <symbol>, kotwice zamiast numerów linii
-  product-card:
-    description: Struktura karty produktu w sklepie, atrybuty data-*, brutto/netto/VAT, sześć miejsc z ceną
+  wina-json:
+    description: data/wina.json jako jedyne źródło asortymentu i cen; zapisujemy tylko brutto, resztę wyliczamy
 
 frontend:
   js-conventions:

@@ -32,13 +32,18 @@ Naruszenie = poprawa przed scaleniem.
    wartość z poprzedniego. Patrz `.ai/standards/frontend/theming.md`.
 2. **NEVER** koduj kolorów na sztywno w `assets/css/custom.css` — zawsze `hsl(var(--nazwa))`,
    inaczej element wypada z systemu motywów.
-3. **NEVER** zmieniaj ceny produktu tylko w jednym miejscu — komplet to `data-price`,
-   `data-price-net`, widoczna cena, tekst `netto: … zł`, a przy promocji przekreślona cena
-   sprzed rabatu i badge `-N%`. Patrz `.ai/standards/content/product-card.md`.
-4. **NEVER** przeformatowuj `index.html` przy okazji innej zmiany — jeden plik jest jedyną kopią
+3. **NEVER** zapisuj ceny netto, ceny sprzed rabatu ani kwoty rabatu jako osobnej danej —
+   jedyną zapisaną ceną jest `cena_brutto` w `data/wina.json`, reszta jest **wyliczana**
+   w `assets/js/main.js`. Patrz `.ai/standards/content/wina-json.md`.
+4. **NEVER** wpisuj produktu na stałe w `index.html` ani w kod JS — nowe wino, sok, cena
+   i dostępność to wyłącznie wpis w `data/wina.json`.
+5. **NEVER** przeformatowuj `index.html` przy okazji innej zmiany — jeden plik jest jedyną kopią
    treści witryny, a duży diff jest nie do przejrzenia.
-5. **NEVER** dodawaj zależności (Python, npm, CDN) bez zgody Właściciela — brak zależności jest
+6. **NEVER** dodawaj zależności (Python, npm, CDN) bez zgody Właściciela — brak zależności jest
    tu decyzją, nie zaniedbaniem.
+7. **NEVER** wystawiaj panelu redakcyjnego poza `127.0.0.1` i nigdy nie wdrażaj go na produkcję —
+   panel zapisuje pliki na dysku i nie ma żadnego uwierzytelniania. Patrz
+   `.ai/specs/SPEC-002-*` oraz decyzja architektoniczna „Panel redakcyjny poza aplikacją produkcyjną".
 
 ## Decision priorities
 
@@ -53,25 +58,32 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 
 ## Architectural boundaries
 
-1. `assets/js/main.js` → **NIGDY** nie trzyma danych produktów. Źródłem prawdy są atrybuty
-   `data-*` na kartach w `index.html`.
+1. `data/wina.json` → **JEDYNE** źródło prawdy o asortymencie i cenach. `index.html` nie zawiera
+   kart produktów, `assets/js/main.js` je renderuje, ale nie definiuje.
 2. `assets/css/custom.css` → **NIGDY** nie duplikuje klas z bundla Tailwinda; dopisuje tylko to,
    czego w bundlu nie ma.
-3. `wsgi.py` → **NIGDY** nie dostaje logiki biznesowej. To serwer plików statycznych; wszystko
-   inne jest zadaniem rozmiaru **L** i wymaga decyzji Właściciela.
-4. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
+3. `wsgi.py` → **NIGDY** nie dostaje logiki biznesowej ani możliwości zapisu na dysk. To serwer
+   plików statycznych; wszystko inne jest zadaniem rozmiaru **L** i wymaga decyzji Właściciela.
+4. `tools/` → skrypty uruchamiane ręcznie na maszynie lokalnej (panel redakcyjny, optymalizacja
+   zdjęć). **NIGDY** nie są częścią wdrożenia i nie mogą być importowane przez `wsgi.py`.
+5. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
 
 ## Consistency rules
 
 1. Dodajesz zmienną CSS → **ZAWSZE** do wszystkich trzech motywów w `themeStyles`.
-2. Zmieniasz cenę produktu → **ZAWSZE** komplet sześciu miejsc na karcie (patrz BLOCK #3),
-   przy zachowaniu `brutto = netto × 1.23`.
-3. Dodajesz produkt → **ZAWSZE** unikalne `data-id`, `data-category` zgodne co do znaku
-   z przyciskiem filtra, cena w zakresie 0–100 zł (inaczej wypadnie z filtra).
-4. Dodajesz sekcję z `id` → **ZAWSZE** pozycja w nawigacji desktopowej i mobilnej
+2. Zmieniasz cenę → **ZAWSZE** tylko `cena_brutto` w `data/wina.json`. Netto, kwota rabatu
+   i cena sprzed rabatu są wyliczane; nie zapisuj ich nigdzie.
+3. Dodajesz pozycję do `data/wina.json` → **ZAWSZE** unikalne `id`, `kategoria` z listy
+   `kategorie` w tym samym pliku i `odmiana_slug` wskazujący na istniejący plik
+   `wina/<slug>.html`.
+4. Dodajesz kategorię → **ZAWSZE** do tablicy `kategorie`; filtr w sklepie buduje z niej swoje
+   opcje, więc nic nie trzeba zmieniać w HTML.
+5. Dodajesz odmianę → **ZAWSZE** kafelek w `#nasze-wina` **i** strona `wina/<slug>.html`
+   **i** wpis w `sitemap.xml`. Odmiana bez własnej strony jest niewidoczna dla wyszukiwarek.
+6. Dodajesz sekcję z `id` → **ZAWSZE** pozycja w nawigacji desktopowej i mobilnej
    (`data-scroll="id-sekcji"`), jeśli ma być osiągalna z menu.
-5. Dodajesz zachowanie w JS → **ZAWSZE** jako `initX()` zarejestrowane w `DOMContentLoaded`.
-6. Dodajesz ikonę → **ZAWSZE** jako `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`,
+7. Dodajesz zachowanie w JS → **ZAWSZE** jako `initX()` zarejestrowane w `DOMContentLoaded`.
+8. Dodajesz ikonę → **ZAWSZE** jako `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`,
    używana przez `<use href="#icon-…">`.
 
 ## Allowed exceptions
@@ -79,10 +91,9 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 1. **`alert()` w `initCart` i `initContactForm`** — świadome zaślepki demo, dopóki nie ma backendu.
    Nie rozszerzamy wzorca na nowy kod i pamiętamy, że blokują automatyzację przeglądarki.
 2. **Koszyk w pamięci (`Map`), znikający po odświeżeniu** — świadomy stan demo, nie błąd.
-3. **Bardzo długie linie atrybutów na kartach produktów** — celowe; nie łamiemy ich, bo diff
-   stałby się nieczytelny.
-4. **Zduplikowana cena netto w markupie** — dopóki `data-price-net` nie zostanie zlikwidowane
-   albo zaczęte renderować z JS (patrz `TODO.md` #3).
+3. **Panel redakcyjny zapisuje pliki bez logowania** — dopuszczalne wyłącznie dlatego, że
+   nasłuchuje na `127.0.0.1` i nigdy nie jest wdrażany. Poza tym jednym miejscem żaden kod
+   w tym projekcie nie zapisuje niczego na dysk.
 
 ## Definition of "done"
 
@@ -113,13 +124,28 @@ Zmiana jest gotowa dopiero, gdy:
   Nowe style piszemy w `custom.css`. Nie proponuj przywracania builda jako „porządków" —
   to zadanie **L** i decyzja Właściciela.
 
-### Dane produktów w HTML zamiast w bazie
+### Dane produktów w pliku JSON, nie w HTML i nie w bazie
 
-- **Wybór**: każdy produkt to `<article class="product-card">` z atrybutami `data-*`.
-- **Dlaczego**: sześć produktów i brak backendu — baza albo plik JSON dokładałyby warstwę,
-  której nikt nie utrzymuje.
-- **Konsekwencja**: cena jest zduplikowana w kilku miejscach jednej karty i nic tego nie waliduje.
-  Pilnuje tego standard `content/product-card` i reguła BLOCK #3.
+- **Wybór**: asortyment i ceny żyją w `data/wina.json`; `main.js` pobiera go przez `fetch`
+  i renderuje karty sklepu. Decyzja Właściciela z 2026-09-02, zastępuje wcześniejszy zapis
+  o danych zaszytych w `index.html`.
+- **Dlaczego**: cennik zmienia się częściej niż kod, a wcześniej jedna zmiana ceny wymagała
+  poprawienia sześciu miejsc w markupie — i już raz się rozjechały. Baza wymagałaby backendu,
+  którego projekt nie ma.
+- **Konsekwencja**: `index.html` nie zawiera kart produktów. Jedyną zapisaną ceną jest
+  `cena_brutto`; netto i rabat są wyliczane. Sklep wymaga serwera HTTP — otwarcie
+  `index.html` przez `file://` zablokuje `fetch`. Treść sklepu nie jest widoczna dla robotów,
+  dlatego każda odmiana ma własną statyczną stronę `wina/<slug>.html`.
+
+### Panel redakcyjny poza aplikacją produkcyjną
+
+- **Wybór**: `data/wina.json` edytuje się lokalnym panelem (`tools/panel/`), uruchamianym
+  ręcznie i nasłuchującym wyłącznie na `127.0.0.1`. Nie jest częścią `wsgi.py` ani wdrożenia.
+- **Dlaczego**: panel musi zapisywać plik, a produkcyjny serwer ma pozostać serwerem plików
+  statycznych bez prawa zapisu. Rozdzielenie ich sprawia, że nawet błąd w konfiguracji
+  wdrożenia nie wystawi zapisu do internetu.
+- **Konsekwencja**: aktualizacja cennika to praca lokalna zakończona commitem i wdrożeniem —
+  nie edycja „na żywo" na serwerze. Nie przenoś panelu do `wsgi.py`, nawet „tymczasowo".
 
 ### Front-end bez frameworka i bez modułów
 
