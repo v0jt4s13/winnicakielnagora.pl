@@ -22,6 +22,9 @@ class _App:
     def route(self, *_, **__):
         return lambda funkcja: funkcja
 
+    def after_request(self, funkcja):
+        return funkcja
+
 
 class _Resp:
     def __init__(self, tresc, kod=200, naglowki=None):
@@ -31,13 +34,14 @@ class _Resp:
 class _Zadanie:
     authorization = None
     method = "GET"
+    script_root = ""
 
     def get_json(self, silent=False):
         return None
 
 
 def _send_from_directory(katalog, sciezka):
-    return f"PLIK:{sciezka}"
+    return _Resp(f"PLIK:{sciezka}")
 
 
 flask = types.ModuleType("flask")
@@ -52,11 +56,21 @@ import wsgi  # noqa: E402  (import po podstawieniu atrapy)
 
 
 def wynik(sciezka: str) -> tuple[str, int]:
-    """Zwraca (oddany_plik, kod_http) dla danego adresu."""
+    """Zwraca (oddany_plik, kod_http) dla danego adresu.
+
+    Strona bledu nie idzie przez send_from_directory — wsgi.strona_404() czyta ja sama,
+    zeby podmienic <base> na przedrostek wdrozenia. Rozpoznajemy ja po kodzie 404.
+    """
     odpowiedz = wsgi.serve(sciezka)
     if isinstance(odpowiedz, tuple):
-        return odpowiedz[0], odpowiedz[1]
-    return odpowiedz, 200
+        odpowiedz, kod = odpowiedz[0], odpowiedz[1]
+    else:
+        kod = getattr(odpowiedz, "kod", 200)
+    if isinstance(odpowiedz, _Resp):
+        if kod == 404:
+            return "404.html", 404
+        return odpowiedz.tresc, kod
+    return odpowiedz, kod
 
 
 PRZYPADKI = [
@@ -121,6 +135,22 @@ def main() -> int:
         if not ok:
             print(f"        oczekiwano: {oczekiwany_plik} [{oczekiwany_kod}]")
             bledy += 1
+
+    # Strona bledu musi dostac <base> zgodny z przedrostkiem wdrozenia, bo bywa serwowana
+    # pod dowolnie gleboka sciezka — inaczej szuka CSS i JS w zlym miejscu.
+    for przedrostek, oczekiwany_base in (("", '<base href="/">'),
+                                         ("/winnicakielnagora.pl", '<base href="/winnicakielnagora.pl/">')):
+        wsgi.request.script_root = przedrostek
+        tresc = wsgi.strona_404().tresc
+        opis = przedrostek or "korzen domeny"
+        ok = oczekiwany_base in tresc
+        print(f"{'OK  ' if ok else 'BLAD'}  404 pod {opis}: {oczekiwany_base}")
+        if not ok:
+            bledy += 1
+        if 'href="/assets' in tresc or 'src="/assets' in tresc:
+            print("BLAD  404 ma sciezki bezwzgledne od korzenia hosta")
+            bledy += 1
+    wsgi.request.script_root = ""
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")
     return 0 if bledy == 0 else 1

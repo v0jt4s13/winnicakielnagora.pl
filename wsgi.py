@@ -1,3 +1,4 @@
+import gzip
 import hashlib
 import hmac
 import json
@@ -61,6 +62,54 @@ def _publiczna(wzgledna: Path) -> bool:
     if len(czesci) == 1:
         return czesci[0] in PLIKI_PUBLICZNE
     return czesci[0] in KATALOGI_PUBLICZNE
+
+
+# --- kompresja i cache --------------------------------------------------------
+# Wlasciwym miejscem na kompresje jest nginx (gzip_types), ale tamten blok trzeba bylo
+# dopisac recznie i przy odtwarzaniu konfiguracji od zera latwo o tym zapomniec. To jest
+# zabezpieczenie: dziala niezaleznie od konfiguracji serwera i nie dokłada zaleznosci —
+# `gzip` jest w bibliotece standardowej.
+TYPY_KOMPRESOWANE = ("text/", "application/javascript", "application/json", "image/svg+xml")
+MIN_DO_KOMPRESJI = 1024
+_kompresja_cache: dict[tuple[str, float], bytes] = {}
+
+# Ile przegladarka moze trzymac zasob. HTML zostaje swiezy, bo to on wskazuje wersje
+# pozostalych plikow. Cennik ma wlasny no-store — ceny zmieniaja sie panelem.
+CACHE_WG_ROZSZERZENIA = {
+    ".jpg": "public, max-age=2592000",
+    ".png": "public, max-age=2592000",
+    ".svg": "public, max-age=2592000",
+    ".ico": "public, max-age=2592000",
+    ".woff2": "public, max-age=2592000",
+    ".css": "public, max-age=3600",
+    ".js": "public, max-age=3600",
+}
+
+
+def _mozna_skompresowac(odpowiedz) -> bool:
+    if odpowiedz.status_code != 200 or "Content-Encoding" in odpowiedz.headers:
+        return False
+    if "gzip" not in (request.headers.get("Accept-Encoding") or ""):
+        return False
+    typ = (odpowiedz.headers.get("Content-Type") or "").split(";")[0]
+    return typ.startswith(TYPY_KOMPRESOWANE)
+
+
+@app.after_request
+def kompresuj(odpowiedz):
+    odpowiedz.headers.setdefault("Vary", "Accept-Encoding")
+    if not _mozna_skompresowac(odpowiedz):
+        return odpowiedz
+    # send_file zwraca odpowiedz w trybie strumieniowym — get_data() rzuca wtedy
+    # wyjatkiem. Trzeba go najpierw wylaczyc, inaczej kazdy plik tekstowy konczy sie 500.
+    odpowiedz.direct_passthrough = False
+    dane = odpowiedz.get_data()
+    if len(dane) < MIN_DO_KOMPRESJI:
+        return odpowiedz
+    odpowiedz.set_data(gzip.compress(dane, 6))
+    odpowiedz.headers["Content-Encoding"] = "gzip"
+    odpowiedz.headers["Content-Length"] = str(len(odpowiedz.get_data()))
+    return odpowiedz
 
 
 def _plik(sciezka: str) -> str | None:
@@ -246,15 +295,24 @@ def panel_pliki(plik: str):
     return odpowiedz
 
 
+def _oddaj(wzgledna: str):
+    """send_from_directory + Cache-Control zalezny od rozszerzenia."""
+    odpowiedz = send_from_directory(STATIC_ROOT, wzgledna)
+    naglowek = CACHE_WG_ROZSZERZENIA.get(Path(wzgledna).suffix.lower())
+    if naglowek:
+        odpowiedz.headers["Cache-Control"] = naglowek
+    return odpowiedz
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path: str):
     if not path:
-        return send_from_directory(STATIC_ROOT, "index.html")
+        return _oddaj("index.html")
 
     istniejacy = _plik(path)
     if istniejacy:
-        return send_from_directory(STATIC_ROOT, istniejacy)
+        return _oddaj(istniejacy)
 
     # Ladniejsze adresy: /wina/monarch obsluguje wina/monarch.html.
     # Uwaga: `python3 -m http.server` tego nie robi, dlatego linki w HTML-u
@@ -264,12 +322,26 @@ def serve(path: str):
         for kandydat in (f"{bez_ukosnika}.html", f"{bez_ukosnika}/index.html"):
             istniejacy = _plik(kandydat)
             if istniejacy:
-                return send_from_directory(STATIC_ROOT, istniejacy)
+                return _oddaj(istniejacy)
 
     # Nieznany adres to blad, a nie strona glowna. Wczesniej kazda literowka
     # dostawala index.html ze statusem 200, przez co wyszukiwarki widzialy
     # duplikaty strony glownej pod dowolnym adresem.
-    strona_bledu = _plik("404.html")
-    if strona_bledu:
-        return send_from_directory(STATIC_ROOT, strona_bledu), 404
-    return "Nie znaleziono strony", 404
+    return strona_404()
+
+
+def strona_404():
+    """404 z <base> ustawionym na przedrostek wdrozenia.
+
+    Strona bledu bywa serwowana pod dowolnie gleboka, nieistniejaca sciezka, wiec
+    sciezki wzgledne w niej nie moga zalezec od tego, gdzie akurat trafil uzytkownik.
+    Podmieniamy wiec <base>, zamiast wpisywac przedrostek na stale — witryna ma dzialac
+    i pod /winnicakielnagora.pl/, i w korzeniu docelowej domeny.
+    """
+    plik = STATIC_ROOT / "404.html"
+    if not plik.is_file():
+        return "Nie znaleziono strony", 404
+    korzen = (request.script_root or "").rstrip("/") + "/"
+    tresc = plik.read_text(encoding="utf-8").replace('<base href="./">', f'<base href="{korzen}">', 1)
+    return Response(tresc, 404, {"Content-Type": "text/html; charset=utf-8",
+                                 "Cache-Control": "no-store"})

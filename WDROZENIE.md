@@ -154,6 +154,28 @@ curl -s -o /dev/null -w "%{http_code}\n" $B/tools/panel/api/wczytaj  # 401
 Ostatnie żądanie ma zwrócić **401**, a nie 404 — 404 znaczy, że zmienne panelu nie doszły
 do procesu.
 
+## Kompresja i cache
+
+Aplikacja **sama** gzipuje odpowiedzi tekstowe (`wsgi.py` → `kompresuj`) i ustawia
+`Cache-Control` zależnie od rozszerzenia. Nie wymaga to niczego po stronie nginx.
+
+Jeśli chcesz przenieść kompresję na nginx (mniej CPU w Pythonie), dopisz w bloku `http {}`
+w `nginx.conf` — **nie** w bloku `location` tego projektu, bo tamten bywa regenerowany:
+
+```nginx
+gzip_types text/css text/javascript application/javascript application/json image/svg+xml text/plain application/xml;
+gzip_vary on;
+gzip_min_length 1024;
+```
+
+Aplikacja wykryje istniejące `Content-Encoding` i nie skompresuje po raz drugi.
+
+Sprawdzenie:
+
+```bash
+curl -sI -H 'Accept-Encoding: gzip' $B/assets/css/style.css | grep -i "content-encoding\|cache-control\|vary"
+```
+
 ## Podścieżka
 
 Nginx przekazuje pełny adres razem z prefiksem, a `SET_SCRIPT_NAME` (domyślnie `1`) ustawia

@@ -275,7 +275,7 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
 
 | Action | Command |
 |---|---|
-| Dev | `python3 -m http.server 5000` w katalogu repo → http://localhost:5000 (zero zależności; Flask/gunicorn nie są zainstalowane lokalnie). Wariant produkcyjny: `python3 -m flask --app wsgi run --port 8004` |
+| Dev | `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000 (zero zależności, obsługuje projektowe `404.html`; Flask/gunicorn nie są zainstalowane lokalnie). Wariant produkcyjny: `python3 -m flask --app wsgi run --port 8004` |
 | Build | **brak** — `assets/css/style.css` jest w repo jako gotowy artefakt; nic się nie kompiluje |
 | Test | **brak** — jedyna weryfikacja to podgląd strony w przeglądarce; opisz w odpowiedzi, którą sekcję i co sprawdzić |
 | Lint / Format | **brak** — trzymaj się formatowania sąsiedniego kodu (2 spacje wcięcia w HTML/JS/CSS) |
@@ -336,7 +336,7 @@ Nie ma builda ani lintera — `/verify-standards` nie odpali tu żadnego narzęd
 `allowed-tools` zna tylko biome/eslint/prettier/ruff/dotnet format/gofmt/rustfmt). Zamiast
 builda, zanim zgłosisz zmianę jako gotową:
 
-1. `python3 -m http.server 5000` w katalogu repo → http://localhost:5000
+1. `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000
 2. Obejrzyj sekcję, której dotyczyła zmiana (kotwice w tabeli **Where to Look**)
 3. **Przełącz wszystkie trzy motywy** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
    musi wyglądać poprawnie w `classic`, `modern` i `rustic`
