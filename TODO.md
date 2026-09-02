@@ -275,36 +275,27 @@ przekierowaniem z HTTP. Jeśli nie — nie włączaj `PANEL_UZYTKOWNIK` ani `PAN
 Warto też rozważyć ograniczenie `/tools/panel/` po adresie IP na poziomie proxy — wtedy nawet
 wyciek hasła nie wystarczy, żeby wejść.
 
-### 28. PILNE: katalog `.git` publicznie dostępny na serwerze dev
+### ~~28. Katalog `.git` publicznie dostępny~~ — ZAMKNIĘTE 2026-09-02
 
-Stan na 2026-09-02, sprawdzony na żywo:
+Po naprawie #29 ruch przechodzi przez aplikację i lista dozwolonych plików działa.
+Sprawdzone na żywo: `/.git/config`, `/wsgi.py`, `/cennik.py`, `/WDROZENIE.md` → **404**.
 
-```
-https://ops02.jdblayer.com/winnicakielnagora.pl/.git/config      → 200
-https://ops02.jdblayer.com/winnicakielnagora.pl/wsgi.py          → 200
-https://ops02.jdblayer.com/winnicakielnagora.pl/cennik.py        → 200
-https://ops02.jdblayer.com/winnicakielnagora.pl/TODO.md          → 200
-```
+Warto mimo to dołożyć `location ~ /\.git { deny all; return 404; }` w nginx — wtedy ochrona
+nie zależy od tego, czy aplikacja działa.
 
-Każdy może pobrać całą historię repozytorium. Lista dozwolonych plików z `wsgi.py`
-(`PLIKI_PUBLICZNE`, `KATALOGI_PUBLICZNE`) **nie działa na serwerze** — pliki są wydawane
-z pominięciem aplikacji.
 
-Do zrobienia natychmiast, niezależnie od reszty: zablokować `.git`, `*.py` i `*.md`
-na poziomie proxy, żeby nie zależało to wyłącznie od kodu aplikacji.
+### ~~29. Aplikacja nie wykonywała aktualnego kodu~~ — ZAMKNIĘTE 2026-09-02
 
-### 29. Aplikacja nie działa jako usługa na serwerze dev
+**Przyczyna: dwie usługi systemd dla tej samej aplikacji.** Port 8004 trzymał gunicorn
+z 1 września należący do unitu **`winnicakielnagora.pl.service`** (z `.pl`), a `projects_manager`
+zarządza unitem **`winnicakielnagora.service`** (bez `.pl`). Nowy proces nie mógł się podpiąć
+pod zajęty port, więc odpowiadał kod sprzed doby.
 
-**Przyczyna ustalona 2026-09-02:** dla tej lokalizacji **nie jest uruchomiony gunicorn**, więc
-nginx wydaje pliki z pominięciem Flaska. Stąd wszystko naraz: dostępne `.git` i `wsgi.py`
-(#28), brak ładnych adresów, brak `/tools/panel/api/…`, obca strona 404.
+Naprawione zatrzymaniem starego procesu. Po restarcie: `/zdrowie` zwraca `1764551b7f51`,
+ładne adresy działają, `.git` i pliki źródłowe dają 404, `/data/wina.json` przychodzi
+z naszej trasy (`no-store`).
 
-Pełna instrukcja: **`WDROZENIE.md`**. W skrócie: sprawdzić, czy blok nginx dla prefiksu
-robi `proxy_pass` (a nie `alias`), uzupełnić `EXTRA_SYSTEMD_ENV` w
-`production_projects/winnicakielnagora.env` i uruchomić usługę przez `production_manager.sh`.
-
-Dopóki to nie zadziała, **żadne zabezpieczenie z `wsgi.py` nie obowiązuje** — lista dozwolonych
-plików i hasło do panelu są martwe, bo ruch tam nie dociera.
+**Zostaje do zrobienia — patrz #32**, inaczej problem wróci po restarcie maszyny.
 
 
 ### 30. Uruchamianie lokalnego serwera panelu z przeglądarki — odrzucone
@@ -315,15 +306,43 @@ serwer nie jest do niczego potrzebny; uruchamianie procesów z żądania HTTP za
 w uwierzytelnianiu w zdalne wykonanie kodu; a przy Basic Auth nie istnieje moment
 „wylogowania", w którym dałoby się taki proces zatrzymać.
 
-### 31. Stary bytecode na serwerze — `__pycache__` był w repozytorium
+### ~~31. Stary bytecode na serwerze~~ — ZAMKNIĘTE 2026-09-02
 
-`__pycache__/wsgi.cpython-311.pyc` był śledzony w gicie od pierwszych commitów do `09178bc`.
-Serwery, które pobrały kod wcześniej, mają w katalogu aplikacji skompilowaną **starą** wersję
-modułu obok nowego źródła. To najlepiej tłumaczy objaw z 2026-09-02: `wsgi.py` na dysku
-identyczny z repozytorium, usługa działa, a zachowanie odpowiada kodowi sprzed kilku commitów.
+`__pycache__` usunięty z serwera, `__pycache__/` jest w `.gitignore` od `09178bc`.
+Ostatecznie nie to okazało się przyczyną (patrz #29), ale plik i tak nie miał prawa
+być w repozytorium.
 
-Naprawa: `sudo rm -rf /opt/apps/app_winnicakielnagora.pl/app/__pycache__` i restart usługi.
-Zapobieganie: `PYTHONDONTWRITEBYTECODE=1` w `EXTRA_SYSTEMD_ENV` (już w `WDROZENIE.md`).
+### 32. PILNE: zduplikowany unit `winnicakielnagora.pl.service`
 
-Do sprawdzenia na pozostałych wdrożeniach z tego repozytorium, jeśli takie są.
+Stary proces trzymający port należał do unitu **`winnicakielnagora.pl.service`**, podczas gdy
+`projects_manager` zarządza unitem **`winnicakielnagora.service`**. Oba uruchamiają tę samą
+aplikację na tym samym porcie.
 
+Stare procesy wystartowały o `15:17:33`, w tej samej sekundzie co kilkanaście innych aplikacji —
+czyli przy starcie maszyny. **Po najbliższym restarcie serwera stary unit znów zajmie port 8004
+i wszystko wróci do stanu sprzed naprawy.**
+
+```bash
+systemctl status winnicakielnagora.pl.service
+sudo systemctl disable --now winnicakielnagora.pl.service
+sudo rm /etc/systemd/system/winnicakielnagora.pl.service   # po upewnieniu sie, ze to duplikat
+sudo systemctl daemon-reload
+```
+
+Warto sprawdzić, czy inne projekty na tym serwerze nie mają tego samego problemu —
+lista procesów pokazała po kilka gunicornów na aplikację, co może być normalne (3 workery),
+ale przy `app_moderacja` widać procesy z dwóch różnych godzin.
+
+### 33. Panel i cennik nie są jeszcze skonfigurowane na serwerze
+
+`/zdrowie` zwraca `"panel_wlaczony": false`, a ścieżka cennika to wciąż kopia w repozytorium
+(`/opt/apps/app_winnicakielnagora.pl/app/data/wina.json`) — czyli zmiany wpisane panelem
+zniknęłyby przy następnym wdrożeniu.
+
+Do dopisania w `production_projects/winnicakielnagora.env` (szczegóły w `WDROZENIE.md`):
+
+```bash
+EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=... PANEL_HASLO_HASH=...'
+```
+
+Przed włączeniem panelu przeczytaj #27 — Basic Auth wymaga HTTPS.

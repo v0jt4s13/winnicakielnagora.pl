@@ -11,7 +11,22 @@ projektu: `production_projects/winnicakielnagora.env`.
 | Adres dev | `https://ops02.jdblayer.com/winnicakielnagora.pl/` |
 | Strategia nginx | `prefix` — blok doklejany do `moderacja.conf` |
 
-## Stan na 2026-09-02: aplikacja nie działa jako usługa
+## Rozwiązany problem: dwa unity systemd dla jednej aplikacji
+
+**2026-09-02.** Port 8004 trzymał gunicorn z poprzedniego dnia, należący do unitu
+`winnicakielnagora.pl.service` (z `.pl`), podczas gdy `projects_manager` zarządza unitem
+`winnicakielnagora.service` (bez `.pl`). Nowy proces nie mógł zająć portu, więc aplikacja
+odpowiadała kodem sprzed doby — mimo aktualnych plików na dysku i pustego `__pycache__`.
+
+**Dopóki stary unit nie zostanie wyłączony, wróci to po restarcie maszyny** (`TODO.md` #32):
+
+```bash
+sudo systemctl disable --now winnicakielnagora.pl.service
+```
+
+Historia diagnostyki poniżej — zostawiona, bo objawy były mylące.
+
+## Stan sprzed naprawy: aplikacja nie wykonywała aktualnego kodu
 
 Sprawdzone na żywo: pod adresem dev pliki są wydawane **z pominięciem Flaska**. Skutki:
 
