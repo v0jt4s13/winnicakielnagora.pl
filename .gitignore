@@ -36,3 +36,5 @@ data/wina.json.bak
 audit/**/*.png
 audit/**/*.jpg
 
+T-SHIRT-README.md
+t-shirt-size-install.sh
