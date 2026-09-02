@@ -3,7 +3,15 @@
 **Status**: propozycja do akceptacji
 **Rozmiar**: M
 **Data**: 2026-09-02
-**Zależy od**: SPEC-001 (definiuje strukturę `data/wina.json`)
+**Zależy od**: SPEC-001 — Etap 2, konkretnie dwóch rzeczy:
+
+1. `data/wina.json` istnieje (może mieć pustą tablicę `wina`),
+2. `assets/js/produkty.js` dostarcza `Produkty.renderProductCard()` i `Produkty.policzCeny()`
+   (kontrakt: SPEC-001 → „Kontrakt `assets/js/produkty.js`").
+
+Etap 2 SPEC-001 **nie jest już niczym zablokowany** — zgoda na zmianę `GUARDRAILS.md` została
+udzielona 2026-09-02, a brak asortymentu (blokada B1) dotyczy treści pliku, nie mechanizmu.
+Panel jest właśnie narzędziem, którym B1 się zamyka.
 
 ## Overview
 
@@ -182,16 +190,74 @@ Zapisane w `.ai/GUARDRAILS.md` → „Panel redakcyjny poza aplikacją produkcyj
 a projekt celowo nie ma `requirements.txt` (`.ai/GUARDRAILS.md` → BLOCK #6). Panel ma działać
 po `git clone` i `python3`, bez instalowania czegokolwiek.
 
+### Podgląd karty — skąd bierze się kod
+
+Panel ładuje `assets/js/produkty.js` zwykłym `<script>` i woła
+`Produkty.renderProductCard(wino, stawkaVat, { przyciskKoszyka: false })`, wstawiając zwrócony
+HTML do kontenera podglądu. Plik nie rejestruje żadnych zdarzeń i nie dotyka DOM-u strony
+głównej, więc jego wczytanie niczego nie uruchamia (SPEC-001 → „Kontrakt `assets/js/produkty.js`").
+
+**`assets/js/main.js` nie jest ładowany w panelu i nie jest serwowany** — jego
+`DOMContentLoaded` odpaliłby nawigację, motywy i koszyk, których w panelu nie ma.
+
 ### API
 
-| Metoda | Ścieżka | Odpowiedź |
+Wszystkie odpowiedzi to `application/json; charset=utf-8`.
+
+| Metoda | Ścieżka | Opis |
 |---|---|---|
 | `GET` | `/` | `panel.html` |
-| `GET` | `/api/wczytaj` | treść `data/wina.json` + lista slugów z `attached_assets/photos/` + lista plików `wina/*.html` |
-| `POST` | `/api/zapisz` | `{"ok": true, "pozycji": 6}` albo `400` z listą błędów walidacji |
+| `GET` | `/api/wczytaj` | stan początkowy panelu (niżej) |
+| `POST` | `/api/zapisz` | zapis pliku; `Content-Type: application/json` |
 
-Serwer oddaje też pliki z `attached_assets/photos/` i `assets/css/style.css`, żeby podgląd karty
-wyglądał jak w sklepie.
+`GET /api/wczytaj` → `200`:
+
+```json
+{
+  "cennik": { "waluta": "PLN", "stawka_vat": 0.23, "kategorie": ["Białe"], "wina": [] },
+  "zdjecia": ["dornfelder-kiscie-01", "monarch-butelka-01"],
+  "odmiany": ["dornfelder", "monarch", "souvignier-gris"],
+  "sciezka": "/home/vs/repo-agents/winnica/data/wina.json"
+}
+```
+
+- `cennik` — dosłowna treść `data/wina.json`. Jeśli pliku nie ma, serwer zwraca szkielet
+  z pustą tablicą `wina` i **nie tworzy pliku** — powstanie dopiero przy pierwszym zapisie.
+- `zdjecia` — slugi z `attached_assets/photos/`, **z odfiltrowanymi wariantami `-sm`**
+  i bez rozszerzenia, posortowane alfabetycznie. Taki sam format ma pole `zdjecie` w cenniku.
+- `odmiany` — nazwy plików `wina/*.html` bez rozszerzenia, posortowane. Pusta lista, jeśli
+  katalogu jeszcze nie ma.
+
+`POST /api/zapisz` — ciałem żądania jest **cała nowa treść pliku** w tym samym kształcie, co
+`cennik` z `/api/wczytaj`. Odpowiedź `200`:
+
+```json
+{ "ok": true, "pozycji": 6, "kopia": "data/wina.json.bak" }
+```
+
+Odpowiedź `400` przy błędach walidacji — zapis **nie następuje w całości**:
+
+```json
+{ "ok": false, "bledy": [
+  { "pozycja": 2, "pole": "cena_brutto", "komunikat": "Cena musi być liczbą dodatnią" },
+  { "pozycja": null, "pole": "kategorie", "komunikat": "Lista kategorii nie może być pusta" }
+]}
+```
+
+`pozycja` to indeks w tablicy `wina` (od 0) albo `null` dla błędów dotyczących całego pliku.
+
+### Pliki serwowane przez panel
+
+Serwer oddaje wyłącznie:
+
+| Ścieżka | Po co |
+|---|---|
+| `tools/panel/*` | interfejs panelu |
+| `assets/js/produkty.js` | **ten jeden plik**, do podglądu karty |
+| `assets/css/style.css` | **ten jeden plik**, żeby podgląd wyglądał jak sklep |
+| `attached_assets/photos/*` | miniatury w podglądzie i na liście |
+
+Żadnych innych plików — w szczególności `assets/js/main.js`, `index.html` ani niczego z `.git/`.
 
 ### Walidacja
 
@@ -213,13 +279,23 @@ Serwer jest instancją rozstrzygającą — przeglądarce nie wolno ufać nawet 
 Zapis odrzucony w całości, jeśli którakolwiek pozycja nie przejdzie — plik nigdy nie zostaje
 w stanie częściowo poprawnym.
 
+**Propozycja `id` z nazwy** (Story 2): małe litery, polskie znaki transliterowane
+(`ą→a ć→c ę→e ł→l ń→n ó→o ś→s ź→z ż→z`), wszystko poza `[a-z0-9]` zamienione na `-`, wielokrotne
+myślniki zwinięte, myślniki z brzegów obcięte, na końcu dopisany rocznik, jeśli podany.
+`Sok z białych winogron` → `sok-z-bialych-winogron`. Propozycja jest tylko podpowiedzią —
+pole `id` pozostaje edytowalne, a przy kolizji panel dopisuje `-2`, `-3`…
+
 ### Bezpieczeństwo
 
 1. `bind` wyłącznie na `127.0.0.1` (nie `0.0.0.0`).
 2. Sprawdzenie `client_address[0] == "127.0.0.1"` przy każdym żądaniu; inaczej 403.
 3. `POST` wymaga nagłówka `Origin: http://127.0.0.1:<port>`; inaczej 403.
-4. Serwer oddaje pliki **tylko** z trzech miejsc: `tools/panel/`, `attached_assets/photos/`,
-   `assets/css/`. Ścieżki są normalizowane i sprawdzane, czy nie wychodzą poza katalog projektu.
+4. Serwer oddaje **tylko** pliki z tabeli „Pliki serwowane przez panel" — dwa konkretne pliki
+   plus zawartość dwóch katalogów. Ścieżka z żądania jest sprawdzana tak:
+   `sciezka = (KATALOG_PROJEKTU / zadanie).resolve()`, a następnie odrzucana, jeśli
+   `KATALOG_PROJEKTU` nie jest jej przodkiem (`Path.is_relative_to`) **albo** jeśli nie mieści
+   się w dozwolonym zbiorze. Samo obcięcie `..` nie wystarcza — dowiązanie symboliczne
+   wyprowadziłoby poza projekt, a `resolve()` je rozwija przed sprawdzeniem.
 5. Zapis dotyczy jednego pliku — `data/wina.json`. Ścieżka jest stała w kodzie, nie z żądania.
 6. Przed zapisem powstaje `data/wina.json.bak`; zapis jest atomowy (`os.replace`).
 
@@ -253,8 +329,10 @@ python3 tools/panel/serwer.py --port 9000
 - [ ] `serwer.py` — trzy zabezpieczenia dostępu (bind, adres klienta, `Origin`)
 - [ ] `panel.html` + `panel.css` — lista i formularz
 - [ ] `panel.js` — walidacja przy polach, stan „niezapisane zmiany", `beforeunload`
-- [ ] `panel.js` — podgląd karty przez `renderProductCard()` z `assets/js/main.js`
-- [ ] Obsługa nowej kategorii (dopisanie do `kategorie`) z ostrzeżeniem
+- [ ] `panel.js` — podgląd karty przez `Produkty.renderProductCard()` z `assets/js/produkty.js`
+- [ ] `panel.js` — propozycja `id` z transliteracją polskich znaków
+- [ ] Obsługa nowej kategorii (dopisanie do `kategorie`) z ostrzeżeniem w interfejsie
+      (pasek pod polem, nie `alert()`)
 - [ ] `data/wina.json.bak` w `.gitignore`
 - [ ] Ręczny test: zmiana ceny, dodanie pozycji, usunięcie, próba zapisu błędnych danych
 - [ ] Ręczny test: sprawdzenie, że `http://<adres-w-LAN>:8765` nie odpowiada
@@ -271,4 +349,9 @@ python3 tools/panel/serwer.py --port 9000
 ## Changelog
 
 ### 2026-09-02
+- Poprawki po recenzji `spec-reviewer`: usunięta sprzeczność między podglądem karty a listą
+  serwowanych plików (podgląd korzysta z wydzielonego `assets/js/produkty.js`, `main.js` nie jest
+  serwowany ani ładowany); doprecyzowany kształt żądań i odpowiedzi obu endpointów; zasada
+  filtrowania wariantów `-sm`; algorytm sprawdzania ścieżek (`resolve()` + `is_relative_to`);
+  transliteracja przy proponowaniu `id`; jawnie opisana zależność od Etapu 2 SPEC-001.
 - Pierwsza wersja specyfikacji.

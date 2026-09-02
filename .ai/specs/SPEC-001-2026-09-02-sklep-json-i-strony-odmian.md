@@ -42,14 +42,20 @@ z nich należy do Właściciela; sesja implementująca nie ma prawa ich rozstrzy
 
 | # | Blokada | Co blokuje | Gdzie |
 |---|---|---|---|
-| B1 | Brak asortymentu i cennika | `data/wina.json`, cała sekcja `#sklep`, bloki „Wina z tej odmiany" | `TODO.md` #10 |
-| B2 | Brak zgody na zmianę `.ai/GUARDRAILS.md` | przejście danych produktów z HTML do JSON (granica #1, BLOCK #3, decyzja „Dane produktów w HTML zamiast w bazie") | ta specyfikacja, „Wpływ na obowiązujące reguły" |
+| B1 | Brak asortymentu i cennika | **treść** `data/wina.json` (nie strukturę) | `TODO.md` #10 |
+| ~~B2~~ | ~~Brak zgody na zmianę `.ai/GUARDRAILS.md`~~ | **ZDJĘTA 2026-09-02** — zgoda udzielona, reguły przepisane | `.ai/GUARDRAILS.md` |
 | B3 | Status odmiany Svenson Red | `wina/svenson-red.html` i pozycja w JSON | `TODO.md` #12 |
 
-**Co da się zrobić mimo blokad** (i co należy zrobić najpierw): strony odmian dla sześciu
-potwierdzonych odmian, podmiana zdjęć AI na prawdziwe, poprawki faktów w `#o-nas`, stopce
-i `<title>`, `sitemap.xml`, `robots.txt`, znaczniki meta. Te prace nie dotykają
-`GUARDRAILS.md` ani danych o cenach.
+**B1 nie blokuje tyle, ile się wydaje.** Plik `data/wina.json` powstaje od razu, z pustą tablicą
+`wina` i wypełnionymi `waluta`, `stawka_vat`, `kategorie`. Cały mechanizm sklepu da się na nim
+zbudować i przetestować, a asortyment wprowadzi Właściciel **panelem redakcyjnym**
+(`.ai/specs/SPEC-002-*`) — to właśnie narzędzie, którym B1 się zamyka. Pusta lista musi dawać
+sensowny komunikat („Oferta w przygotowaniu"), a nie pustą sekcję.
+
+**Co da się zrobić mimo blokad** (i co należy zrobić najpierw): cały mechanizm sklepu na pustym
+`data/wina.json`, strony odmian dla sześciu potwierdzonych odmian, podmiana zdjęć AI na
+prawdziwe, poprawki faktów w `#o-nas`, stopce i `<title>`, `sitemap.xml`, `robots.txt`,
+znaczniki meta.
 
 ### Zasada dotycząca treści, których nie znamy
 
@@ -267,7 +273,8 @@ wina/
   svenson-red.html
 data/
   wina.json                   # JEDYNE zrodlo asortymentu i cen
-assets/js/main.js             # + initShop(), initWineOffer(), renderProductCard()
+assets/js/produkty.js         # renderProductCard() + wyliczenia cen - wspoldzielone z panelem
+assets/js/main.js             # + initShop(), initWineOffer(); laduje sie PO produkty.js
 attached_assets/photos/       # zoptymalizowane zdjecia (juz sa)
 sitemap.xml, robots.txt       # nowe, w katalogu glownym
 tools/optimize-photos.py      # generator zdjec (juz jest)
@@ -279,6 +286,39 @@ tools/optimize-photos.py      # generator zdjec (juz jest)
 data/wina.json ──fetch──> initShop()        ──> karty w #lista-produktow ──> initFilters(), koszyk
                └─fetch──> initWineOffer()   ──> blok "Wina z tej odmiany" na stronie odmiany
 ```
+
+### Kontrakt `assets/js/produkty.js`
+
+Renderowanie karty produktu i wyliczenia cen mieszkają w **osobnym pliku**, a nie w `main.js`.
+Powód: panel redakcyjny (SPEC-002) pokazuje podgląd karty i musi używać dokładnie tego samego
+kodu, co sklep — inaczej podgląd zacznie kłamać. `main.js` nie da się w tym celu wczytać
+w panelu, bo jego `DOMContentLoaded` odpala całą inicjalizację strony (nawigację, motywy,
+koszyk), której w panelu nie ma i nie powinno być.
+
+`produkty.js` to zwykły skrypt bez `import`/`export` (zgodnie z `.ai/GUARDRAILS.md` → „Front-end
+bez frameworka i bez modułów"), definiujący jeden globalny obiekt. **Nie ma w nim żadnego
+`addEventListener` ani odwołania do DOM strony głównej** — wczytanie go niczego nie uruchamia.
+
+```js
+// assets/js/produkty.js
+const Produkty = {
+  // { netto, brutto, przedRabatem|null, promocja }  — wszystkie liczby, nie napisy
+  policzCeny(wino, stawkaVat),
+
+  // zwraca STRING z HTML-em jednej karty (nie węzeł DOM)
+  // opcje: { linkOdmiany: bool = true, przyciskKoszyka: bool = true, bazaZdjec: "./attached_assets/photos/" }
+  renderProductCard(wino, stawkaVat, opcje = {}),
+
+  formatujCene(liczba),   // "65,00 zł"
+};
+```
+
+- Zwracany string zawiera **te same klasy CSS**, co dzisiejsze karty — bundle Tailwinda jest
+  zamknięty i nie da się dołożyć nowej klasy utility.
+- `opcje.przyciskKoszyka: false` służy panelowi: podgląd pokazuje kartę bez działającego
+  przycisku „Dodaj".
+- `opcje.bazaZdjec` pozwala panelowi wskazać własną ścieżkę do zdjęć.
+- Kolejność w `index.html` i na stronach odmian: `produkty.js` **przed** `main.js`, oba z `defer`.
 
 ### Decyzje projektowe
 
@@ -506,24 +546,39 @@ dochodzi `frontend/theming`.
 - [ ] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
 - [ ] Przegląd w przeglądarce we wszystkich trzech motywach
 
-**Etap 2 — po zdjęciu blokad B1 i B2**
+**Etap 2 — mechanizm sklepu (nie wymaga danych; działa na pustym JSON)**
 
-- [ ] Wpis w Changelogu potwierdzający zgodę na zmianę `GUARDRAILS.md`
-- [ ] `data/wina.json` — struktura + realne dane
-- [ ] `main.js`: `initShop()` — fetch, walidacja, render, obsługa błędu
-- [ ] `main.js`: `renderProductCard()` — te same klasy CSS, wyliczane netto/rabat, link do odmiany
+- [x] Aktualizacja `.ai/GUARDRAILS.md` i zastąpienie standardu `content/product-card`
+      przez `content/wina-json` — zrobione 2026-09-02 po zgodzie Właściciela
+- [ ] `data/wina.json` — struktura z pustą tablicą `wina`
+- [ ] `assets/js/produkty.js` — `policzCeny`, `renderProductCard`, `formatujCene` (kontrakt wyżej)
+- [ ] `main.js`: `initShop()` — fetch, walidacja, render, obsługa błędu i pustej listy
 - [ ] `main.js`: opcje `<select>` i zakres suwaka cen z danych (zamyka `TODO.md` #2)
 - [ ] `main.js`: `initFilters()` i koszyk uruchamiane po renderze
-- [ ] `index.html`: usunięcie sześciu kart, wstawienie `#lista-produktow`
+- [ ] `index.html`: usunięcie sześciu kart, wstawienie `#lista-produktow`, dodanie `produkty.js`
 - [ ] `main.js`: `initWineOffer()` — blok „Wina z tej odmiany" na stronach odmian
-- [ ] Aktualizacja `.ai/GUARDRAILS.md` i `.ai/standards/content/product-card.md`
 - [ ] `/sync-standards`
+
+**Etap 2b — po zdjęciu blokady B1**
+
+- [ ] Wprowadzenie realnego asortymentu — panelem z SPEC-002 albo wprost do pliku
 
 **Etap 3 — po zdjęciu blokady B3**
 
 - [ ] `wina/svenson-red.html` albo usunięcie kafelka odmiany z `#nasze-wina`
 
 ## Changelog
+
+### 2026-09-02 — zgoda na zmianę GUARDRAILS (blokada B2 zdjęta)
+
+Właściciel wyraził zgodę na przeniesienie danych produktów z `index.html` do `data/wina.json`
+i polecił dostosować `.ai/GUARDRAILS.md` do projektu. Reguły zostały przepisane (granice #1 i #4,
+BLOCK #3, #4 i #7, reguły spójności, dwie decyzje architektoniczne), a standard
+`content/product-card` zastąpiony przez `content/wina-json`. **B2 nie blokuje już implementacji.**
+
+Dodatkowo: renderowanie karty wydzielone do `assets/js/produkty.js` wraz z kontraktem, żeby panel
+redakcyjny (SPEC-002) mógł pokazywać podgląd tym samym kodem, co sklep. `data/wina.json`
+powstaje od razu z pustą tablicą — B1 blokuje treść, nie mechanizm.
 
 ### 2026-09-02
 - Poprawki po recenzji `spec-reviewer`: dodane sekcje „Blokady" (B1–B3), „Materiały źródłowe"
