@@ -1,6 +1,9 @@
-# Agents Guidelines
+# AGENTS.md — winnicakielnagora.pl
 
-This project uses the **t-shirt size workflow** for AI-assisted coding. Agents should leverage strict phase progression and the standards system to keep the codebase consistent and safe to extend.
+Statyczna witryna winnicy (jeden `index.html` + `assets/`), serwowana przez 16-liniowy
+Flask. Projekt pracuje w **t-shirt size workflow**, ale framework jest tu świadomie
+odchudzony — sekcje, które zakładają warstwy API/DB/UI, zostały wycięte lub przepisane
+pod realia trzech plików. Zmiany oznaczone są w tekście.
 
 ## ⚠️ Before you start — HARD STOP gate
 
@@ -15,8 +18,8 @@ The user must fill in (themselves, by hand) the following sections of this file:
 
 And in `.ai/GUARDRAILS.md`:
 
-- [ ] At least one project-specific BLOCK rule
-- [ ] Your architectural decisions section
+- [x] At least one project-specific BLOCK rule
+- [x] Your architectural decisions section
 
 ### Rule for agents
 
@@ -46,6 +49,9 @@ Then run `/discover-standards` on your codebase to generate your first standards
 - Use plan mode for verification steps, not just building
 - Write detailed specs upfront to reduce ambiguity
 - Save context - load only these specification file that is related to the current task at hand or required for it to finish
+- **Przed większą zmianą przejrzyj `TODO.md`** — trzyma znane rozjazdy w kodzie (martwe atrybuty,
+  zaszyte zakresy, zaślepki). Sporo „błędów", które zobaczysz w kodzie, jest tam już opisanych
+  wraz z decyzją, czy w ogóle je naprawiamy.
 
 ### 2. Strict Phase Progression (M/L tasks)
 
@@ -85,24 +91,32 @@ The workflow phases for M/L tasks are strictly ordered:
 
 ### 3. Subagent Strategy
 
-- Use subagents liberally to keep main context window clean
-- Offload research, exploration, and parallel analysis to subagents
-- For complex problems, throw more compute at it via subagents
-- One task per subagent for focused execution
+**W tym projekcie subagenci do czytania kodu są stratą czasu i kontekstu.** Cała baza kodu
+to ~1500 linii w trzech plikach (`index.html`, `assets/js/main.js`, `assets/css/custom.css`) —
+`grep -n` + `sed -n` na konkretnej sekcji jest tańsze i pewniejsze niż `codebase-analyzer`
+czy `codebase-pattern-finder`.
+
+Subagenta odpalaj tylko wtedy, gdy praca wychodzi **poza to repo**:
+
+- research zewnętrzny (przepisy o sprzedaży wina online, charakterystyka odmian winorośli),
+- równoległe zadanie, które ma wrócić samym wnioskiem, a nie listą plików.
 
 ### 4. Self-improvement Loop
 
 - After ANY correction from the user: update specification file or run `/sync-standards` command if it's something more general with the pattern
 - Write rules for yourself that prevent the same mistake and suggest updates to `AGENTS.md` files
 - Ruthlessly iterate on these lessons until mistake rate drops
-- Review lessons at session start for relevant project
+- Trwałe wnioski zapisuj tam, gdzie ktoś je znajdzie: reguła o kodzie → `.ai/standards/`,
+  granica nie do przekroczenia → `.ai/GUARDRAILS.md`, znany brak → `TODO.md`. Nie ma tu
+  osobnego pliku z lekcjami.
 
 ### 5. Verification Before Done
 
 - Suggest user to verify the task completeness by proving it works:
   - Diff behavior between main and your changes when relevant
   - Ask yourself: "Would a staff engineer approve this?"
-  - Run tests, check logs, demonstrate correctness
+  - Nie ma testów ani logów aplikacji — dowodem jest **podgląd w przeglądarce**
+    (patrz „Weryfikacja w przeglądarce"). Napisz, co obejrzałeś i w którym motywie.
 
 ### 6. Demand Elegance (Balanced)
 
@@ -115,9 +129,10 @@ The workflow phases for M/L tasks are strictly ordered:
 ### 7. Autonomous Bug Fixing
 
 - When given a bug report: just fix it. Don't ask for hand-holding
-- Point at logs, errors, failing tests - then resolve them
 - Zero context switching required from the user
-- Go fix failing CI tests without being told how
+- Nie ma tu CI, testów ani logów serwera aplikacji — zgłoszenie będzie opisem tego, co widać
+  na stronie („koszyk nie przelicza VAT-u", „filtr gubi produkt"). Odtwórz to w przeglądarce,
+  znajdź przyczynę w `index.html` / `main.js`, napraw i opisz, jak sprawdzić poprawkę.
 
 
 ## Documentation and Specifications
@@ -189,8 +204,8 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 
 ### Task Rules
 
-1. **Atomic steps**: Each task = one file or one logical change (e.g., "Create NotificationService.ts", not "Do backend")
-2. **Dependencies**: Set `blockedBy` — e.g., registration in manager depends on creating the class
+1. **Atomic steps**: Each task = one file or one logical change (np. „Dodaj sekcję `#degustacje` do index.html", nie „Zrób stronę degustacji")
+2. **Dependencies**: Set `blockedBy` — np. obsługa w `main.js` zależy od dodania markupu w `index.html`
 3. **Inject standards as task #1**: First task is always injecting standards (blocks the rest)
 4. **Track Progress**: Mark `in_progress` before starting, `completed` after finishing
 5. **Explain Changes**: High-level summary at each step
@@ -199,9 +214,9 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
    ```markdown
    ## Implementation Checklist
    - [x] Inject standards
-   - [x] Create DB migration
-   - [ ] Create API routes    ← in progress
-   - [ ] Create state slice
+   - [x] Markup sekcji w index.html
+   - [ ] Obsługa w main.js (funkcja initX + rejestracja w DOMContentLoaded)    ← in progress
+   - [ ] Style w custom.css sprawdzone we wszystkich trzech motywach
    ```
 
 ### After Completing Implementation
@@ -216,62 +231,27 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 
 ## Project Layout
 
-<!--
-Fill in after running /discover-standards on your codebase.
-Describe the high-level folder layout and which package/app does what.
-
-Example (Node.js monorepo):
-  apps/api/        # Backend HTTP API
-  apps/web/        # Frontend SPA
-  apps/worker/     # Background job runner
-  packages/shared/ # Code shared between apps
-
-Example (.NET solution):
-  src/Api/              # ASP.NET Core Web API
-  src/Application/      # Use cases, application services
-  src/Domain/           # Entities, domain logic
-  src/Infrastructure/   # EF Core, external integrations
-  tests/                # xUnit / NUnit test projects
-
-Example (Ruby on Rails):
-  app/controllers/  # HTTP endpoints
-  app/models/       # ActiveRecord models
-  app/views/        # ERB templates
-  app/services/     # Service objects (business logic)
-  app/jobs/         # ActiveJob background jobs
-  config/           # routes.rb, database.yml, initializers
--->
-
 ```
 index.html                # CAŁA witryna — jeden plik, wszystkie sekcje (~790 linii)
-wsgi.py                   # Flask (14 linii): serwuje statyki + fallback na index.html
+wsgi.py                   # Flask (16 linii): serwuje statyki + fallback na index.html
 assets/
   css/style.css           # prebudowany bundle Tailwind (zminifikowany, 1 linia) — NIE edytować ręcznie
-  css/custom.css          # ręcznie pisane style projektu (.btn-primary, .card, hover-elevate…)
+  css/custom.css          # ręcznie pisane style projektu (.btn-primary, .hover-elevate, .cart-panel…)
   js/main.js              # cały front-end: motywy, nawigacja, filtry, koszyk, formularz
 attached_assets/
   generated_images/       # grafiki witryny (hero, butelki, wnętrza) — PNG + jeden JPG
-.ai/                      # GUARDRAILS.md, specs/, standards/ (workflow t-shirt size)
-.claude/agents/                   # definicje subagentów (codebase-analyzer, pattern-finder, spec-reviewer)
-.claude/skills/                   # komendy /discover-standards, /inject-standards, /verify-standards…
-AGENTS-auto.md            # notatka operacyjna o projekcie (deploy, praca w toku, pułapki)
+.ai/                      # GUARDRAILS.md, specs/, standards/ — workspace workflow t-shirt size
+.claude/agents/           # subagenci — UWAGA: katalog jest w .gitignore, po klonie go nie ma
+.claude/skills/           # komendy /inject-standards, /verify-standards… — też w .gitignore
+t-shirt-size-install.sh   # instalator frameworka (patrz TODO.md — brakuje mu katalogów źródłowych)
+TODO.md                   # znane braki i rozjazdy w kodzie — przeczytaj przed większą zmianą
+AGENTS.md                 # ten plik; CLAUDE.md to jednolinijkowy stub `@AGENTS.md`
 ```
 
 Projekt jest jednomodułowy: **nie ma podziału na warstwy, pakiety ani aplikacje**.
 Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
 
 ## Tech Stack
-
-<!--
-Fill in the runtime, framework, DB, styling, linter/formatter, and any other
-first-class tools agents must be aware of.
-
-Example (Node.js):  Node.js 22, Fastify, PostgreSQL (Prisma), Tailwind, ESLint + Prettier
-Example (.NET):     .NET 9, ASP.NET Core, EF Core, SQL Server, dotnet format
-Example (Rails):    Ruby 3.3, Rails 7.2, PostgreSQL, ActiveRecord, RuboCop, Standard
-Example (Go):       Go 1.23, Chi router, pgx, goose migrations, gofmt, golangci-lint
-Example (Python):   Python 3.12, FastAPI, SQLAlchemy, Alembic, ruff, black
--->
 
 - **Frontend**: statyczny HTML5 + vanilla JavaScript (ES6, bez frameworka, bez modułów,
   bez bundlera). Jeden plik `assets/js/main.js` ładowany z `defer`.
@@ -285,20 +265,13 @@ Example (Python):   Python 3.12, FastAPI, SQLAlchemy, Alembic, ruff, black
   katalog `/opt/apps/app_winnicakielnagora.pl`, wdrożenie przez `projects_manager`.
 - **Baza danych**: brak. Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw
   w `localStorage` pod kluczem `winery-style`.
+- **Motywy**: trzy zestawy (`classic`, `modern`, `rustic`), po 29 zmiennych CSS każdy,
+  w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
+- **Ceny**: `data-price` na karcie produktu to **brutto**; netto i VAT 23% liczy
+  `renderCart` (`subtotal / 1.23`). Nie ma nigdzie osobnego źródła cen.
 - **Testy**: brak. **Linter / formatter**: brak. **Krok budowania**: brak.
 
 ## Commands
-
-<!--
-Fill in the commands agents should use to run, build, test, and lint the project.
-Keep this table small — only the commands used during normal development.
-
-Example (Node.js):  bun dev / bun run build / bun test / biome check --write
-Example (.NET):     dotnet run / dotnet build / dotnet test / dotnet format
-Example (Rails):    bin/dev / bin/rails assets:precompile / bin/rails test / bundle exec rubocop -A
-Example (Go):       go run ./cmd/server / go build ./... / go test ./... / golangci-lint run --fix
-Example (Python):   uvicorn main:app / python -m build / pytest / ruff check --fix && ruff format
--->
 
 | Action | Command |
 |---|---|
@@ -312,181 +285,189 @@ Example (Python):   uvicorn main:app / python -m build / pytest / ruff check --f
 Detailed standards: `.ai/standards/`
 Index: `.ai/standards/index.yml`
 
-**Before any non-trivial change** — read the relevant standard. Areas are discovered and populated per project via `/discover-standards`. Typical areas look like:
+**Before any non-trivial change** — przeczytaj właściwy standard. Obszary w tym projekcie:
 
-- API → `.ai/standards/api/`
-- Database → `.ai/standards/database/`
-- State management → `.ai/standards/<your-state-layer>/`
-- UI components → `.ai/standards/<your-ui-layer>/`
-- Cross-cutting → `.ai/standards/global/`
+- Treść i dane zaszyte w HTML → `.ai/standards/content/`
+- Front-end: JS, motywy, style → `.ai/standards/frontend/`
 
-See `.ai/standards/examples/` for what a finished standard looks like.
+Format standardu pokazuje `.ai/standards/HOW-A-STANDARD-LOOKS.md`.
 
 Available skills:
+
 - `/inject-standards` — inject standards into context
 - `/discover-standards` — discover new patterns in the code
 - `/verify-standards` — verify code vs standards (after implementation)
 - `/sync-standards` — synchronize standards with new code (after implementation)
+- `/index-standards` — przebuduj `.ai/standards/index.yml` po ręcznej edycji standardów
+- `/create-spec` — interaktywne tworzenie specyfikacji w `.ai/specs/`
 
 ## Workflow (Feedback Loop)
 
 Classification and flow:
 
 ```
-S: inject → implement → verify → build
-M: inject(propose) → plan(+analogies, +user-stories) → tasks → implement(+pattern-finder) → verify → build → sync-standards
-L: discover → inject(propose) → spec(+analogies, +user-stories) → tasks → implement(+pattern-finder) → verify → build → sync-standards
+S: inject → implement → verify → przegląd w przeglądarce
+M: inject(propose) → plan(+user-stories) → tasks → implement → verify → przegląd w przeglądarce → sync-standards
+L: discover → inject(propose) → spec(+user-stories) → tasks → implement → verify → przegląd w przeglądarce → sync-standards
 ```
 
 - `tasks` — after completing/verifying spec, BEFORE implementation: break down tasks with dependencies (TaskCreate + TaskUpdate). Tasks are atomic implementation steps derived from the spec.
 - `inject(propose)` — read index.yml, propose specific standards, after confirmation `/inject-standards` explicit
-- `+analogies` — in plan/spec phase: find an analogous module in codebase as a structural pattern
-- `+pattern-finder` — in implement phase: concrete code examples with targeted query
+- Fazy `+analogies` i `+pattern-finder` z oryginalnego szablonu **są wycięte** — patrz
+  „Nawigacja po kodzie" niżej.
+- `build` zastąpiony **przeglądem w przeglądarce** — w tym projekcie nie ma czego zbudować.
 
 Standards are a living document — every implementation either confirms standards or updates them.
 
-### Build Verification
+### Klasyfikacja rozmiaru w tym projekcie
 
-After `/verify-standards`, before commit — run the project's build command for any packages you touched (see the **Commands** table above). Build must pass without errors. If build fails — fix before commit.
+| Rozmiar | Co to znaczy tutaj | Przykłady |
+|---|---|---|
+| **S** | zmiana treści lub atrybutu, bez nowego zachowania | poprawka tekstu, podmiana zdjęcia, zmiana ceny produktu, nowy punkt listy |
+| **M** | nowa sekcja strony albo zmiana zachowania w `main.js` | sekcja `#degustacje`, nowy filtr w sklepie, zmiana logiki koszyka |
+| **L** | funkcja wymagająca czegoś, czego projekt nie ma (backend, baza, build, integracja) | realna wysyłka formularza, płatności, trwały koszyk, przebudowa Tailwinda ze źródeł |
+
+**L prawie zawsze oznacza rozmowę z Właścicielem przed napisaniem kodu** — dokłada projektowi
+zależność, której świadomie nie ma (patrz `.ai/GUARDRAILS.md` → Architectural decisions).
+
+### Weryfikacja w przeglądarce (zamiast builda)
+
+Nie ma builda ani lintera — `/verify-standards` nie odpali tu żadnego narzędzia (jego
+`allowed-tools` zna tylko biome/eslint/prettier/ruff/dotnet format/gofmt/rustfmt). Zamiast
+builda, zanim zgłosisz zmianę jako gotową:
+
+1. `python3 -m http.server 5000` w katalogu repo → http://localhost:5000
+2. Obejrzyj sekcję, której dotyczyła zmiana (kotwice w tabeli **Where to Look**)
+3. **Przełącz wszystkie trzy motywy** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
+   musi wyglądać poprawnie w `classic`, `modern` i `rustic`
+4. Przy zmianach w sklepie: sprawdź filtry (kategoria, zakres cen, „tylko promocje") oraz
+   koszyk (dodanie, +/−, podsumowanie netto / VAT / razem)
+5. Konsola przeglądarki bez błędów
+6. W odpowiedzi napisz, co konkretnie sprawdziłeś i czego sprawdzić się nie dało
+
+**Nie klikaj „Przejdź do płatności" ani „Wyślij" w automatyzacji przeglądarki** — oba wołają
+`alert()`, który zawiesza sesję Chrome MCP (patrz Gotchas).
 
 ### Standards Injection Protocol (M/L tasks)
 
-For M and L tasks — **DO NOT explore codebase** to learn patterns. Standards ALREADY document them. Instead:
+Standardy dokumentują reguły; sam kod czytaj wprost (jest tani). Zanim zaczniesz:
 
-1. **Read the index** — `.ai/standards/index.yml` (small file, context-cheap)
-2. **Match to task** — based on task description, determine which standard domains are needed
-3. **Propose to user** specific paths to inject, e.g.:
+1. **Read the index** — `.ai/standards/index.yml`
+2. **Match to task** — dobierz obszary do treści zadania
+3. **Propose to user** konkretne ścieżki, np.:
 
-   > This task involves a new API endpoint and database write. I suggest injecting:
-   > - `api/route-structure` — route export pattern, middleware, validation
-   > - `api/error-handling` — error formats, logging
-   > - `database/repository-pattern` — repo structure, SQL, naming
-   > - `global/naming-conventions` — file and variable naming conventions
+   > Zadanie dotyczy dodania produktu do sklepu. Proponuję wstrzyknąć:
+   > - `content/product-card` — atrybuty `data-*`, brutto/netto/VAT, co czyta JS
+   > - `content/html-editing` — jak edytować `index.html`, ikony, wcięcia
    >
-   > Do you confirm? Want to add/remove anything from the list?
+   > Potwierdzasz? Chcesz coś dodać lub usunąć z listy?
 
-4. **After confirmation** — run `/inject-standards` in explicit mode with confirmed paths:
+4. **After confirmation** — `/inject-standards` w trybie jawnym:
    ```
-   /inject-standards api/route-structure api/error-handling database/repository-pattern global/naming-conventions
+   /inject-standards content/product-card content/html-editing
    ```
-5. **DO NOT use** auto-suggest mode (`/inject-standards` without arguments) for M/L — always propose specific standards
+5. **DO NOT use** auto-suggest mode (`/inject-standards` bez argumentów) dla M/L — zawsze
+   proponuj konkretne standardy
 
-### Analogy Discovery (plan/spec phase)
+### Nawigacja po kodzie (zamiast Analogy Discovery / Pattern Finder)
 
-During planning — before you start writing spec or plan — **find an analogous module** in the codebase. Goal: understand scope, what layers need to be built, how many files, what structure.
+Oryginalny szablon przewiduje w tym miejscu dwie fazy z subagentem `codebase-pattern-finder`:
+szukanie analogicznego modułu i szukanie przykładu kodu. **W tym projekcie obie są wycięte** —
+nie ma modułów ani warstw, a całość mieści się w trzech plikach. Zamiast tego:
 
-**How it works:**
+| Czego szukasz | Jak to znaleźć |
+|---|---|
+| sekcja strony | `grep -n 'id="nazwa-sekcji"' index.html`, potem `sed -n 'A,Bp' index.html` |
+| zachowanie front-endu | `grep -n '^function' assets/js/main.js` — każde `initX()` to jeden obszar |
+| wzór markupu (np. karta produktu) | skopiuj sąsiedni element z tej samej sekcji — to jedyny obowiązujący wzorzec |
+| klasa CSS | `grep -n '^\.' assets/css/custom.css`; jeśli nie ma — sprawdź, czy klasa jest w bundlu Tailwinda |
+| dokumentacja biblioteki zewnętrznej | Context7 (`resolve-library-id` + `query-docs`) — **nigdy WebSearch** |
 
-1. **Propose an analogy to the user** — based on task description and the "Where to Look" table, e.g.:
-
-   > You're building a notifications module. Structurally the closest existing module is {analogous module} — it has the same layers you'll need (API routes, DB repo, state slice, UI pages).
-   >
-   > Want me to analyze it as a structural pattern? Or do you have another suggestion?
-
-2. **After confirmation** — use `codebase-pattern-finder` with a query about **module structure** (not implementation details):
-   ```
-   Task(subagent_type=codebase-pattern-finder):
-     "Analyze the {analogous module} structure as a pattern for a new module.
-      Show: what files exist, what layers (route → repo → store → UI),
-      how they're connected. Search in the relevant directories listed in
-      'Where to Look' in AGENTS.md."
-   ```
-
-3. **Write the result** into spec/plan as a "Reference Module" section — so in the implement phase it's clear what to model after
-
-**How to know which analogy fits:**
-- Use the "Where to Look" table (at the bottom of this file) + knowledge of existing modules
-- If you don't know — **ask the user**: "Which existing module is closest to what you're building?"
-- DO NOT explore the entire repo to discover this yourself
+Wycięte sekcje („Analogy Discovery", „Code Pattern Finder", „Summary: 3 Tools Instead of
+Explore") są w historii gita, gdyby projekt kiedyś urósł.
 
 ### User Stories (plan/spec phase — M/L only)
 
-After analogy discovery and before writing Architecture — **write user stories**. They are implementation scenarios that bridge UX and code. Detailed guidelines in `.ai/specs/AGENTS.md` → "User Stories Guidelines".
+Po klasyfikacji rozmiaru, a przed opisem rozwiązania — **napisz scenariusze użytkownika**.
+Szczegółowe wytyczne: `.ai/specs/AGENTS.md` → „User Stories Guidelines".
 
-**Why they matter:**
-- Force you to understand existing UX before changing it ("Change vs. current state" boxes)
-- ASCII wireframes define component structure before you write JSX / template code
-- Technical context boxes map each UX step to API calls, state changes, DB writes
-- Multiple personas test your architecture from different angles — reveal edge cases early
-- Comparison tables (e.g., sync vs async, API-based vs webhook-based) clarify conditional logic
+**Dlaczego mają tu sens:** witryna jest w całości UX-em — nie ma logiki serwerowej, którą
+można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, co zmiana robi.
 
-**How to write them:**
+**Jak je pisać w tym projekcie:**
 
-1. **Identify 2-3 personas** — at minimum: primary user (happy path) + alternative user (different use case or technical level)
-2. **Walk through screen-by-screen** — each step = what user sees (ASCII wireframe) + what happens in the background (technical context)
-3. **Add "Change vs. current state"** at every step that modifies existing behavior — this prevents breaking things
-4. **Add comparison table** if the feature has variants or replaces existing behavior
-5. **3rd story for edge cases** (L specs) — e.g., multiple entities, error states, power-user scenarios
-
-### Code Pattern Finder (implement phase)
-
-Standards give **rules** (what to do). When during implementation you need to see a **concrete code example** — use `codebase-pattern-finder` with a targeted query. DO NOT explore the entire repo.
-
-**When to use:**
-- Standard says "use repository pattern" but you need to see a concrete implementation
-- You need a test pattern for a given component/route type
-- You're implementing a specific method and want to see how an analogous one looks
-
-**How to use:**
-```
-Task(subagent_type=codebase-pattern-finder):
-  "Find examples of a CRUD route with validation and auth middleware
-   in this codebase. Search in the directories listed under 'Where to Look'
-   in AGENTS.md."
-```
-
-**DO NOT use for:**
-- Discovering naming conventions → that's in standards (`global/naming-conventions`)
-- Learning response structure → that's in standards (`api/route-structure`)
-- Anything that standards already document
-
-### Summary: 3 Tools Instead of Explore
-
-| Phase | Tool | What it provides | Cost |
-|-------|------|------------------|------|
-| Before code | `/inject-standards` explicit | Rules and conventions | Low (read index + files) |
-| Plan/Spec | `codebase-pattern-finder` (analogy) | Reference module structure | Medium (targeted query) |
-| Implement | `codebase-pattern-finder` (example) | Concrete code snippet | Medium (targeted query) |
-| Any phase | Context7 (`resolve-library-id` + `query-docs`) | External library documentation — **ALWAYS use this, NEVER WebSearch** | Low (MCP call) |
-
-
-**Explore on entire repo** → NO. Use ONLY for business specifics, not for conventions or coding patterns.
+1. **2–3 persony** — realne dla winnicy: zwiedzający szukający informacji o winnicy, klient
+   kupujący wino w sklepie, osoba rezerwująca wydarzenie/degustację
+2. **Krok po kroku przez ekran** — co użytkownik widzi (szkic ASCII) + co się dzieje pod
+   spodem (**która sekcja `index.html`, która funkcja `initX()` w `main.js`, jaki stan**)
+3. **„Zmiana vs. stan obecny"** przy każdym kroku, który rusza istniejące zachowanie — to
+   najtańszy sposób, żeby nie zepsuć działającej strony
+4. **Tabela porównawcza**, jeśli funkcja ma warianty albo zastępuje obecne zachowanie
+5. **Trzeci scenariusz na przypadki brzegowe** (spec L) — pusty koszyk, brak wyników filtra,
+   telefon zamiast desktopu, przełączony motyw
 
 ## Gotchas
 
 - **NEVER invent URLs.** If a spec or code needs an external URL — ask the user for the real link or verify it exists via WebFetch. Hallucinated URLs are a real problem — many sites return custom pages (not 404) for non-existent paths, making fake links hard to detect later.
 - **Use Context7 for library documentation**, not training-data memory — library APIs drift and your recall can be stale.
 
-<!--
-Add your project's own gotchas below as you discover them — conventions, traps,
-and implicit rules only you/your team know. Keep each bullet short; link to a
-standard or guardrail for anything that needs more words.
-Examples:
-- Runtime is Bun, not Node.js — do NOT use `npm`/`npx`
-- Database columns are snake_case, TypeScript fields are camelCase
-- Never import from `legacy/` — that directory is scheduled for deletion
--->
+### Pułapki tego projektu
 
-- **`assets/css/style.css` 
-- **`wsgi.py` preferuje `dist/public`, jeśli ten katalog istnieje**, a w konfiguracji
-  wdrożeniowej nie ma kroku budowania — czyli na produkcji serwowany jest katalog repo.
-  Zanim oprzesz coś na gałęzi `dist/public`, ustal z Właścicielem, czy build ma powstać.
+- **`assets/css/style.css` to zbudowany Tailwind bez źródeł w repo.** Klasa Tailwinda, której
+  nie ma w bundlu, po prostu nie zadziała i nie da się jej „dobudować" — nie ma `package.json`
+  ani `tailwind.config`. Nowe style pisz w `assets/css/custom.css` albo użyj klasy, która
+  w bundlu już jest.
+- **Zmiana ceny produktu to sześć miejsc w `index.html`, nie jedno.** `data-price` (brutto),
+  `data-price-net`, widoczny tekst ceny, tekst `netto: … zł`, a przy promocji jeszcze
+  przekreślona cena sprzed rabatu i badge `-N%` (plus `data-promo` i `data-discount`). JS czyta **tylko** `data-price`, `data-promo`, `data-category`,
+  `data-id`, `data-name`, `data-image` — `data-price-net` i `data-discount` są martwe
+  i utrzymywane ręcznie. Szczegóły: `.ai/standards/content/product-card.md`.
+- **Filtr cenowy ma zaszyty zakres 0–100 zł** (`input[type="range"]` w sekcji `#sklep`
+  oraz `initFilters` w `main.js`). Produkt droższy niż 100 zł zniknie z listy bez żadnego
+  komunikatu.
+- **VAT 23% jest zaszyty w dwóch miejscach**: `renderCart` w `main.js` (`subtotal / 1.23`)
+  i etykieta „VAT (23%)" w panelu koszyka w `index.html`.
+- **Trzy motywy po 29 zmiennych CSS.** `setTheme` ustawia je jako style inline na
+  `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
+  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich trzech obiektach
+  `themeStyles`. Szczegóły: `.ai/standards/frontend/theming.md`.
+- **`alert()` blokuje automatyzację przeglądarki.** „Przejdź do płatności" (`initCart`)
+  i wysyłka formularza (`initContactForm`) wołają `alert()` — kliknięcie ich przez Chrome MCP
+  zawiesza sesję. Te dwa przyciski testuj ręcznie.
+- **Koszyk nie jest trwały** — `Map` w pamięci, znika po odświeżeniu strony. To świadomy stan
+  demo; nie „naprawiaj" go bez ustalenia z Właścicielem.
+- **Formularz kontaktowy nic nie wysyła** — `preventDefault()` + `alert()`. Nie ma backendu,
+  który przyjąłby POST.
+- **`wsgi.py` zwraca `index.html` dla każdej nieznanej ścieżki** — status 200, nigdy 404.
+  Literówka w linku nigdy się sama nie ujawni; linki sprawdzaj wzrokowo.
+- **`wsgi.py` preferuje `dist/public`, jeśli ten katalog istnieje**, a wdrożenie nie ma kroku
+  budowania — na produkcji serwowany jest katalog repo. Zanim oprzesz cokolwiek na
+  `dist/public`, ustal z Właścicielem, czy build ma powstać.
+- **Fonty idą z Google Fonts (CDN)** — bez internetu strona wygląda źle, ale to nie jest błąd CSS.
+- **`index.html` to jedyna kopia treści strony**, po polsku, bez i18n i bez kluczy tłumaczeń.
+  Zmieniaj dokładnie ten fragment, którego dotyczy zadanie — nie przeformatowuj całości,
+  bo diff staje się nieczytelny.
 - **Sprawdź `git status` przed pierwszą edycją** — repo bywa zostawiane z niezacommitowaną
-  pracą w `index.html` i `attached_assets/generated_images/`. Nie commituj cudzej pracy
-  razem ze swoją.
+  pracą w `index.html` i `attached_assets/`. Nie commituj cudzej pracy razem ze swoją.
+- **`.claude/skills/` i `.claude/agents/` są w `.gitignore`** — po świeżym klonie komendy `/…`
+  i subagenci nie istnieją (patrz `TODO.md`).
 - **Nie dodawaj zależności Pythona bez potrzeby.** Projekt celowo nie ma `requirements.txt`;
   środowisko wymaga tylko Flaska i gunicorna.
 
 ## Where to Look
 
-<!--
-Fill in paths to the most important directories in your project.
-This table is used by agents during "Analogy Discovery" and "Code Pattern Finder".
-If an area doesn't exist in your project, delete the row.
+**Nie podawaj w tej tabeli numerów linii** — `index.html` zmienia się przy każdej edycji
+treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa funkcji.
 
-Example (Node.js):  api routes = src/routes/, DB = src/db/, UI = src/components/
-Example (.NET):     HTTP handlers = src/Api/Controllers/, DB = src/Infrastructure/Persistence/, UI = src/Web/Pages/
-Example (Rails):    HTTP handlers = app/controllers/, DB = app/models/ + db/migrate/, UI = app/views/
-Example (Go):       HTTP handlers = internal/handlers/, DB = internal/store/, Tests = *_test.go next to code
-Example (Python):   HTTP handlers = app/routers/, DB = app/models/ + alembic/versions/, Tests = tests/
--->
+| What | Where |
+|------|-------|
+| Serwowanie plików | `wsgi.py` — jedyny handler `serve()`, fallback na `index.html`. Brak API i endpointów biznesowych |
+| Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `kontakt` |
+| Dane produktów (zamiast bazy) | sekcja `#sklep` w `index.html` — `grep -n 'class="product-card' index.html` (6 kart, atrybuty `data-*`) |
+| Ikony | `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`, użycie `<use href="#icon-…">` — `grep -n '<symbol' index.html` |
+| Koszyk | `assets/js/main.js` — stan w `const cart = new Map()`, render w `renderCart`, zdarzenia w `initCart` (`grep -n 'function initCart' assets/js/main.js`) |
+| Motywy | `assets/js/main.js` — obiekt `themeStyles` na górze pliku + `setTheme` / `initStyleSwitcher` |
+| Filtry sklepu | `assets/js/main.js` — `function initFilters` (kategoria, zakres cen 0–100, „tylko promocje") |
+| Style własne | `assets/css/custom.css` — `grep -n '^\.' assets/css/custom.css`; bundle `assets/css/style.css` tylko do odczytu |
+| Grafiki | `attached_assets/generated_images/`, ścieżki względne `./attached_assets/…` |
+| Znane braki i rozjazdy | `TODO.md` |

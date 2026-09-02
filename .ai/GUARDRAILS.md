@@ -1,144 +1,137 @@
 # GUARDRAILS
 
-> Inviolable project rules. Every developer and AI agent MUST follow these.
+> Nienaruszalne reguły projektu. Obowiązują każdego — człowieka i agenta AI.
 >
-> This file does NOT describe project structure (see `AGENTS.md`)
-> or code patterns (see `.ai/standards/`).
-> This file defines **boundaries that must never be crossed**.
->
-> The sections below start with a small set of rules that apply to most web
-> projects. Extend them with project-specific rules after running
-> `/discover-standards` and talking with the team about past incidents,
-> compliance requirements, and architectural non-negotiables.
+> Ten plik nie opisuje struktury projektu (to `AGENTS.md`) ani wzorców kodu
+> (to `.ai/standards/`). Tu są **granice, których się nie przekracza**.
 
 ## Absolute prohibitions
 
 ### STOP — immediate revert
 
-Violation = revert NOW, no discussion.
+Naruszenie = natychmiastowy revert, bez dyskusji.
 
-1. **NEVER** store PII (email, IP, phone, full name, payment data) as plaintext in the database — use a hash (for lookup) + encrypted ciphertext (for retrieval), or column-level encryption provided by your DB/ORM.
-2. **NEVER** build SQL queries via string concatenation or template literal interpolation of user input — always use parameterized queries (`$1`, `?`, `:name`, etc.) of your DB driver / ORM.
-3. **NEVER** commit secrets (JWT signing keys, encryption keys, API keys, DB passwords, OAuth client secrets) to the repository — environment variables only, via `.env` / your secrets manager.
-4. **NEVER** log PII in plaintext — strip query strings from logged URLs; hash or mask emails, IPs, tokens before they hit any log sink.
+1. **NEVER** commit secrets (klucze API, hasła, tokeny) do repozytorium — zmienne środowiskowe
+   albo menedżer sekretów. Dziś projekt nie ma ani jednego sekretu i tak ma zostać.
+2. **NEVER** wstawiaj do repo danych osobowych (maile, telefony, nazwiska klientów) — witryna
+   jest w całości publiczna, każdy plik w repo trafia na produkcję.
+3. **NEVER** edytuj `assets/css/style.css` — to zbudowany artefakt Tailwinda bez źródeł w repo.
+   Ręczna edycja jest nie do odtworzenia i nie do przeglądu (plik ma jedną linię).
 
-<!--
-Add your own STOP-level rules below. Guidance: only add a rule here if
-violating it causes a security, legal, or data-integrity incident —
-everything softer belongs in BLOCK.
-Examples:
-5. NEVER bypass row-level security policies in admin tooling
-6. NEVER write across tenant boundaries in a multi-tenant query
--->
+> Klasyczne reguły o PII w bazie i o SQL injection **nie mają tu zastosowania** — projekt nie ma
+> bazy, backendu ani formularza, który cokolwiek wysyła. Jeśli kiedyś powstaną (zadanie rozmiaru
+> **L**), dopisz je tutaj, zanim powstanie pierwszy endpoint.
 
 ### BLOCK — do not merge without fix
 
-Violation = fix before merge, PR blocked.
+Naruszenie = poprawa przed scaleniem.
 
-<!--
-Fill in after /discover-standards. These are the "always/never" rules specific
-to your architecture. They catch the mistakes reviewers point out every week.
-Examples:
-1. NEVER add an endpoint under /api/private/ without the auth middleware
-2. NEVER access the database from route handlers directly — always go through
-   the Repository / data-access layer
-3. NEVER use console.log — always use the project logger
-4. NEVER import from the legacy / deprecated package
-5. NEVER edit generated files (e.g. Prisma client, OpenAPI output)
--->
-
-_(add project-specific BLOCK rules here)_
+1. **NEVER** dodawaj zmiennej CSS tylko do jednego motywu — każda nowa zmienna musi trafić do
+   `classic`, `modern` **i** `rustic` w `themeStyles` (`assets/js/main.js`). `setTheme` ustawia
+   style inline i ich nie czyści, więc brak zmiennej w jednym motywie zostawia po przełączeniu
+   wartość z poprzedniego. Patrz `.ai/standards/frontend/theming.md`.
+2. **NEVER** koduj kolorów na sztywno w `assets/css/custom.css` — zawsze `hsl(var(--nazwa))`,
+   inaczej element wypada z systemu motywów.
+3. **NEVER** zmieniaj ceny produktu tylko w jednym miejscu — komplet to `data-price`,
+   `data-price-net`, widoczna cena, tekst `netto: … zł`, a przy promocji przekreślona cena
+   sprzed rabatu i badge `-N%`. Patrz `.ai/standards/content/product-card.md`.
+4. **NEVER** przeformatowuj `index.html` przy okazji innej zmiany — jeden plik jest jedyną kopią
+   treści witryny, a duży diff jest nie do przejrzenia.
+5. **NEVER** dodawaj zależności (Python, npm, CDN) bez zgody Właściciela — brak zależności jest
+   tu decyzją, nie zaniedbaniem.
 
 ## Decision priorities
 
-When values conflict, this hierarchy resolves:
+Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 
-1. **PII and user-data security** — breaches have legal, reputational, and often existential consequences.
-2. **Data integrity** — corrupted data with no rollback is worse than downtime.
-3. **Public / customer-facing surface stability** — public endpoints, embedded widgets, and integrations that third parties depend on.
-4. **API contract compatibility** — breaking changes cascade to every client.
-5. **Code readability and consistency** — predictable patterns make multi-developer + AI development sustainable.
-
-<!--
-Adjust this ordering if your project has a different top priority (e.g. a
-realtime system might place availability above data integrity). Keep it to
-5 items max — a priority list that long stops being a priority list.
--->
+1. **Poprawność treści publicznej** — to strona firmowa; błędna cena, nieistniejąca odmiana albo
+   martwy link są kosztowniejsze niż brzydki kod.
+2. **Stabilność wyglądu we wszystkich trzech motywach** — złamany motyw widzi każdy odwiedzający.
+3. **Czytelność diffu w `index.html`** — jedyna kontrola jakości, jaką ma tu recenzent.
+4. **Brak nowych zależności** — projekt utrzymuje się sam dzięki temu, że nic nie wymaga budowania.
+5. **Elegancja kodu** — ostatnia, nie pierwsza.
 
 ## Architectural boundaries
 
-<!--
-Fill in the layer boundaries that must not be crossed in your codebase.
-Format: {Layer A} -> NEVER {action that violates layering} ({why})
-Examples:
-1. Route handler -> NEVER writes raw SQL — always through the Repository layer
-2. Repository -> NEVER imports from routes/ or middlewares/ — data layer doesn't know about transport
-3. UI components -> NEVER call the database directly — always via the API client
-4. Background worker -> NEVER imports HTTP framework code
--->
-
-_(add project-specific boundaries here)_
+1. `assets/js/main.js` → **NIGDY** nie trzyma danych produktów. Źródłem prawdy są atrybuty
+   `data-*` na kartach w `index.html`.
+2. `assets/css/custom.css` → **NIGDY** nie duplikuje klas z bundla Tailwinda; dopisuje tylko to,
+   czego w bundlu nie ma.
+3. `wsgi.py` → **NIGDY** nie dostaje logiki biznesowej. To serwer plików statycznych; wszystko
+   inne jest zadaniem rozmiaru **L** i wymaga decyzji Właściciela.
+4. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
 
 ## Consistency rules
 
-<!--
-"When you add X, you must also add Y." These keep the codebase symmetric.
-Examples:
-1. When adding a new PII field -> ALWAYS add the _hash + _encoded pair
-2. When adding a new endpoint under /api/private/ -> ALWAYS add the auth middleware
-3. When adding a user-facing string -> ALWAYS add a translation key (no hardcoded text)
-4. When adding a new DB model -> ALWAYS create an interface, a Repository, and an export
--->
-
-_(add project-specific consistency rules here)_
+1. Dodajesz zmienną CSS → **ZAWSZE** do wszystkich trzech motywów w `themeStyles`.
+2. Zmieniasz cenę produktu → **ZAWSZE** komplet sześciu miejsc na karcie (patrz BLOCK #3),
+   przy zachowaniu `brutto = netto × 1.23`.
+3. Dodajesz produkt → **ZAWSZE** unikalne `data-id`, `data-category` zgodne co do znaku
+   z przyciskiem filtra, cena w zakresie 0–100 zł (inaczej wypadnie z filtra).
+4. Dodajesz sekcję z `id` → **ZAWSZE** pozycja w nawigacji desktopowej i mobilnej
+   (`data-scroll="id-sekcji"`), jeśli ma być osiągalna z menu.
+5. Dodajesz zachowanie w JS → **ZAWSZE** jako `initX()` zarejestrowane w `DOMContentLoaded`.
+6. Dodajesz ikonę → **ZAWSZE** jako `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`,
+   używana przez `<use href="#icon-…">`.
 
 ## Allowed exceptions
 
-<!--
-Document the edge cases where the rules above can be intentionally broken,
-and WHY. Without this section, juniors and AI agents will either bend rules
-silently or refuse to ship valid changes.
-Examples:
-1. console.* in browser-only widget code — the server logger isn't available there
-2. Raw interpolation of a hardcoded constant column name — parameterization
-   can't cover identifiers in all drivers
--->
-
-_(add project-specific allowed exceptions here)_
+1. **`alert()` w `initCart` i `initContactForm`** — świadome zaślepki demo, dopóki nie ma backendu.
+   Nie rozszerzamy wzorca na nowy kod i pamiętamy, że blokują automatyzację przeglądarki.
+2. **Koszyk w pamięci (`Map`), znikający po odświeżeniu** — świadomy stan demo, nie błąd.
+3. **Bardzo długie linie atrybutów na kartach produktów** — celowe; nie łamiemy ich, bo diff
+   stałby się nieczytelny.
+4. **Zduplikowana cena netto w markupie** — dopóki `data-price-net` nie zostanie zlikwidowane
+   albo zaczęte renderować z JS (patrz `TODO.md` #3).
 
 ## Definition of "done"
 
-A change is complete ONLY when:
+Zmiana jest gotowa dopiero, gdy:
 
-- [ ] The project's linter / formatter passes with no errors (see `Commands` in AGENTS.md)
-- [ ] The type-checker / compiler passes with no errors
-- [ ] Tests relevant to the change pass locally
-- [ ] No secrets or plaintext PII in staged files (see Prohibitions #3, #4)
-- [ ] Every new rule that was introduced during implementation has been captured via `/sync-standards` or an entry in this file
-- [ ] The spec file (if any) has its `## Implementation Checklist` updated
+- [ ] Strona otwarta lokalnie (`python3 -m http.server 5000`) pokazuje zmianę tak, jak zaplanowano
+- [ ] Sekcja obejrzana we **wszystkich trzech motywach** (`classic`, `modern`, `rustic`)
+- [ ] Konsola przeglądarki bez błędów
+- [ ] Przy zmianach w sklepie: filtry (kategoria, zakres cen, „tylko promocje") i koszyk
+      (dodanie, +/−, podsumowanie netto / VAT / razem) działają
+- [ ] Diff dotyczy wyłącznie fragmentu, którego dotyczyło zadanie
+- [ ] W odpowiedzi napisane, co sprawdzono i czego sprawdzić się nie dało
+- [ ] Nowa reguła, która wyszła w trakcie pracy, trafiła do `.ai/standards/` (`/sync-standards`)
+      albo do tego pliku; nowy znany brak — do `TODO.md`
+- [ ] Spec (jeśli istnieje) ma zaktualizowaną sekcję `## Implementation Checklist`
 
-<!--
-Add project-specific "done" criteria here — e.g. "widget rebuild has run",
-"migration has been tested against a prod-sized snapshot", "translations
-have been exported".
--->
+> Nie ma lintera, type-checkera ani testów. Podgląd w przeglądarce jest jedynym dowodem.
 
 ## Architectural decisions
 
-<!--
-Document non-obvious architectural choices that AI agents should respect
-rather than "improve". For each decision, write:
+### Brak kroku budowania
 
-### {Decision name}
-- **Choice**: {what we picked}
-- **Why**: {the constraint or tradeoff that made this the right choice}
-- **Consequence**: {what agents must do / must not do because of it}
+- **Wybór**: Tailwind leży w repo jako gotowy, zminifikowany `assets/css/style.css`; nie ma
+  `package.json`, `tailwind.config` ani źródeł.
+- **Dlaczego**: witryna ma się utrzymywać latami bez łańcucha narzędzi — nic nie może się
+  „zepsuć przy buildzie", bo buildu nie ma.
+- **Konsekwencja**: klasa Tailwinda spoza bundla nie zadziała i nie da się jej dobudować.
+  Nowe style piszemy w `custom.css`. Nie proponuj przywracania builda jako „porządków" —
+  to zadanie **L** i decyzja Właściciela.
 
-Examples: "Raw SQL instead of ORM", "Event sourcing for audit trail",
-"Single monolith instead of microservices", "Feature flags via {provider}".
+### Dane produktów w HTML zamiast w bazie
 
-Without this section, agents will default to best-practices-in-general
-instead of best-practices-for-this-project.
--->
+- **Wybór**: każdy produkt to `<article class="product-card">` z atrybutami `data-*`.
+- **Dlaczego**: sześć produktów i brak backendu — baza albo plik JSON dokładałyby warstwę,
+  której nikt nie utrzymuje.
+- **Konsekwencja**: cena jest zduplikowana w kilku miejscach jednej karty i nic tego nie waliduje.
+  Pilnuje tego standard `content/product-card` i reguła BLOCK #3.
 
-_(add project-specific architectural decisions here)_
+### Front-end bez frameworka i bez modułów
+
+- **Wybór**: jeden plik `main.js`, ES6, `defer`, funkcje `initX()` spinane w `DOMContentLoaded`.
+- **Dlaczego**: strona ma pięć sekcji i jeden interaktywny element (sklep). Framework kosztowałby
+  więcej niż cały obecny front-end.
+- **Konsekwencja**: nie wprowadzamy `import`/`export`, bundlera ani biblioteki UI bez decyzji
+  Właściciela. Nowa funkcjonalność = nowa funkcja `initX()`.
+
+### Koszyk i formularz jako zaślepki
+
+- **Wybór**: koszyk w pamięci, formularz i płatność kończą się `alert()`.
+- **Dlaczego**: nie ma backendu, który przyjąłby zamówienie ani wiadomość.
+- **Konsekwencja**: to nie są błędy do naprawienia „przy okazji". Uczynienie ich prawdziwymi
+  to zadanie **L** — patrz `TODO.md` #7.
