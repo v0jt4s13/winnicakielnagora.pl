@@ -29,3 +29,10 @@ docs/
 
 # --- kopia zapasowa robiona przez panel redakcyjny ---
 data/wina.json.bak
+
+# --- zrzuty ekranu z audytow (10 MB PNG) ---
+# Raporty .md zostaja w repozytorium, obrazy sa dowodem roboczym i zyja lokalnie.
+# Uwaga: przez to podglad obrazkow w AUDIT.md nie zadziala na GitHubie.
+audit/**/*.png
+audit/**/*.jpg
+
