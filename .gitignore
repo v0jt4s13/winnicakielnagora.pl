@@ -1,12 +1,31 @@
-__pycache__/*
+# --- systemowe i edytorskie ---
 .DS_Store
-.git
+Thumbs.db
+.idea/
+.vscode/
+*.swp
 
+# --- artefakty Pythona ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- logi i pliki tymczasowe ---
+*.log
+*.tmp
+
+# --- framework t-shirt size: katalogi generowane przez instalator ---
+# Odtwarza je t-shirt-size-install.sh (patrz TODO.md #17)
 .claude/skills/
 .claude/agents/
+.cursor/
+.agents/
 
-# materialy zrodlowe (580 MB zdjec i filmow) - do repo trafiaja tylko zoptymalizowane
-# kopie w attached_assets/photos/, generowane przez tools/optimize-photos.py
+# --- materialy zrodlowe: 580 MB zdjec i filmow ---
+# Do repozytorium trafiaja wylacznie zoptymalizowane kopie w attached_assets/photos/,
+# generowane przez tools/optimize-photos.py
 docs/
-# kopia zapasowa robiona przez panel redakcyjny
+
+# --- kopia zapasowa robiona przez panel redakcyjny ---
 data/wina.json.bak
