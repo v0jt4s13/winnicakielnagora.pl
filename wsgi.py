@@ -1,3 +1,4 @@
+import hashlib
 import hmac
 import json
 import os
@@ -127,6 +128,26 @@ def _json(dane: dict, kod: int = 200):
     return Response(json.dumps(dane, ensure_ascii=False), kod,
                     {"Content-Type": "application/json; charset=utf-8",
                      "Cache-Control": "no-store"})
+
+
+@app.route("/zdrowie")
+def zdrowie():
+    """Punkt kontrolny: czy dziala TEN kod, a nie starsza kopia w pamieci procesu.
+
+    Zwraca skrot z wsgi.py i cennik.py. Porownaj z wynikiem lokalnego:
+        python3 -c "import hashlib,pathlib; print(hashlib.sha256(b''.join(pathlib.Path(p).read_bytes() for p in ('wsgi.py','cennik.py'))).hexdigest()[:12])"
+    Rozne wartosci = serwer trzyma inny kod, niz jest w repozytorium.
+    """
+    znacznik = hashlib.sha256(
+        b"".join((BASE / p).read_bytes() for p in ("wsgi.py", "cennik.py"))
+    ).hexdigest()[:12]
+    return _json({
+        "ok": True,
+        "znacznik_kodu": znacznik,
+        "panel_wlaczony": panel_wlaczony(),
+        "cennik": str(cennik.CENNIK),
+        "sciezka_bazowa": SCIEZKA_BAZOWA,
+    })
 
 
 @app.route("/data/wina.json")

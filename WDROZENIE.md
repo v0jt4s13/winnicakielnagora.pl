@@ -79,7 +79,21 @@ sudo ./production_manager.sh logs winnicakielnagora 200
 
 Projekt nie ma kroku budowania — `BUILD_CMD` ma zostać zakomentowany.
 
-### 4. Sprawdzić po wdrożeniu
+### 4. Sprawdzić, czy działa TEN kod
+
+Najszybszy test — punkt kontrolny `/zdrowie` zwraca skrót z `wsgi.py` i `cennik.py`:
+
+```bash
+curl -s https://ops02.jdblayer.com/winnicakielnagora.pl/zdrowie
+python3 -c "import hashlib,pathlib; print(hashlib.sha256(b''.join(pathlib.Path(p).read_bytes() for p in ('wsgi.py','cennik.py'))).hexdigest()[:12])"
+```
+
+Te dwie wartości muszą być identyczne. Jeśli `/zdrowie` zwraca 404 albo stronę HTML,
+**proces nie wykonuje tego kodu** — patrz „Gdy `/zdrowie` nie odpowiada" niżej.
+
+Odpowiedź mówi też, czy panel jest włączony (`panel_wlaczony`) i skąd czytany jest cennik.
+
+### 5. Sprawdzić po wdrożeniu
 
 ```bash
 B=https://ops02.jdblayer.com/winnicakielnagora.pl
@@ -111,3 +125,40 @@ został obcięty.
 - `data/wina.json` w repozytorium — **wersja startowa**, kopiowana tylko wtedy, gdy pliku
   roboczego jeszcze nie ma.
 - `docs/` i zrzuty z `audit/` — nie są w repozytorium (`.gitignore`).
+
+## Gdy `/zdrowie` nie odpowiada albo znacznik się nie zgadza
+
+Objaw z 2026-09-02: `wsgi.py` na dysku serwera był **bajt w bajt identyczny** z repozytorium,
+usługa `winnicakielnagora` działała, a mimo to `/wsgi.py` zwracało 200 z nagłówkiem
+`content-disposition` (czyli Flaskowym `send_file`), `/wina/monarch` dawało 404 Werkzeuga,
+a `/data/wina.json` przychodziło z `cache-control: no-cache` zamiast naszego `no-store`.
+
+To znaczy, że żądania obsługuje **inny proces niż nasz** albo nasz proces trzyma starszy kod.
+Do sprawdzenia, w tej kolejności:
+
+```bash
+# 1. z jakiego katalogu i czym startuje usluga (+ czy dostala zmienne panelu)
+systemctl show winnicakielnagora -p WorkingDirectory -p ExecStart -p Environment
+
+# 2. czy gunicorn na 8004 odpowiada poprawnie Z POMINIECIEM nginx
+curl -s http://127.0.0.1:8004/zdrowie                                    # znacznik kodu
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8004/wsgi.py  # ma byc 404
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8004/.git/config  # ma byc 404
+
+# 3. dokad nginx kieruje ten prefiks — proxy_pass czy alias/root?
+grep -n -B2 -A14 "winnicakielnagora" /etc/nginx/sites-available/moderacja.conf
+
+# 4. czy nie zostala starsza kopia kodu albo skompilowane bytecode
+find /opt/apps/app_winnicakielnagora.pl -name "wsgi.py" -o -name "__pycache__" -type d
+```
+
+Interpretacja:
+
+- **Punkt 2 działa poprawnie, a przez nginx nie** → nginx nie kieruje ruchu do naszej usługi;
+  w bloku prefiksu jest `alias`/`root` zamiast `proxy_pass`, albo prefiks przejmuje wcześniejszy
+  blok innej aplikacji z `moderacja.conf`.
+- **Punkt 2 też zwraca 200 dla `/wsgi.py`** → to nasz proces trzyma stary kod: usuń
+  `__pycache__` w katalogu aplikacji i zrestartuj usługę.
+- **Znajdzie się druga kopia `wsgi.py`** (np. w `${APP_DIR}` obok `${APP_DIR}/app`) → gunicorn
+  importuje tamtą; `WorkingDirectory` musi wskazywać katalog z repozytorium.
+
