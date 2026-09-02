@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Winnica Kielna Góra">
+  <rect width="32" height="32" rx="6" fill="#6d1f2e"/>
+  <g fill="none" stroke="#f5ede4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+     transform="translate(4 4) scale(1)">
+    <path d="M8 22h8"/>
+    <path d="M7 10h10"/>
+    <path d="M12 15v7"/>
+    <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>
+  </g>
+</svg>

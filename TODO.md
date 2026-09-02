@@ -115,10 +115,17 @@ budynku innego niż `winnica-budynek-01`. Strona pokazuje dziś w tych miejscach
 (`attached_assets/generated_images/`). Potrzebna sesja zdjęciowa albo zgoda na dalsze
 korzystanie z grafik zastępczych.
 
-### 16. Filmy nie są wykorzystane
+### 16. Filmy — czekamy na linki z YouTube
 
-W `docs/` leży 12 filmów 1080p (3–34 s, 6–74 MB). Nie są nigdzie użyte i nie ma decyzji, czy
-mają być (tło sekcji hero, galeria, czy wcale). Kompresję zrobi `ffmpeg`, jest zainstalowany.
+**Decyzja z 2026-09-02:** filmy trafią na YouTube, Właściciel dostarczy linki później.
+Nie kompresujemy ich więc do `filmy/` ani nie hostujemy u siebie.
+
+Do zrobienia po otrzymaniu linków: sekcja z osadzonymi filmami (najlepiej lazy — miniatura
+plus odtwarzacz dopiero po kliknięciu, żeby YouTube nie ładował skryptów przy każdym wejściu)
+oraz `VideoObject` w JSON-LD, jeśli filmy mają się pojawiać w wynikach wyszukiwania.
+
+Katalog `filmy/` zostaje — przyda się na miniatury albo pliki lokalne, gdyby coś nie miało
+trafić na YouTube.
 
 ## Higiena repo
 
@@ -177,13 +184,56 @@ Jeśli z tych odmian faktycznie powstaje białe wino (co jest możliwe), warto t
 napisać wprost. Jeśli to pomyłka przy wprowadzaniu — zmiana kategorii w panelu zajmie chwilę.
 **Nie ruszałem tych danych.**
 
-### 22. „Swenson Red" czy „Svenson Red"?
+### ~~22. „Swenson Red" czy „Svenson Red"~~ — ZAMKNIĘTE 2026-09-02
 
-W cenniku wpisano **Swenson Red 2023**, a strona, slug (`svenson-red`), tytuł strony odmiany
-i `sitemap.xml` używają formy **Svenson**. Wikipedia w Twoim pliku `.txt` to
-`en.wikipedia.org/wiki/Swenson_Red`, więc poprawna wydaje się forma przez „w".
+Ujednolicone na **Swenson Red** (zgodnie z Wikipedią wskazaną w materiałach). Zmienione:
+kafelek odmiany, `wina/swenson-red.html`, tytuł, `canonical`, Open Graph, JSON-LD,
+`sitemap.xml`, nazwy zdjęć w `attached_assets/photos/`, mapowanie w `tools/optimize-photos.py`
+oraz pola `odmiana_slug` i `zdjecie` w `data/wina.json`.
 
-Poprawienie samej treści jest proste. Zmiana sluga na `swenson-red` pociąga za sobą
-aktualizację linku w `#nasze-wina`, `sitemap.xml`, `canonical` i pola `odmiana_slug`
-w cenniku — do zrobienia razem, żeby nie zostawić martwego adresu.
+Stary adres `/wina/svenson-red.html` zwraca teraz 404. Nie robiłem przekierowania, bo strona
+nie jest jeszcze online — gdyby była, trzeba by je dodać.
+
+### 23. Sklep obiecuje dostawę, której nie ma
+
+Nagłówek sekcji sklepu mówi „Wszystkie produkty dostępne **z dostawą do domu**", a koszyk jest
+zaślepką — przycisk płatności kończy się `alert()`. To ten sam gatunek problemu, co usunięte
+wcześniej zmyślone wydarzenia: obietnica bez pokrycia.
+
+Do decyzji: usunąć wzmiankę o dostawie do czasu uruchomienia sprzedaży, czy opisać, jak
+zamówienie faktycznie działa (np. telefonicznie albo mailem po ustaleniu). Podobnie ogólnikowe
+są „Odkryj naszą kolekcję wyjątkowych win" i „Odkryj wyjątkowy smak win produkowanych z pasją"
+w hero — do przepisania przy okazji prac nad treścią.
+
+### 24. „Bieszczadzkie stoki" a lokalizacja winnicy
+
+Hasło w hero brzmi teraz **„Tradycyjne wina z bieszczadzkich stoków"** (na polecenie Właściciela,
+2026-09-02). Warto to zweryfikować: winnica leży w **Kielnarowej pod Rzeszowem**, a Bieszczady
+to pasmo ok. 100 km na południowy wschód. Reszta strony — tytuł, opisy meta, sekcja „O nas",
+strony odmian — mówi konsekwentnie o Kielnarowej i okolicach Rzeszowa.
+
+Jeśli to skrót myślowy marketingowy, zostaje. Jeśli nie — naturalniejsze byłoby np.
+„Tradycyjne wina z podkarpackich stoków" albo „…ze stoku nad Rzeszowem", i wtedy hasło
+zgadzałoby się z resztą treści oraz z lokalizacją, którą podajemy wyszukiwarkom.
+
+### 25. Wnioski z audytu projektanta (2026-09-02)
+
+Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Poza rzeczami już zrobionymi (nazwa marki,
+`WebSite` JSON-LD, metadane Open Graph) zostają:
+
+- **Krytyczne, mobilne:** nagłówek H1 i ikona wychodzą poza viewport na 390 px — strona wygląda
+  na uciętą.
+- Nawigacja sekcyjna i CTA to `<button data-scroll>`, a nie `<a href="#sekcja">` — brak
+  indeksowalnej siatki linków wewnętrznych i gorsza obsługa klawiaturą.
+- „Degustacje" i „Wydarzenia" w menu prowadzą do tej samej sekcji.
+- Siedem rozbudowanych kart odmian zajmuje większość strony głównej; na telefonie droga do
+  sklepu i kontaktu jest bardzo długa. Odstępy `py-20` nie zmniejszają się na małych ekranach.
+- Brakuje nazw dostępności przy przyciskach stylu, koszyka i menu oraz `aria-expanded`.
+- Brak linku „Przejdź do treści", widocznego fokusu spójnego z motywami i obsługi
+  `prefers-reduced-motion`.
+- Nagłówek stron odmian na telefonie: przyciski różnej wysokości, „Nasze odmiany" łamie się
+  na dwa wiersze.
+
+`Organization` w JSON-LD celowo pominięte do czasu uzupełnienia adresu, telefonu i logo
+(pozycja #9) — tak też rekomenduje audyt.
 

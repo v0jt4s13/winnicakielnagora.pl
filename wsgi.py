@@ -12,7 +12,7 @@ app = Flask(__name__, static_folder=str(STATIC_ROOT), static_url_path="")
 # Katalogiem statycznym jest caly katalog repozytorium, wiec bez tej listy publicznie
 # dostepne bylyby takze wsgi.py, AGENTS.md, TODO.md, tools/ oraz .git/ z cala historia.
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
-PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico"}
+PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico", "favicon.svg"}
 KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "data", "filmy"}
 # Z calego tools/ publiczne sa wylacznie te trzy pliki. Sam panel i tak nic tu nie zrobi —
 # API zyje tylko w tools/panel/serwer.py, uruchamianym lokalnie.

@@ -44,7 +44,7 @@ z nich należy do Właściciela; sesja implementująca nie ma prawa ich rozstrzy
 |---|---|---|---|
 | B1 | Brak asortymentu i cennika | **treść** `data/wina.json` (nie strukturę) | `TODO.md` #10 |
 | ~~B2~~ | ~~Brak zgody na zmianę `.ai/GUARDRAILS.md`~~ | **ZDJĘTA 2026-09-02** | `.ai/GUARDRAILS.md` |
-| ~~B3~~ | ~~Status odmiany Svenson Red~~ | **ZDJĘTA 2026-09-02** — Właściciel potwierdził, że wino Svenson Red jest produkowane | — |
+| ~~B3~~ | ~~Status odmiany Swenson Red~~ | **ZDJĘTA 2026-09-02** — Właściciel potwierdził, że wino Swenson Red jest produkowane | — |
 
 Wszystkie blokady zdjęte. Zostaje jedynie B1, i tylko w części dotyczącej treści pliku.
 
@@ -89,7 +89,7 @@ z niego potrzebne, jest przepisane tutaj.
 
 (cytat z `docs/materialy-do-wykorzystania/zbiory_i_winnica/Winnica Kielna Góra.txt`)
 
-Uwaga: **ten opis nie wymienia Svenson Red** — stąd blokada B3.
+Uwaga: **ten opis nie wymienia Swenson Red** — stąd blokada B3.
 
 ### Źródła opisów odmian (wskazane przez Właściciela)
 
@@ -100,7 +100,7 @@ Uwaga: **ten opis nie wymienia Svenson Red** — stąd blokada B3.
 | Souvignier Gris | `https://en.wikipedia.org/wiki/Souvignier_gris` |
 | St. Pepin | `https://en.wikipedia.org/wiki/St._Pepin_(grape)` |
 | Vidal Blanc | `https://en.wikipedia.org/wiki/Vidal_blanc` |
-| Svenson Red | `https://en.wikipedia.org/wiki/Swenson_Red` |
+| Swenson Red | `https://en.wikipedia.org/wiki/Swenson_Red` |
 | Monarch | `https://www.rebschule-sester.de/en/variety-description/fungus-resistant-red-varieties/monarch/` |
 
 Adresy pochodzą z plików `.txt` dołączonych przez Właściciela do każdego folderu z materiałami —
@@ -272,7 +272,7 @@ wina/
   seyval-blanc.html
   monarch.html
   dornfelder.html
-  svenson-red.html
+  swenson-red.html
 data/
   wina.json                   # JEDYNE zrodlo asortymentu i cen
 assets/js/produkty.js         # renderProductCard() + wyliczenia cen - wspoldzielone z panelem
@@ -435,10 +435,10 @@ literówka w danych nie może wysypać całego sklepu.
 | Seyval Blanc | `seyval-blanc` | Białe | `seyval-blanc-kieliszki-01` |
 | Monarch | `monarch` | Czerwone | `monarch-kieliszek-01`, `monarch-butelka-01` |
 | Dornfelder | `dornfelder` | Czerwone | `dornfelder-kiscie-01`, `dornfelder-kieliszek-01` |
-| Svenson Red | `svenson-red` | Czerwone | `svenson-red-kiscie-01/02` |
+| Swenson Red | `swenson-red` | Czerwone | `swenson-red-kiscie-01/02` |
 | — (soki) | `soki` | Soki | `winnica-butelka-biale-01`, `seyval-blanc-kieliszki-01` |
 
-**Svenson Red** — Właściciel potwierdził 2026-09-02, że wino z tej odmiany jest produkowane.
+**Swenson Red** — Właściciel potwierdził 2026-09-02, że wino z tej odmiany jest produkowane.
 Strona powstaje jak pozostałe, mimo że pisany opis winnicy jej nie wymienia.
 
 **Soki** dostają **stronę zbiorczą** `wina/soki.html` — nie pochodzą z jednej odmiany, a karta
@@ -462,7 +462,7 @@ ale każdy musi zostać unikalny i mieścić się w 150–160 znakach.
 | `seyval-blanc` | Seyval Blanc — świeże białe wino z Podkarpacia | Hybryda o cytrusowo-ziołowym charakterze, porównywana do lekkiego sauvignon blanc. Uprawiana w Winnicy Kielna Góra pod Rzeszowem. |
 | `monarch` | Monarch — czerwona odmiana z Winnicy Kielna Góra | Ciemne jagody dają wina barwne i wyraziste, z nutami czarnej porzeczki. Odmiana odporna na choroby grzybowe, uprawiana w Kielnarowej. |
 | `dornfelder` | Dornfelder — soczyste czerwone wino z Kielnarowej | Odmiana znana z owocowych win o miękkich taninach i intensywnej barwie. Uprawiamy ją na jednohektarowej winnicy pod Rzeszowem. |
-| `svenson-red` | Svenson Red — mrozoodporna czerwona odmiana | Wysoka odporność na mróz i lekkie, owocowe czerwone wina z nutami malin i wiśni. Winnica Kielna Góra w Kielnarowej pod Rzeszowem. |
+| `swenson-red` | Swenson Red — mrozoodporna czerwona odmiana | Wysoka odporność na mróz i lekkie, owocowe czerwone wina z nutami malin i wiśni. Winnica Kielna Góra w Kielnarowej pod Rzeszowem. |
 
 ### JSON-LD — decyzja
 
@@ -556,7 +556,7 @@ dochodzi `frontend/theming`.
 - [x] Poprawki faktów w `#o-nas` (Kielnarowa, 1 ha, 2020/2024, 7 odmian), stopce i `<title>`
 - [x] Podmiana zdjęć AI na prawdziwe w `index.html` (bez plików z członem `-osoby-`)
 - [x] `wina/souvignier-gris.html` — wzorzec dla pozostałych
-- [x] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder, Svenson Red
+- [x] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder, Swenson Red
 - [x] `wina/soki.html` — strona zbiorcza soków
 - [x] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
 - [ ] Przegląd w przeglądarce we wszystkich trzech motywach — **do zrobienia przez Właściciela**,
@@ -590,7 +590,7 @@ dochodzi `frontend/theming`.
 ### 2026-09-02 — wszystkie blokady zdjęte
 
 Właściciel: (1) zatwierdził podział JS na osobne pliki, dopuszczając kolejne, jeśli mają jasno
-wydzieloną rolę; (2) potwierdził, że wino **Svenson Red** jest produkowane — blokada B3 zdjęta,
+wydzieloną rolę; (2) potwierdził, że wino **Swenson Red** jest produkowane — blokada B3 zdjęta,
 odmiana dostaje stronę jak pozostałe; (3) polecił przygotować **stronę zbiorczą soków**
 (`wina/soki.html`), dzięki czemu `odmiana_slug` zostaje polem wymaganym dla każdej pozycji.
 Implementacja ruszyła.
