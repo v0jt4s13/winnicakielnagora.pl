@@ -17,6 +17,8 @@ venv/
 
 # --- framework t-shirt size: katalogi generowane przez instalator ---
 # Odtwarza je t-shirt-size-install.sh (patrz TODO.md #17)
+T-SHIRT-README.md
+t-shirt-size-install.sh
 .claude/skills/
 .claude/agents/
 .cursor/
@@ -35,6 +37,3 @@ data/wina.json.bak
 # Uwaga: przez to podglad obrazkow w AUDIT.md nie zadziala na GitHubie.
 audit/**/*.png
 audit/**/*.jpg
-
-T-SHIRT-README.md
-t-shirt-size-install.sh

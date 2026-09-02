@@ -169,6 +169,31 @@ Interpretacja:
 - **Znajdzie się druga kopia `wsgi.py`** (np. w `${APP_DIR}` obok `${APP_DIR}/app`) → gunicorn
   importuje tamtą; `WorkingDirectory` musi wskazywać katalog z repozytorium.
 
+### Osierocony proces trzymający port 8004
+
+Objaw: plik na dysku jest aktualny, `__pycache__` usunięty, `systemctl status` pokazuje
+„active (running)", a mimo to aplikacja zachowuje się jak sprzed kilku wdrożeń.
+
+Przyczyna: **stary gunicorn nadal zajmuje port 8004**. Nowa usługa nie może się podpiąć,
+kończy się błędem „Address already in use" i wpada w pętlę restartów — `status` złapany
+zaraz po starcie zdąży jeszcze pokazać „running".
+
+```bash
+# kto naprawde trzyma port
+sudo ss -ltnp | grep 8004
+ps -eo pid,lstart,cmd | grep -i "[g]unicorn"     # zwroc uwage na czas startu procesu
+
+# czy usluga sie nie restartuje w kolko
+sudo systemctl status winnicakielnagora --no-pager
+sudo journalctl -u winnicakielnagora -n 50 --no-pager | grep -i "address already in use\|Traceback\|error"
+```
+
+Naprawa: zabij osierocony proces (`sudo kill <PID>`, w razie potrzeby `-9`), potem
+`sudo systemctl restart winnicakielnagora` i sprawdź `/zdrowie`.
+
+Jeśli w logu jest `Traceback` zamiast błędu portu — aplikacja nie startuje z innego powodu
+i trzeba przeczytać wyjątek.
+
 ### Stary bytecode — znany, konkretny przypadek
 
 Plik `__pycache__/wsgi.cpython-311.pyc` był przez pomyłkę **śledzony w repozytorium** od
