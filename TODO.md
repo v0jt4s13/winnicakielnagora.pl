@@ -135,3 +135,14 @@ i `sitemap.xml`, istnienie każdego pliku ze zdjęciem oraz 20 testów logiki ce
 
 Do obejrzenia: strona główna i strony odmian w motywach `classic`, `modern` i `rustic`,
 konsola przeglądarki bez błędów, układ na telefonie.
+
+### 19. Treści stron odmian nie były weryfikowane wobec źródeł
+
+Opisy na ośmiu stronach w `wina/` powstały z rozwinięcia tekstów, które już były na stronie
+głównej, plus potwierdzonych faktów o winnicy z materiałów Właściciela. **Nie korzystałem
+z linków do Wikipedii i katalogów szkółek** wskazanych w `docs/` — SPEC-001 wymaga
+zweryfikowania ich przez WebFetch przed użyciem jako źródło.
+
+Warto je przejrzeć pod kątem zgodności z faktami o odmianach (aromaty, odporność, typowe
+zastosowanie) przed publikacją strony.
+
