@@ -155,7 +155,7 @@ def waliduj(dane) -> list[dict]:
 # a projekt celowo nie ma requirements.txt (.ai/GUARDRAILS.md → BLOCK #6).
 
 MAX_TEKST = 20_000
-MODEL_DOMYSLNY = "gpt-4o-mini"
+MODEL_DOMYSLNY = "gpt-5.6-luna"
 BAZOWY_URL_DOMYSLNY = "https://api.openai.com/v1"
 
 PROMPT = """Jesteś redaktorem strony małej, rodzinnej winnicy z Podkarpacia.
