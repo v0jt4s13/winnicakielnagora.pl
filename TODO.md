@@ -70,15 +70,15 @@ wskazywała współrzędne w okolicach Ustrzyk Dolnych; na jej miejscu jest zdj�
 Nadal potrzebne: **dokładny adres, telefon, e-mail**, a jeśli ma być sprzedaż — także NIP
 i dane do faktury. Po uzupełnieniu warto przywrócić mapę i dodać `Organization` w JSON-LD.
 
-### 10. Asortyment i cennik do `data/wina.json`
+### ~~10. Asortyment i cennik~~ — ZAMKNIĘTE 2026-09-03
 
-**To jedyna rzecz, która trzyma sklep pusty.** Wprowadzisz ją sam panelem:
-`python3 tools/panel/serwer.py` → http://127.0.0.1:8765
+Właściciel wprowadził cennik panelem: 7 win (3 czerwone, 4 białe) i sok winogronowy.
+Dane żyją na produkcji w `/opt/apps/app_winnicakielnagora.pl/dane/wina.json`; w repozytorium
+`data/wina.json` jest wersją startową (patrz #26 i #34).
 
-Potrzebne dla każdej pozycji: nazwa handlowa, kategoria (białe / czerwone / różowe / sok),
-rocznik, zawartość alkoholu, pojemność, cena brutto, ewentualny rabat, opis, dostępność.
-Dotyczy też **soków winogronowych** — z opisu winnicy wynika, że są w ofercie; do ustalenia,
-czy trafiają do cennika jako osobna kategoria, czy tylko do treści.
+Sklep na stronie renderuje się z tych danych — zakres filtra cenowego liczy się sam
+(15–222 zł), kategorie też pochodzą z pliku.
+
 
 ### ~~11. Adresy stron odmian bez `.html`~~ — ZAMKNIĘTE 2026-09-02
 
@@ -301,26 +301,22 @@ w uwierzytelnianiu w zdalne wykonanie kodu; a przy Basic Auth nie istnieje momen
 Ostatecznie nie to okazało się przyczyną (patrz #29), ale plik i tak nie miał prawa
 być w repozytorium.
 
-### 32. PILNE: zduplikowany unit `winnicakielnagora.pl.service`
+### ~~32. Zduplikowany unit `winnicakielnagora.pl.service`~~ — ZAMKNIĘTE 2026-09-03
 
-Stary proces trzymający port należał do unitu **`winnicakielnagora.pl.service`**, podczas gdy
-`projects_manager` zarządza unitem **`winnicakielnagora.service`**. Oba uruchamiają tę samą
-aplikację na tym samym porcie.
+`systemctl disable` zwrócił „Unit file … does not exist" — plik unitu już nie istnieje.
+Stary proces działał w cgroup po unicie usuniętym wcześniej z dysku, więc po jego zabiciu
+nie ma czego wskrzeszać przy starcie maszyny.
 
-Stare procesy wystartowały o `15:17:33`, w tej samej sekundzie co kilkanaście innych aplikacji —
-czyli przy starcie maszyny. **Po najbliższym restarcie serwera stary unit znów zajmie port 8004
-i wszystko wróci do stanu sprzed naprawy.**
+Potwierdzenie, że został jeden unit:
 
 ```bash
-systemctl status winnicakielnagora.pl.service
-sudo systemctl disable --now winnicakielnagora.pl.service
-sudo rm /etc/systemd/system/winnicakielnagora.pl.service   # po upewnieniu sie, ze to duplikat
-sudo systemctl daemon-reload
+systemctl list-unit-files | grep winnica     # tylko winnicakielnagora.service
+ls /etc/systemd/system | grep winnica
 ```
 
-Warto sprawdzić, czy inne projekty na tym serwerze nie mają tego samego problemu —
-lista procesów pokazała po kilka gunicornów na aplikację, co może być normalne (3 workery),
-ale przy `app_moderacja` widać procesy z dwóch różnych godzin.
+Warto sprawdzić po najbliższym restarcie serwera, czy port 8004 zajmuje właściwa usługa:
+`sudo ss -ltnp | grep 8004` — linia poleceń ma zawierać `--timeout 300`.
+
 
 ### ~~33. Panel i cennik na serwerze~~ — ZAMKNIĘTE 2026-09-02
 
