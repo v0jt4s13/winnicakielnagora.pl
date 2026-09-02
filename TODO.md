@@ -102,17 +102,24 @@ chcecie prowadzić kalendarz konkretnych wydarzeń.
 
 ## Materiały
 
-### 14. Zgody na wizerunek
+### 14. Zgody na wizerunek — do zebrania na piśmie
 
 Osiemnaście zdjęć w `attached_assets/photos/` z członem **`-osoby-`** pokazuje rozpoznawalne
 osoby. Do czasu potwierdzenia zgód strona używa wyłącznie kadrów bez tego członu.
 
-Ponumerowany przegląd: `docs/zgody-wizerunek.jpg` plus lista `docs/zgody-wizerunek.txt`
-(katalog `docs/` jest w `.gitignore`, więc nie trafia do repozytorium).
+Właściciel zebrał zgody **ustnie przy robieniu zdjęć** (2026-09-03). Formularz do potwierdzenia
+ich na piśmie: `docs/zgoda-wizerunek-formularz.html` — jedna strona A4, osiem wierszy na
+podpisy, z klauzulą informacyjną RODO. Przed pierwszym użyciem trzeba w nim uzupełnić adres,
+e-mail i telefon winnicy (te same dane, których brakuje w pozycji #9) i warto dać go
+do przejrzenia prawnikowi — nie był przez takiego pisany.
 
-**Czego potrzebuję, żeby ich użyć:** wyłącznie numery zdjęć, na które są zgody.
-**Nie przysyłaj nazwisk ani dokumentów zgód** — to dane osobowe, a repozytorium jest
-publiczne (`.ai/GUARDRAILS.md` → STOP #2). Dokumenty zostają u Właściciela.
+Ponumerowany przegląd zdjęć: `docs/zgody-wizerunek.jpg` + lista `docs/zgody-wizerunek.txt`.
+Katalog `docs/` jest w `.gitignore`.
+
+**Czego potrzebuję, żeby użyć tych zdjęć:** wyłącznie numery z przeglądu.
+**Nie przysyłaj nazwisk ani podpisanych formularzy** — to dane osobowe, a repozytorium jest
+publiczne (`.ai/GUARDRAILS.md` → STOP #2). Wypełnione formularze zostają u Właściciela,
+poza repozytorium i poza serwerem strony.
 
 
 ### 15. Brakujące ujęcia
