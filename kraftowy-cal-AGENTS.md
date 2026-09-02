@@ -8,10 +8,10 @@ This project uses the **t-shirt size workflow** for AI-assisted coding. Agents s
 
 The user must fill in (themselves, by hand) the following sections of this file:
 
-- [x] **Project Layout** (below) — high-level folder map
-- [x] **Tech Stack** (below) — runtime, framework, DB, linter
-- [x] **Commands** table (below) — dev, build, test, lint/format
-- [x] **Where to Look** table (bottom of this file) — delete rows that don't apply to your stack
+- [ ] **Project Layout** (below) — high-level folder map
+- [ ] **Tech Stack** (below) — runtime, framework, DB, linter
+- [ ] **Commands** table (below) — dev, build, test, lint/format
+- [ ] **Where to Look** table (bottom of this file) — delete rows that don't apply to your stack
 
 And in `.ai/GUARDRAILS.md`:
 
@@ -53,14 +53,14 @@ Then run `/discover-standards` on your codebase to generate your first standards
 
 The workflow phases for M/L tasks are strictly ordered:
 
-| # | Phase | What you do | What you say to the user after completing |
-|---|-------|-------------|-------------------------------------------|
-| 1 | **Spec** | Write/verify specification | Run `spec-reviewer` agent on the spec file. If PASS → "Spec verified as self-contained. Next step: task breakdown. Should I proceed?" If NEEDS WORK → follow the Spec Review Loop below. |
-| 2 | **Tasks** | TaskCreate all steps + TaskUpdate dependencies | "Tasks created ([N] tasks). Next step: inject relevant standards. I propose injecting: [list]. Confirm?" |
-| 3 | **Inject** | `/inject-standards` with confirmed paths | "Standards injected. Ready to start implementation. Should I begin with task #1: [name]?" |
-| 4 | **Implement** | Code, one task at a time | Mark each task completed, move to next |
-| 5 | **Verify** | `/verify-standards` automatically | Report results, fix if needed |
-| 6 | **Build** | Run build for changed packages | Report build status |
+| #   | Phase         | What you do                                    | What you say to the user after completing                                                                                                                                                |
+| --- | ------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Spec**      | Write/verify specification                     | Run `spec-reviewer` agent on the spec file. If PASS → "Spec verified as self-contained. Next step: task breakdown. Should I proceed?" If NEEDS WORK → follow the Spec Review Loop below. |
+| 2   | **Tasks**     | TaskCreate all steps + TaskUpdate dependencies | "Tasks created ([N] tasks). Next step: inject relevant standards. I propose injecting: [list]. Confirm?"                                                                                 |
+| 3   | **Inject**    | `/inject-standards` with confirmed paths       | "Standards injected. Ready to start implementation. Should I begin with task #1: [name]?"                                                                                                |
+| 4   | **Implement** | Code, one task at a time                       | Mark each task completed, move to next                                                                                                                                                   |
+| 5   | **Verify**    | `/verify-standards` automatically              | Report results, fix if needed                                                                                                                                                            |
+| 6   | **Build**     | Run build for changed packages                 | Report build status                                                                                                                                                                      |
 
 **Spec Review Loop (when `spec-reviewer` returns NEEDS WORK):**
 
@@ -195,7 +195,8 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 4. **Track Progress**: Mark `in_progress` before starting, `completed` after finishing
 5. **Explain Changes**: High-level summary at each step
 6. **Document Results**: Add review section to specification file
-7. **Sync to spec**: After creating tasks, write an `## Implementation Checklist` section at the end of the spec file (before Changelog). Update checkboxes as tasks complete. This enables session continuity — if a session breaks mid-implementation, a new session reads the spec and sees what's done vs remaining.
+7. **Capture Lessons**: Update `.ai/lessons.md` after corrections if there's a general rule that will let us save time fixing things in the future.
+8. **Sync to spec**: After creating tasks, write an `## Implementation Checklist` section at the end of the spec file (before Changelog). Update checkboxes as tasks complete. This enables session continuity — if a session breaks mid-implementation, a new session reads the spec and sees what's done vs remaining.
    ```markdown
    ## Implementation Checklist
    - [x] Inject standards
@@ -216,96 +217,52 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 
 ## Project Layout
 
-<!--
-Fill in after running /discover-standards on your codebase.
-Describe the high-level folder layout and which package/app does what.
-
-Example (Node.js monorepo):
-  apps/api/        # Backend HTTP API
-  apps/web/        # Frontend SPA
-  apps/worker/     # Background job runner
-  packages/shared/ # Code shared between apps
-
-Example (.NET solution):
-  src/Api/              # ASP.NET Core Web API
-  src/Application/      # Use cases, application services
-  src/Domain/           # Entities, domain logic
-  src/Infrastructure/   # EF Core, external integrations
-  tests/                # xUnit / NUnit test projects
-
-Example (Ruby on Rails):
-  app/controllers/  # HTTP endpoints
-  app/models/       # ActiveRecord models
-  app/views/        # ERB templates
-  app/services/     # Service objects (business logic)
-  app/jobs/         # ActiveJob background jobs
-  config/           # routes.rb, database.yml, initializers
--->
-
-```
-index.html                # CAŁA witryna — jeden plik, wszystkie sekcje (~790 linii)
-wsgi.py                   # Flask (14 linii): serwuje statyki + fallback na index.html
-assets/
-  css/style.css           # prebudowany bundle Tailwind (zminifikowany, 1 linia) — NIE edytować ręcznie
-  css/custom.css          # ręcznie pisane style projektu (.btn-primary, .card, hover-elevate…)
-  js/main.js              # cały front-end: motywy, nawigacja, filtry, koszyk, formularz
-attached_assets/
-  generated_images/       # grafiki witryny (hero, butelki, wnętrza) — PNG + jeden JPG
-.ai/                      # GUARDRAILS.md, specs/, standards/ (workflow t-shirt size)
-.claude/agents/                   # definicje subagentów (codebase-analyzer, pattern-finder, spec-reviewer)
-.claude/skills/                   # komendy /discover-standards, /inject-standards, /verify-standards…
-AGENTS-auto.md            # notatka operacyjna o projekcie (deploy, praca w toku, pułapki)
-```
-
-Projekt jest jednomodułowy: **nie ma podziału na warstwy, pakiety ani aplikacje**.
-Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
+apps/web/                    # Main Next.js application
+packages/prisma/             # Database schema (schema.prisma) and migrations
+packages/trpc/               # tRPC API layer (routers in server/routers/)
+packages/ui/                 # Shared UI components
+packages/features/           # Feature-specific code
+packages/app-store/          # Third-party integrations
+packages/lib/                # Shared utilities
 
 ## Tech Stack
 
-<!--
-Fill in the runtime, framework, DB, styling, linter/formatter, and any other
-first-class tools agents must be aware of.
-
-Example (Node.js):  Node.js 22, Fastify, PostgreSQL (Prisma), Tailwind, ESLint + Prettier
-Example (.NET):     .NET 9, ASP.NET Core, EF Core, SQL Server, dotnet format
-Example (Rails):    Ruby 3.3, Rails 7.2, PostgreSQL, ActiveRecord, RuboCop, Standard
-Example (Go):       Go 1.23, Chi router, pgx, goose migrations, gofmt, golangci-lint
-Example (Python):   Python 3.12, FastAPI, SQLAlchemy, Alembic, ruff, black
--->
-
-- **Frontend**: statyczny HTML5 + vanilla JavaScript (ES6, bez frameworka, bez modułów,
-  bez bundlera). Jeden plik `assets/js/main.js` ładowany z `defer`.
-- **CSS**: Tailwind jako **gotowy, zbudowany artefakt w repo** (`assets/css/style.css`) —
-  brak `package.json`, `tailwind.config` i źródeł, więc bundla nie da się przebudować.
-  Style dopisywane ręcznie idą do `assets/css/custom.css`. Motywy = zmienne CSS (HSL)
-  podmieniane w JS na `document.documentElement`.
-- **Fonty**: Google Fonts (Playfair Display + Lato) z CDN — jedyna zewnętrzna zależność runtime.
-- **Serwer**: Python 3.11 + Flask (`wsgi.py`) wyłącznie do serwowania plików statycznych.
-  Produkcja: gunicorn `wsgi:app` na `127.0.0.1:8004`, domena `ops02.jdblayer.com`,
-  katalog `/opt/apps/app_winnicakielnagora.pl`, wdrożenie przez `projects_manager`.
-- **Baza danych**: brak. Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw
-  w `localStorage` pod kluczem `winery-style`.
-- **Testy**: brak. **Linter / formatter**: brak. **Krok budowania**: brak.
+Framework: Next.js 13+ (App Router in some areas)
+Language: TypeScript (strict)
+Database: PostgreSQL with Prisma ORM
+API: tRPC for type-safe APIs
+Auth: NextAuth.js
+Styling: Tailwind CSS
+Testing: Vitest (unit), Playwright (E2E)
+i18n: next-i18next
 
 ## Commands
 
-<!--
-Fill in the commands agents should use to run, build, test, and lint the project.
-Keep this table small — only the commands used during normal development.
+### Development Commands
+yarn dev - Start development server for web app
+yarn dev:all - Start web, website, and console apps
+yarn dev:api - Start web app with API proxy and API
+yarn dev:console - Start web app with console
+yarn dx - Start development with database setup
 
-Example (Node.js):  bun dev / bun run build / bun test / biome check --write
-Example (.NET):     dotnet run / dotnet build / dotnet test / dotnet format
-Example (Rails):    bin/dev / bin/rails assets:precompile / bin/rails test / bundle exec rubocop -A
-Example (Go):       go run ./cmd/server / go build ./... / go test ./... / golangci-lint run --fix
-Example (Python):   uvicorn main:app / python -m build / pytest / ruff check --fix && ruff format
--->
+### Build Commands
+yarn build - Build all packages and apps
+yarn build:ai - Build AI package specifically
+yarn clean - Remove build artifacts (node_modules, .next, .turbo, dist)
 
-| Action | Command |
-|---|---|
-| Dev | `python3 -m http.server 5000` w katalogu repo → http://localhost:5000 (zero zależności; Flask/gunicorn nie są zainstalowane lokalnie). Wariant produkcyjny: `python3 -m flask --app wsgi run --port 8004` |
-| Build | **brak** — `assets/css/style.css` jest w repo jako gotowy artefakt; nic się nie kompiluje |
-| Test | **brak** — jedyna weryfikacja to podgląd strony w przeglądarce; opisz w odpowiedzi, którą sekcję i co sprawdzić |
-| Lint / Format | **brak** — trzymaj się formatowania sąsiedniego kodu (2 spacje wcięcia w HTML/JS/CSS) |
+### Lint & Type Check
+yarn lint - Run Biome across the codebase
+yarn lint:fix - Run Biome and apply safe fixes
+yarn lint:report - Generate Biome lint report
+yarn type-check - Run TypeScript type checking
+yarn format - Format code with Biome
+
+### Unit Tests
+yarn test - Run unit tests (vitest)
+yarn test <filename> - Run tests for specific file
+yarn test <filename> -t "<testName>" - Run specific test by name for specific file
+yarn tdd - Run tests in watch mode
+yarn test:ui - Run tests with UI interface
 
 ## Coding Standards
 
@@ -442,12 +399,12 @@ Task(subagent_type=codebase-pattern-finder):
 
 ### Summary: 3 Tools Instead of Explore
 
-| Phase | Tool | What it provides | Cost |
-|-------|------|------------------|------|
-| Before code | `/inject-standards` explicit | Rules and conventions | Low (read index + files) |
-| Plan/Spec | `codebase-pattern-finder` (analogy) | Reference module structure | Medium (targeted query) |
-| Implement | `codebase-pattern-finder` (example) | Concrete code snippet | Medium (targeted query) |
-| Any phase | Context7 (`resolve-library-id` + `query-docs`) | External library documentation — **ALWAYS use this, NEVER WebSearch** | Low (MCP call) |
+| Phase       | Tool                                           | What it provides                                                      | Cost                     |
+| ----------- | ---------------------------------------------- | --------------------------------------------------------------------- | ------------------------ |
+| Before code | `/inject-standards` explicit                   | Rules and conventions                                                 | Low (read index + files) |
+| Plan/Spec   | `codebase-pattern-finder` (analogy)            | Reference module structure                                            | Medium (targeted query)  |
+| Implement   | `codebase-pattern-finder` (example)            | Concrete code snippet                                                 | Medium (targeted query)  |
+| Any phase   | Context7 (`resolve-library-id` + `query-docs`) | External library documentation — **ALWAYS use this, NEVER WebSearch** | Low (MCP call)           |
 
 
 **Explore on entire repo** → NO. Use ONLY for business specifics, not for conventions or coding patterns.
@@ -457,36 +414,17 @@ Task(subagent_type=codebase-pattern-finder):
 - **NEVER invent URLs.** If a spec or code needs an external URL — ask the user for the real link or verify it exists via WebFetch. Hallucinated URLs are a real problem — many sites return custom pages (not 404) for non-existent paths, making fake links hard to detect later.
 - **Use Context7 for library documentation**, not training-data memory — library APIs drift and your recall can be stale.
 
-<!--
-Add your project's own gotchas below as you discover them — conventions, traps,
-and implicit rules only you/your team know. Keep each bullet short; link to a
-standard or guardrail for anything that needs more words.
-Examples:
-- Runtime is Bun, not Node.js — do NOT use `npm`/`npx`
-- Database columns are snake_case, TypeScript fields are camelCase
-- Never import from `legacy/` — that directory is scheduled for deletion
--->
-
-- **`assets/css/style.css` 
-- **`wsgi.py` preferuje `dist/public`, jeśli ten katalog istnieje**, a w konfiguracji
-  wdrożeniowej nie ma kroku budowania — czyli na produkcji serwowany jest katalog repo.
-  Zanim oprzesz coś na gałęzi `dist/public`, ustal z Właścicielem, czy build ma powstać.
-- **Sprawdź `git status` przed pierwszą edycją** — repo bywa zostawiane z niezacommitowaną
-  pracą w `index.html` i `attached_assets/generated_images/`. Nie commituj cudzej pracy
-  razem ze swoją.
-- **Nie dodawaj zależności Pythona bez potrzeby.** Projekt celowo nie ma `requirements.txt`;
-  środowisko wymaga tylko Flaska i gunicorna.
+### Never do
+- Commit secrets, API keys, or .env files
+- Expose credential.key in any query
+- Use as any type casting
+- Force push or rebase shared branches
+- Modify generated files directly
 
 ## Where to Look
 
-<!--
-Fill in paths to the most important directories in your project.
-This table is used by agents during "Analogy Discovery" and "Code Pattern Finder".
-If an area doesn't exist in your project, delete the row.
-
-Example (Node.js):  api routes = src/routes/, DB = src/db/, UI = src/components/
-Example (.NET):     HTTP handlers = src/Api/Controllers/, DB = src/Infrastructure/Persistence/, UI = src/Web/Pages/
-Example (Rails):    HTTP handlers = app/controllers/, DB = app/models/ + db/migrate/, UI = app/views/
-Example (Go):       HTTP handlers = internal/handlers/, DB = internal/store/, Tests = *_test.go next to code
-Example (Python):   HTTP handlers = app/routers/, DB = app/models/ + alembic/versions/, Tests = tests/
--->
+- Routes: apps/web/app/ (App Router)
+- Database schema: packages/prisma/schema.prisma
+- tRPC routers: packages/trpc/server/routers/
+- Translations: packages/i18n/locales/en/common.json
+- Workflow constants: packages/features/ee/workflows/lib/constants.ts
