@@ -105,6 +105,15 @@ const themeStyles = {
 
 const cart = new Map();
 
+// Cennik z data/wina.json — jedyne źródło asortymentu i cen.
+// Patrz .ai/standards/content/wina-json.md
+let cennik = null;
+const STAWKA_VAT_DOMYSLNA = 0.23;
+
+function stawkaVat() {
+  return cennik?.stawka_vat ?? STAWKA_VAT_DOMYSLNA;
+}
+
 const qs = (sel) => document.querySelector(sel);
 const qsa = (sel) => Array.from(document.querySelectorAll(sel));
 
@@ -190,12 +199,27 @@ function initFilters() {
   const noProducts = qs("#no-products");
   const products = qsa(".product-card");
 
+  // Granice suwaka biorą się z danych, nie z zaszytego 0–100 (TODO.md #2).
+  const zakres = zakresCen();
+  [priceMin, priceMax].forEach((input) => {
+    if (!input) return;
+    input.min = String(zakres.min);
+    input.max = String(zakres.max);
+  });
+  if (priceMin) priceMin.value = String(zakres.min);
+  if (priceMax) priceMax.value = String(zakres.max);
+  if (priceMinLabel) priceMinLabel.textContent = String(zakres.min);
+  if (priceMaxLabel) priceMaxLabel.textContent = String(zakres.max);
+
+  function procent(wartosc) {
+    const rozpietosc = zakres.max - zakres.min;
+    return rozpietosc > 0 ? ((wartosc - zakres.min) / rozpietosc) * 100 : 0;
+  }
+
   function updateHighlight() {
     if (!priceMin || !priceMax || !rangeHighlight) return;
-    const minVal = Number(priceMin.value);
-    const maxVal = Number(priceMax.value);
-    const minPercent = (minVal / 100) * 100;
-    const maxPercent = (maxVal / 100) * 100;
+    const minPercent = procent(Number(priceMin.value));
+    const maxPercent = procent(Number(priceMax.value));
     rangeHighlight.style.background = `linear-gradient(to right, hsl(var(--secondary)) 0%, hsl(var(--secondary)) ${minPercent}%, hsl(var(--primary)) ${minPercent}%, hsl(var(--primary)) ${maxPercent}%, hsl(var(--secondary)) ${maxPercent}%, hsl(var(--secondary)) 100%)`;
   }
 
@@ -210,8 +234,8 @@ function initFilters() {
 
   function applyFilters() {
     const category = categorySelect?.value || "Wszystkie";
-    const min = Number(priceMin?.value || 0);
-    const max = Number(priceMax?.value || 100);
+    const min = Number(priceMin?.value ?? zakres.min);
+    const max = Number(priceMax?.value ?? zakres.max);
     const promo = promoOnly?.checked || false;
 
     let visible = 0;
@@ -227,7 +251,8 @@ function initFilters() {
       if (shouldShow) visible += 1;
     });
 
-    const hasFilters = category !== "Wszystkie" || promo || min > 0 || max < 100;
+    const hasFilters =
+      category !== "Wszystkie" || promo || min > zakres.min || max < zakres.max;
     clearBtn?.classList.toggle("hidden", !hasFilters);
     activeFilters?.classList.toggle("hidden", !hasFilters);
     toggleBadge(filterCategory, category !== "Wszystkie", category);
@@ -261,11 +286,11 @@ function initFilters() {
 
   clearBtn?.addEventListener("click", () => {
     if (categorySelect) categorySelect.value = "Wszystkie";
-    if (priceMin) priceMin.value = "0";
-    if (priceMax) priceMax.value = "100";
+    if (priceMin) priceMin.value = String(zakres.min);
+    if (priceMax) priceMax.value = String(zakres.max);
     if (promoOnly) promoOnly.checked = false;
-    priceMinLabel && (priceMinLabel.textContent = "0");
-    priceMaxLabel && (priceMaxLabel.textContent = "100");
+    priceMinLabel && (priceMinLabel.textContent = String(zakres.min));
+    priceMaxLabel && (priceMaxLabel.textContent = String(zakres.max));
     updateHighlight();
     applyFilters();
   });
@@ -284,10 +309,6 @@ function initFilters() {
   applyFilters();
 }
 
-function formatPrice(value) {
-  return `${value.toFixed(2)} zł`;
-}
-
 function renderCart() {
   const overlay = qs("#cart-overlay");
   const itemsWrap = qs("#cart-items");
@@ -302,8 +323,10 @@ function renderCart() {
   const items = Array.from(cart.values());
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const net = subtotal / 1.23;
+  const net = subtotal / (1 + stawkaVat());
   const tax = subtotal - net;
+  const taxLabel = qs("#cart-tax-label");
+  if (taxLabel) taxLabel.textContent = `VAT (${Math.round(stawkaVat() * 100)}%):`;
 
   if (countLabel) {
     if (totalItems > 0) {
@@ -317,9 +340,9 @@ function renderCart() {
   }
 
   if (itemsCount) itemsCount.textContent = `(${items.length})`;
-  if (subtotalEl) subtotalEl.textContent = formatPrice(net);
-  if (taxEl) taxEl.textContent = formatPrice(tax);
-  if (totalEl) totalEl.textContent = formatPrice(subtotal);
+  if (subtotalEl) subtotalEl.textContent = Produkty.formatujCene(net);
+  if (taxEl) taxEl.textContent = Produkty.formatujCene(tax);
+  if (totalEl) totalEl.textContent = Produkty.formatujCene(subtotal);
 
   if (!itemsWrap || !emptyState || !summary) return;
 
@@ -354,7 +377,7 @@ function renderCart() {
               <span>${item.quantity}</span>
               <button data-increase="${item.id}"><svg class="w-3 h-3"><use href="#icon-plus"></use></svg></button>
             </div>
-            <span class="font-semibold">${formatPrice(item.price * item.quantity)}</span>
+            <span class="font-semibold">${Produkty.formatujCene(item.price * item.quantity)}</span>
           </div>
         </div>
       </div>
@@ -421,8 +444,11 @@ function initCart() {
     alert("Przekierowanie do płatności w pełnej wersji sklepu.");
   });
 
-  qsa("[data-add-to-cart]").forEach((btn) =>
-    btn.addEventListener("click", () => {
+  // Delegacja: karty produktów powstają dopiero po wczytaniu cennika i mogą
+  // zostać przerenderowane, więc nasłuch wisi na kontenerze, nie na przyciskach.
+  qs("#lista-produktow")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-add-to-cart]");
+    if (btn) {
       const card = btn.closest(".product-card");
       if (!card) return;
       const id = card.dataset.id;
@@ -439,10 +465,116 @@ function initCart() {
       }
       renderCart();
       openCart();
-    })
-  );
+    }
+  });
 
   renderCart();
+}
+
+/** Wczytuje data/wina.json. Zwraca null, jeśli się nie udało — komunikat pokazuje initShop. */
+async function wczytajCennik() {
+  try {
+    const odpowiedz = await fetch("./data/wina.json", { cache: "no-store" });
+    if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
+    const dane = await odpowiedz.json();
+    if (!Array.isArray(dane?.wina)) throw new Error("brak tablicy 'wina'");
+    return dane;
+  } catch (blad) {
+    console.error("Nie udało się wczytać data/wina.json:", blad);
+    return null;
+  }
+}
+
+/** Zakres suwaka cen liczony z danych; sensowny domyślny, gdy cennik jest pusty. */
+function zakresCen() {
+  const ceny = (cennik?.wina || [])
+    .filter((wino) => wino.dostepne !== false)
+    .map((wino) => Number(wino.cena_brutto || 0));
+  if (ceny.length === 0) return { min: 0, max: 100 };
+  return { min: Math.floor(Math.min(...ceny)), max: Math.ceil(Math.max(...ceny)) };
+}
+
+/** Opcje filtra kategorii biorą się z cennika — dodanie kategorii nie wymaga zmian w HTML. */
+function renderKategorie() {
+  const select = qs("#category-select");
+  if (!select) return;
+  const kategorie = cennik?.kategorie || [];
+  select.innerHTML = ["Wszystkie", ...kategorie]
+    .map((nazwa) => `<option>${Produkty.escape(nazwa)}</option>`)
+    .join("");
+}
+
+function komunikatSklepu(tresc) {
+  const wrap = qs("#lista-produktow");
+  if (!wrap) return;
+  wrap.innerHTML = `
+                <p class="col-span-full text-center text-muted-foreground py-12">${tresc}</p>`;
+}
+
+/**
+ * Buduje sekcję sklepu z cennika. Bez tego kroku nie ma czego filtrować,
+ * dlatego initFilters() uruchamia się dopiero po nim.
+ */
+function renderSklep() {
+  const wrap = qs("#lista-produktow");
+  if (!wrap) return false;
+
+  if (!cennik) {
+    komunikatSklepu(
+      'Nie udało się wczytać oferty. <a href="#kontakt" class="underline">Skontaktuj się z nami</a>.'
+    );
+    return false;
+  }
+
+  const kategorie = cennik.kategorie || [];
+  const dostepne = cennik.wina.filter((wino) => {
+    if (wino.dostepne === false) return false;
+    if (!kategorie.includes(wino.kategoria)) {
+      console.warn(`Pomijam "${wino.id}" — nieznana kategoria "${wino.kategoria}"`);
+      return false;
+    }
+    return true;
+  });
+
+  if (dostepne.length === 0) {
+    komunikatSklepu("Oferta w przygotowaniu — zapraszamy wkrótce.");
+    return false;
+  }
+
+  wrap.innerHTML = dostepne
+    .map((wino) => Produkty.renderProductCard(wino, stawkaVat()))
+    .join("");
+  return true;
+}
+
+/** Blok „Wina z tej odmiany" na stronach odmian. Treść strony działa bez tego. */
+function initWineOffer() {
+  const wrap = qs("#oferta-odmiany");
+  if (!wrap) return;
+  const slug = wrap.dataset.odmiana;
+  const pasujace = (cennik?.wina || []).filter((wino) => wino.odmiana_slug === slug);
+
+  if (pasujace.length === 0) return; // zostaje statyczny tekst zastępczy z HTML-a
+
+  wrap.innerHTML = pasujace
+    .map((wino) => {
+      const ceny = Produkty.policzCeny(wino, stawkaVat());
+      const opis = Produkty.opisPodtytul(wino).join(" • ");
+      const cena = wino.dostepne === false
+        ? '<span class="text-muted-foreground">chwilowo niedostępne</span>'
+        : `<span class="text-xl font-bold text-ring">${Produkty.formatujCene(ceny.brutto)}</span>`;
+      return `
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border py-4 last:border-0">
+            <div>
+              <p class="font-semibold">${Produkty.escape(wino.nazwa)}</p>
+              <p class="text-sm text-muted-foreground">${Produkty.escape(opis)}</p>
+            </div>
+            <div class="flex items-center gap-4">${cena}
+              <a href="../index.html#sklep" class="btn-primary">Zobacz w sklepie</a>
+            </div>
+          </div>`;
+    })
+    .join("");
 }
 
 function initContactForm() {
@@ -454,10 +586,14 @@ function initContactForm() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   initStyleSwitcher();
   initNavigation();
-  initFilters();
-  initCart();
   initContactForm();
+
+  cennik = await wczytajCennik();
+  renderKategorie();
+  if (renderSklep()) initFilters();
+  initWineOffer();
+  initCart();
 });

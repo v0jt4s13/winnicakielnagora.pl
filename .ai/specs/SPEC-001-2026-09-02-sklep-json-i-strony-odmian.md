@@ -43,8 +43,10 @@ z nich należy do Właściciela; sesja implementująca nie ma prawa ich rozstrzy
 | # | Blokada | Co blokuje | Gdzie |
 |---|---|---|---|
 | B1 | Brak asortymentu i cennika | **treść** `data/wina.json` (nie strukturę) | `TODO.md` #10 |
-| ~~B2~~ | ~~Brak zgody na zmianę `.ai/GUARDRAILS.md`~~ | **ZDJĘTA 2026-09-02** — zgoda udzielona, reguły przepisane | `.ai/GUARDRAILS.md` |
-| B3 | Status odmiany Svenson Red | `wina/svenson-red.html` i pozycja w JSON | `TODO.md` #12 |
+| ~~B2~~ | ~~Brak zgody na zmianę `.ai/GUARDRAILS.md`~~ | **ZDJĘTA 2026-09-02** | `.ai/GUARDRAILS.md` |
+| ~~B3~~ | ~~Status odmiany Svenson Red~~ | **ZDJĘTA 2026-09-02** — Właściciel potwierdził, że wino Svenson Red jest produkowane | — |
+
+Wszystkie blokady zdjęte. Zostaje jedynie B1, i tylko w części dotyczącej treści pliku.
 
 **B1 nie blokuje tyle, ile się wydaje.** Plik `data/wina.json` powstaje od razu, z pustą tablicą
 `wina` i wypełnionymi `waluta`, `stawka_vat`, `kategorie`. Cały mechanizm sklepu da się na nim
@@ -433,12 +435,16 @@ literówka w danych nie może wysypać całego sklepu.
 | Seyval Blanc | `seyval-blanc` | Białe | `seyval-blanc-kieliszki-01` |
 | Monarch | `monarch` | Czerwone | `monarch-kieliszek-01`, `monarch-butelka-01` |
 | Dornfelder | `dornfelder` | Czerwone | `dornfelder-kiscie-01`, `dornfelder-kieliszek-01` |
-| Svenson Red ⚠ | `svenson-red` | Czerwone | `svenson-red-kiscie-01/02` |
+| Svenson Red | `svenson-red` | Czerwone | `svenson-red-kiscie-01/02` |
+| — (soki) | `soki` | Soki | `winnica-butelka-biale-01`, `seyval-blanc-kieliszki-01` |
 
-⚠ **Svenson Red — nie twórz tej strony bez potwierdzenia** (blokada B3). Opis winnicy nie
-wymienia tej odmiany, mimo że na stronie głównej jest jej kafelek, a w materiałach są zdjęcia.
-Jeśli Właściciel potwierdzi uprawę — strona powstaje jak pozostałe. Jeśli zaprzeczy — usuwamy
-też kafelek z `#nasze-wina`, a zdjęcia zostają nieużywane.
+**Svenson Red** — Właściciel potwierdził 2026-09-02, że wino z tej odmiany jest produkowane.
+Strona powstaje jak pozostałe, mimo że pisany opis winnicy jej nie wymienia.
+
+**Soki** dostają **stronę zbiorczą** `wina/soki.html` — nie pochodzą z jednej odmiany, a karta
+w sklepie musi mieć dokąd linkować. Strona opisuje soki 100% z białych winogron (bez dodatków)
+i wskazuje odmiany, z których powstają. Dzięki temu `odmiana_slug` pozostaje polem wymaganym
+dla **każdej** pozycji cennika — bez wyjątków w kodzie i bez martwych linków.
 
 Zdjęcia ogólne: `winnica-panorama-01` (hero), `winnica-budynek-01`, `winnica-rzedy-01`,
 `winnica-butelka-biale-01`, `winnica-butelka-czerwone-01`.
@@ -456,7 +462,7 @@ ale każdy musi zostać unikalny i mieścić się w 150–160 znakach.
 | `seyval-blanc` | Seyval Blanc — świeże białe wino z Podkarpacia | Hybryda o cytrusowo-ziołowym charakterze, porównywana do lekkiego sauvignon blanc. Uprawiana w Winnicy Kielna Góra pod Rzeszowem. |
 | `monarch` | Monarch — czerwona odmiana z Winnicy Kielna Góra | Ciemne jagody dają wina barwne i wyraziste, z nutami czarnej porzeczki. Odmiana odporna na choroby grzybowe, uprawiana w Kielnarowej. |
 | `dornfelder` | Dornfelder — soczyste czerwone wino z Kielnarowej | Odmiana znana z owocowych win o miękkich taninach i intensywnej barwie. Uprawiamy ją na jednohektarowej winnicy pod Rzeszowem. |
-| `svenson-red` ⚠ | Svenson Red — mrozoodporna czerwona odmiana | Wysoka odporność na mróz i lekkie, owocowe czerwone wina z nutami malin i wiśni. Winnica Kielna Góra w Kielnarowej pod Rzeszowem. |
+| `svenson-red` | Svenson Red — mrozoodporna czerwona odmiana | Wysoka odporność na mróz i lekkie, owocowe czerwone wina z nutami malin i wiśni. Winnica Kielna Góra w Kielnarowej pod Rzeszowem. |
 
 ### JSON-LD — decyzja
 
@@ -550,7 +556,8 @@ dochodzi `frontend/theming`.
 - [ ] Poprawki faktów w `#o-nas` (Kielnarowa, 1 ha, 2020/2024, 7 odmian), stopce i `<title>`
 - [ ] Podmiana zdjęć AI na prawdziwe w `index.html` (bez plików z członem `-osoby-`)
 - [ ] `wina/souvignier-gris.html` — wzorzec dla pozostałych
-- [ ] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder
+- [ ] `wina/` — St. Pepin, Vidal Blanc, Seyval Blanc, Monarch, Dornfelder, Svenson Red
+- [ ] `wina/soki.html` — strona zbiorcza soków
 - [ ] `sitemap.xml`, `robots.txt`, meta, Open Graph, JSON-LD
 - [ ] Przegląd w przeglądarce we wszystkich trzech motywach
 
@@ -571,19 +578,26 @@ dochodzi `frontend/theming`.
 
 - [ ] Wprowadzenie realnego asortymentu — panelem z SPEC-002 albo wprost do pliku
 
-**Etap 3 — po zdjęciu blokady B3**
+**Etap 3 — panel redakcyjny**
 
-- [ ] `wina/svenson-red.html` albo usunięcie kafelka odmiany z `#nasze-wina`
+- [ ] Implementacja wg `.ai/specs/SPEC-002-*` (odblokowuje wprowadzenie asortymentu przez
+      Właściciela, czyli zamyka B1)
 
 ## Changelog
 
-### 2026-09-02 — do potwierdzenia: podział JS na dwa pliki
+### 2026-09-02 — wszystkie blokady zdjęte
+
+Właściciel: (1) zatwierdził podział JS na osobne pliki, dopuszczając kolejne, jeśli mają jasno
+wydzieloną rolę; (2) potwierdził, że wino **Svenson Red** jest produkowane — blokada B3 zdjęta,
+odmiana dostaje stronę jak pozostałe; (3) polecił przygotować **stronę zbiorczą soków**
+(`wina/soki.html`), dzięki czemu `odmiana_slug` zostaje polem wymaganym dla każdej pozycji.
+Implementacja ruszyła.
+
+### 2026-09-02 — podział JS na dwa pliki (zatwierdzone)
 
 Wydzielenie `assets/js/produkty.js` z `main.js` łamie decyzję architektoniczną „Front-end bez
-frameworka i bez modułów" w brzmieniu „jeden plik `main.js`". **Zgoda Właściciela z tego dnia
-dotyczyła przeniesienia danych produktów do JSON-a, nie liczby plików JS.** Zapis w
-`.ai/GUARDRAILS.md` został przepisany na wariant dwuplikowy i oznaczony jako wymagający
-potwierdzenia. Do czasu potwierdzenia Etap 2 nie startuje.
+frameworka i bez modułów" w brzmieniu „jeden plik `main.js`". Zapis w `.ai/GUARDRAILS.md` został przepisany
+na wariant wieloplikowy i **zatwierdzony przez Właściciela 2026-09-02**.
 
 Alternatywa, gdyby Właściciel wolał zostać przy jednym pliku: panel kopiuje funkcję renderującą
 do siebie — wtedy podgląd karty i sklep rozjadą się przy pierwszej zmianie wyglądu karty, czyli

@@ -341,8 +341,9 @@ python3 tools/panel/serwer.py --port 9000
 
 ## Otwarte decyzje
 
-1. **Soki a `odmiana_slug`** (Story 2) — pole wymagane dla wszystkich pozycji, czy opcjonalne
-   dla kategorii innych niż wino? Do czasu decyzji: wymagane.
+1. ~~**Soki a `odmiana_slug`**~~ — **rozstrzygnięte 2026-09-02**: powstaje strona zbiorcza
+   `wina/soki.html`, a `odmiana_slug` zostaje polem **wymaganym dla każdej** pozycji. Sok
+   wskazuje `soki`. Brak wyjątków w kodzie, brak martwych linków.
 2. **Czy panel ma edytować `stawka_vat`** — dziś zakładam, że nie: to zmiana raz na kilka lat
    i wymaga też poprawienia etykiety „VAT (23%)" w `index.html` (`TODO.md` #4).
 

@@ -1,0 +1,6 @@
+{
+  "waluta": "PLN",
+  "stawka_vat": 0.23,
+  "kategorie": ["Białe", "Czerwone", "Różowe", "Soki"],
+  "wina": []
+}

@@ -161,12 +161,15 @@ Zmiana jest gotowa dopiero, gdy:
   `main.js` nie da się w panelu wczytać, bo jego `DOMContentLoaded` odpaliłby nawigację, motywy
   i koszyk, których w panelu nie ma. Alternatywa — skopiowanie funkcji do panelu — gwarantuje
   rozjazd, czyli dokładnie to, przed czym podgląd ma chronić.
-- **Konsekwencja**: `produkty.js` jest **jedynym** wyjątkiem od wzorca `initX()` +
-  `DOMContentLoaded` i jedynym plikiem JS wolno serwowanym panelowi. Trzeciego pliku JS nie
-  dokładamy bez decyzji Właściciela; nowe zachowanie strony to nadal `initX()` w `main.js`.
-- **Status**: podział wprowadzony 2026-09-02 razem z przejściem danych do JSON.
-  **Wymaga potwierdzenia Właściciela** — jego zgoda z tego dnia dotyczyła danych produktów,
-  nie liczby plików JS. Do czasu potwierdzenia traktuj ten zapis jako propozycję.
+- **Konsekwencja**: kolejne pliki JS wolno dokładać, jeśli mają jasno wydzieloną rolę, ale
+  każdy musi należeć do jednej z dwóch kategorii:
+  - **biblioteka** — definiuje globalny obiekt, zero zdarzeń i zero DOM-u przy wczytaniu,
+    dzięki czemu da się jej użyć poza stroną (np. w panelu);
+  - **zachowanie strony** — funkcje `initX()` spięte w `DOMContentLoaded` w `main.js`.
+
+  Biblioteki ładują się **przed** `main.js`. Nie wprowadzamy `import`/`export`, bundlera ani
+  biblioteki UI — to nadal wymaga decyzji Właściciela.
+- **Status**: zatwierdzone przez Właściciela 2026-09-02.
 
 ### Koszyk i formularz jako zaślepki
 
