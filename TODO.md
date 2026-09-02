@@ -6,10 +6,6 @@ pozycji usuń ją i dopisz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`.
 
 Ostatnia aktualizacja: **2026-09-02**.
 
-Nowa pozycja: **18. Przegląd strony w przeglądarce** — nie mogłem go wykonać, bo rozszerzenie
-Chrome nie było podłączone. Trzeba obejrzeć stronę główną i strony odmian we wszystkich trzech
-motywach (`classic`, `modern`, `rustic`) i sprawdzić konsolę.
-
 ## Do naprawy
 
 ### ~~1. Rozjazd ceny netto~~ — ZAMKNIĘTE 2026-09-02
@@ -128,3 +124,14 @@ Po świeżym klonie nie ma komend `/…` ani subagentów. Odtworzyć powinien je
 `t-shirt-size-install.sh`, ale **instalator kopiuje z katalogów `skills/` i `agents/`, których
 w repo nie ma** — dziś jedyna kopia frameworka to lokalne `.claude/`. Do rozstrzygnięcia:
 commitować `.claude/`, czy dodać katalogi źródłowe.
+
+### 18. Przegląd strony w przeglądarce
+
+Zmiany z 2026-09-02 (sklep z JSON, osiem stron odmian, podmienione zdjęcia) **nie zostały
+obejrzane w przeglądarce** — rozszerzenie Chrome nie było podłączone. Sprawdzone zostało
+tylko to, co da się sprawdzić bez niej: kody HTTP wszystkich adresów, poprawność JSON-LD
+i `sitemap.xml`, istnienie każdego pliku ze zdjęciem oraz 20 testów logiki cen
+(`node tools/test-produkty.js`).
+
+Do obejrzenia: strona główna i strony odmian w motywach `classic`, `modern` i `rustic`,
+konsola przeglądarki bez błędów, układ na telefonie.
