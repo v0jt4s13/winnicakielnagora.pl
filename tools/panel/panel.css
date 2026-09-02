@@ -160,3 +160,45 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .znaczniki button:hover { color: var(--blad); }
 .dodaj-kategorie { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .dodaj-kategorie input { padding: 0.5rem 0.6rem; border: 1px solid var(--ramka); border-radius: 6px; font: inherit; }
+
+/* Pomoc w opisie (model językowy) */
+.pomoc {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--ramka);
+  border-radius: 8px;
+  background: var(--tlo);
+}
+.pomoc summary { cursor: pointer; font-weight: 600; }
+.pomoc textarea {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.6rem;
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+  font: inherit;
+  resize: vertical;
+}
+.pomoc-akcje {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+.pomoc .podpowiedz { margin: 0.6rem 0 0; }
+.wynik {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  background: var(--karta);
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+}
+.wynik-naglowek {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.wynik-naglowek h4 { margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--przygaszony); }
+.wynik-tresc { margin: 0.6rem 0 0; }

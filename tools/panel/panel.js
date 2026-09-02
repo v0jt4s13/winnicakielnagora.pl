@@ -292,7 +292,7 @@ qs("#usun").addEventListener("click", () => {
   qs("#sekcja-formularza").hidden = true;
   oznaczZmiane();
   renderLista();
-  pokazKomunikat(`Usunięto „${Produkty.escape(usuniete.nazwa || "pozycję")}". Zmiana zostanie utrwalona po zapisie.`, "ostrzezenie");
+  pokazKomunikat(`Usunięto „${Produkty.escape(usuniete.nazwa || "pozycję")}”. Zmiana zostanie utrwalona po zapisie.`, "ostrzezenie");
 });
 
 qs("#formularz").addEventListener("input", (e) => {
@@ -327,7 +327,7 @@ qs("#dodaj-kategorie").addEventListener("click", () => {
   const nazwa = pole.value.trim();
   if (!nazwa) return;
   if ((cennik.kategorie || []).includes(nazwa)) {
-    pokazKomunikat(`Kategoria „${Produkty.escape(nazwa)}" już istnieje.`, "ostrzezenie");
+    pokazKomunikat(`Kategoria „${Produkty.escape(nazwa)}” już istnieje.`, "ostrzezenie");
     return;
   }
   cennik.kategorie = [...(cennik.kategorie || []), nazwa];
@@ -335,7 +335,7 @@ qs("#dodaj-kategorie").addEventListener("click", () => {
   oznaczZmiane();
   renderKategorie();
   if (wybrany !== null) renderFormularz();
-  pokazKomunikat(`Kategoria „${Produkty.escape(nazwa)}" pojawi się w filtrze sklepu po zapisie.`, "ostrzezenie");
+  pokazKomunikat(`Kategoria „${Produkty.escape(nazwa)}” pojawi się w filtrze sklepu po zapisie.`, "ostrzezenie");
 });
 
 qs("#lista-kategorii").addEventListener("click", (e) => {
@@ -343,13 +343,85 @@ qs("#lista-kategorii").addEventListener("click", (e) => {
   if (!nazwa) return;
   const uzywana = cennik.wina.filter((w) => w.kategoria === nazwa).length;
   if (uzywana > 0) {
-    pokazKomunikat(`Nie można usunąć — kategorii „${Produkty.escape(nazwa)}" używa ${uzywana} pozycji.`, "blad");
+    pokazKomunikat(`Nie można usunąć — kategorii „${Produkty.escape(nazwa)}” używa ${uzywana} pozycji.`, "blad");
     return;
   }
   cennik.kategorie = cennik.kategorie.filter((k) => k !== nazwa);
   oznaczZmiane();
   renderKategorie();
   if (wybrany !== null) renderFormularz();
+});
+
+// --- pomoc w opisie -------------------------------------------------------
+
+qs("#notatki").addEventListener("input", (e) => {
+  qs("#licznik-znakow").textContent = `${e.target.value.length} znaków`;
+});
+
+qs("#przygotuj").addEventListener("click", async () => {
+  if (wybrany === null) {
+    pokazKomunikat("Najpierw wybierz albo dodaj pozycję, dla której mam przygotować opis.", "ostrzezenie");
+    return;
+  }
+  const tekst = qs("#notatki").value.trim();
+  if (!tekst) {
+    pokazKomunikat("Wklej najpierw treść, z której mam przygotować opis.", "ostrzezenie");
+    return;
+  }
+
+  const wino = cennik.wina[wybrany];
+  const przycisk = qs("#przygotuj");
+  przycisk.disabled = true;
+  przycisk.textContent = "Przygotowuję…";
+  try {
+    const odp = await fetch("/api/opisz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tekst,
+        kontekst: {
+          nazwa: wino.nazwa, kategoria: wino.kategoria,
+          rocznik: wino.rocznik, odmiana_slug: wino.odmiana_slug,
+        },
+      }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) {
+      pokazKomunikat(Produkty.escape(wynik.komunikat || `HTTP ${odp.status}`), "blad");
+      return;
+    }
+    // Propozycja trafia na ekran, nie do pliku — wstawia ją dopiero klikniecie.
+    qs("#wynik-opis").textContent = wynik.opis;
+    qs("#wynik-meta").textContent = `${wynik.opis_meta} (${wynik.opis_meta.length} znaków)`;
+    qs("#wynik-meta").dataset.tresc = wynik.opis_meta;
+    qs("#wyniki-opisu").hidden = false;
+    ukryjKomunikat();
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się przygotować opisu: ${blad.message}`, "blad");
+  } finally {
+    przycisk.disabled = false;
+    przycisk.textContent = "Przygotuj opis";
+  }
+});
+
+qs("#wstaw-opis").addEventListener("click", () => {
+  if (wybrany === null) return;
+  qs("#formularz").elements.opis.value = qs("#wynik-opis").textContent;
+  zbierzFormularz();
+  oznaczZmiane();
+  renderPodglad();
+  renderLista();
+  pokazKomunikat("Opis wstawiony do formularza. Kliknij „Zapisz”, żeby go utrwalić.", "ostrzezenie");
+});
+
+qs("#kopiuj-meta").addEventListener("click", async () => {
+  const tresc = qs("#wynik-meta").dataset.tresc || "";
+  try {
+    await navigator.clipboard.writeText(tresc);
+    pokazKomunikat("Skopiowano opis meta do schowka.", "sukces");
+  } catch {
+    pokazKomunikat("Przeglądarka nie pozwoliła na kopiowanie — zaznacz tekst i skopiuj ręcznie.", "ostrzezenie");
+  }
 });
 
 qs("#zapisz").addEventListener("click", zapisz);

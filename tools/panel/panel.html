@@ -85,6 +85,43 @@
         </label>
       </form>
 
+      <details class="pomoc">
+        <summary>Pomoc w opisie — wklej notatki, model przygotuje tekst</summary>
+        <p class="podpowiedz">
+          Wklejona treść zostanie wysłana do OpenAI. Dla notatek o winie to bez znaczenia,
+          ale <strong>nie wklejaj tu danych osobowych</strong> — nazwisk klientów, adresów
+          ani treści maili.
+        </p>
+        <textarea id="notatki" rows="6"
+          placeholder="Wklej surowe notatki: wrażenia z degustacji, informacje o roczniku, cechy wina…"></textarea>
+        <div class="pomoc-akcje">
+          <span class="podpowiedz" id="licznik-znakow">0 znaków</span>
+          <button type="button" id="przygotuj" class="przycisk">Przygotuj opis</button>
+        </div>
+
+        <div id="wyniki-opisu" hidden>
+          <div class="wynik">
+            <div class="wynik-naglowek">
+              <h4>Opis na kartę produktu</h4>
+              <button type="button" id="wstaw-opis" class="przycisk">Wstaw do pola</button>
+            </div>
+            <p id="wynik-opis" class="wynik-tresc"></p>
+          </div>
+          <div class="wynik">
+            <div class="wynik-naglowek">
+              <h4>Opis meta — do strony odmiany</h4>
+              <button type="button" id="kopiuj-meta" class="przycisk">Kopiuj</button>
+            </div>
+            <p id="wynik-meta" class="wynik-tresc"></p>
+            <p class="podpowiedz">
+              Karta w sklepie renderuje się JavaScriptem, więc jej opis niewiele znaczy dla
+              wyszukiwarek. Ten tekst wklej ręcznie do <code>&lt;meta name="description"&gt;</code>
+              w pliku strony odmiany.
+            </p>
+          </div>
+        </div>
+      </details>
+
       <div class="podglad">
         <h3>Tak zobaczy to klient</h3>
         <!-- Renderowane przez Produkty.renderProductCard() — tym samym kodem, co sklep -->

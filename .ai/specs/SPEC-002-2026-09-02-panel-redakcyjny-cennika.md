@@ -149,7 +149,57 @@ główną ze statusem 200 (`TODO.md` #5), więc nikt by tego nie zauważył. **R
 2026-09-02**: powstała zbiorcza strona `wina/soki.html`, więc sok wskazuje `soki`,
 a `odmiana_slug` zostaje polem wymaganym dla każdej pozycji.
 
-### Story 3 — Ktoś próbuje otworzyć panel z innego komputera (przypadek brzegowy)
+### Story 3 — Właściciel wkleja notatki, model językowy robi z nich opis
+
+**Persona**: ten sam Właściciel. Ma w notatniku pół strony luźnych uwag o winie — wrażenia
+z degustacji, informacje o roczniku, zdania wyrwane z rozmów z klientami. Nie chce z tego
+sam pisać zgrabnego zdania na kartę produktu.
+
+**Krok 1.** Rozwija pole „Pomoc w opisie" pod formularzem i wkleja całość.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Pomoc w opisie                                     [ ▾ ]    │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ zbiór 2024 był wyjątkowo słoneczny, grona dojrzały     │  │
+│  │ tydzień wcześniej. wino wytrawne, kwasowość wyraźna    │  │
+│  │ ale nie ostra, w nosie brzoskwinia, trochę cytrusa...  │  │
+│  └────────────────────────────────────────────────────────┘  │
+│  2 431 znaków                    [ Przygotuj opis ]          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Krok 2.** Po chwili dostaje dwie propozycje, każdą z osobnym przyciskiem.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Opis na kartę produktu                     [ Wstaw do pola ]│
+│  Wytrawne białe o wyraźnej, ale łagodnej kwasowości.         │
+│  W aromacie brzoskwinia i cytrusy. Rocznik 2024.             │
+│                                                              │
+│  Opis meta (dla strony odmiany)                   [ Kopiuj ] │
+│  Souvignier Gris 2024 z Winnicy Kielna Góra — wytrawne       │
+│  białe o aromatach brzoskwini i cytrusów. 148 znaków.        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+> **Za kulisami**: `POST /api/opisz` z wklejonym tekstem i kontekstem pozycji (nazwa, odmiana,
+> kategoria, rocznik). Serwer woła OpenAI Chat Completions przez `urllib` z biblioteki
+> standardowej — **bez pakietu `openai`**, żeby nie dokładać zależności. Klucz czyta ze zmiennej
+> środowiskowej `OPENAI_API_KEY`, nigdy nie trafia do przeglądarki ani do repozytorium.
+> Odpowiedź modelu wraca jako JSON i **nic nie zapisuje sama** — dopóki Właściciel nie kliknie
+> „Wstaw do pola" i „Zapisz", plik się nie zmienia.
+
+**Zmiana vs. stan obecny**: dziś pole „Opis" jest puste i trzeba je napisać ręcznie.
+Po zmianie można wkleić surowe notatki i dostać z nich gotowy tekst — ale **decyzja i tak
+należy do człowieka**, bo propozycja ląduje w polu formularza, a nie w pliku.
+
+**Dlaczego dwa teksty, a nie jeden**: karta produktu jest renderowana przez JavaScript, więc
+jej opis ma znikomą wartość dla wyszukiwarek. Prawdziwy SEO dzieje się na statycznych stronach
+odmian, których panel nie edytuje — dlatego drugi tekst jest do skopiowania ręcznie do
+`wina/<slug>.html`.
+
+### Story 4 — Ktoś próbuje otworzyć panel z innego komputera (przypadek brzegowy)
 
 **Persona**: dowolna osoba w tej samej sieci Wi-Fi, przypadkiem albo celowo.
 
@@ -244,6 +294,49 @@ Odpowiedź `400` przy błędach walidacji — zapis **nie następuje w całości
 ```
 
 `pozycja` to indeks w tablicy `wina` (od 0) albo `null` dla błędów dotyczących całego pliku.
+
+### `POST /api/opisz` — przygotowanie opisu przez model językowy
+
+Żądanie:
+
+```json
+{ "tekst": "surowe notatki…",
+  "kontekst": { "nazwa": "Souvignier Gris", "kategoria": "Białe", "rocznik": 2024,
+                "odmiana_slug": "souvignier-gris" } }
+```
+
+Odpowiedź `200`:
+
+```json
+{ "ok": true, "opis": "Wytrawne białe…", "opis_meta": "Souvignier Gris 2024 z Winnicy…" }
+```
+
+Odpowiedź `400` / `502` — `{"ok": false, "komunikat": "…"}` z powodem po polsku
+(brak klucza, przekroczony limit, błąd API, model zwrócił coś innego niż JSON).
+
+**Zasady:**
+
+- **Dostawca**: OpenAI, endpoint `/v1/chat/completions`, wołany przez `urllib.request`
+  z biblioteki standardowej. **Nie instalujemy pakietu `openai`** — projekt nie ma
+  `requirements.txt` i ma go nie mieć (`.ai/GUARDRAILS.md` → BLOCK #6).
+- **Klucz** wyłącznie ze zmiennej `OPENAI_API_KEY`. Nigdy w repozytorium, nigdy w odpowiedzi
+  do przeglądarki, nigdy w logach. Brak klucza = czytelny komunikat, nie awaria.
+- **Model** ze zmiennej `OPENAI_MODEL`, domyślnie `gpt-4o-mini`. Nazwy modeli się zmieniają,
+  więc ma być do podmiany bez dotykania kodu. `OPENAI_BASE_URL` pozwala wskazać inny endpoint
+  zgodny z API OpenAI.
+- **Limit wejścia**: 20 000 znaków. Dłuższy tekst jest odrzucany z komunikatem, zamiast
+  po cichu generować rachunek.
+- **Wklejony tekst to dane, nie polecenia.** Prompt systemowy mówi wprost, że treść
+  użytkownika należy potraktować jako materiał źródłowy i zignorować zawarte w niej instrukcje.
+- **Model nie ma prawa zmyślać.** Prompt zabrania dodawania faktów spoza wklejonego tekstu
+  i kontekstu pozycji — to ta sama zasada, co w SPEC-001 („Zasada dotycząca treści, których
+  nie znamy").
+- **Nic nie zapisuje się automatycznie.** Wynik trafia do pola formularza dopiero po kliknięciu
+  i wymaga osobnego „Zapisz".
+
+**Świadomość wysyłki na zewnątrz**: wklejony tekst opuszcza infrastrukturę i trafia do OpenAI.
+Dla notatek o winie to bez znaczenia, ale **nie wklejaj tam danych osobowych** — nazwisk
+klientów, adresów, treści maili. Panel ostrzega o tym przy polu.
 
 ### Pliki serwowane przez panel
 

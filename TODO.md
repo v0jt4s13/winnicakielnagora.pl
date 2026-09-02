@@ -146,3 +146,17 @@ zweryfikowania ich przez WebFetch przed użyciem jako źródło.
 Warto je przejrzeć pod kątem zgodności z faktami o odmianach (aromaty, odporność, typowe
 zastosowanie) przed publikacją strony.
 
+### 20. Pomoc w opisie — nazwa modelu i koszty
+
+Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pythona, bez pakietu
+`openai`. Otwarte sprawy:
+
+- **Domyślny model to `gpt-4o-mini`** — wybrany jako tani i powszechnie dostępny, ale nazw
+  modeli nie dało się zweryfikować w tej sesji. Jeśli API odpowie błędem o nieznanym modelu,
+  ustaw `OPENAI_MODEL` na aktualną nazwę; kod nie wymaga zmian.
+- **Funkcja nie została przetestowana z prawdziwym kluczem** — sprawdzone są tylko ścieżki
+  błędów (brak klucza → 400, zbyt długi tekst → 400, brak połączenia → 502, klucz nie trafia
+  do logów). Pierwsze użycie z realnym kluczem warto obejrzeć.
+- **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać przy
+  wklejaniu czegokolwiek poza notatkami o winie.
+
