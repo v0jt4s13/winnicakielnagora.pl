@@ -1,7 +1,17 @@
-# Konwencje `main.js`
+# Konwencje JS
 
-Jeden plik, ES6, bez modułów i bundlera, ładowany z `defer`. Brak `import`/`export` — wszystko
-żyje w zasięgu pliku.
+Dwa pliki, ES6, bez modułów i bundlera, ładowane z `defer`. Brak `import`/`export` — wszystko
+żyje w zasięgu pliku albo w jednym globalnym obiekcie.
+
+| Plik | Rola | Uruchamia coś przy wczytaniu? |
+|---|---|---|
+| `assets/js/produkty.js` | biblioteka: wyliczenia cen i render karty produktu (obiekt `Produkty`) | **nie** — zero zdarzeń, zero DOM |
+| `assets/js/main.js` | zachowanie strony: `initX()` spięte w `DOMContentLoaded` | tak |
+
+Kolejność w HTML: `produkty.js` **przed** `main.js`. Powód rozdzielenia: panel redakcyjny
+używa `Produkty.renderProductCard()` do podglądu i nie może wczytać `main.js`, bo ten odpaliłby
+całą inicjalizację strony. Szczegóły: `.ai/GUARDRAILS.md` → „Front-end bez frameworka i bez
+modułów, w dwóch plikach".
 
 ## Wzorzec: jedna funkcja `initX()` na obszar
 
@@ -33,7 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
   wybrany motyw (klucz `winery-style`). Nie dokładaj tam nic bez ustalenia z Właścicielem.
 - **Dane czytaj z `dataset`**, nie z tekstu w DOM — źródłem prawdy o produkcie są atrybuty
   `data-*` na karcie (patrz `content/product-card`).
-- **Ceny formatuj przez `formatPrice`**, nie ręcznym `toFixed(2) + " zł"`.
+- **Ceny formatuj przez `Produkty.formatujCene()`** — jedyna funkcja formatująca kwoty
+  w projekcie, używana zarówno przez sklep, koszyk, jak i panel. Nie pisz `toFixed(2) + " zł"`
+  i nie dokładaj drugiej takiej funkcji w `main.js`.
 
 ## Wyjątek: `alert()`
 

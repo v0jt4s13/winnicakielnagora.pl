@@ -315,6 +315,14 @@ const Produkty = {
 
 - Zwracany string zawiera **te same klasy CSS**, co dzisiejsze karty — bundle Tailwinda jest
   zamknięty i nie da się dołożyć nowej klasy utility.
+- Zawiera też atrybuty `data-*`, których potrzebują `initFilters()` i `initCart()`:
+  `data-id`, `data-name`, `data-category`, `data-price`, `data-promo`, `data-image`.
+  **Nie** zawiera `data-price-net` ani `data-discount` — te były martwe i znikają.
+  Atrybuty są tu wyłącznie nośnikiem stanu dla już istniejącego kodu filtrów i koszyka;
+  źródłem prawdy pozostaje `data/wina.json`.
+- `Produkty.formatujCene()` **zastępuje** dotychczasową `formatPrice()` z `main.js` — starą
+  funkcję usuwamy, a jej wywołania w `renderCart()` przepinamy. Dwie funkcje formatujące ceny
+  rozjechałyby się przy pierwszej zmianie formatu.
 - `opcje.przyciskKoszyka: false` służy panelowi: podgląd pokazuje kartę bez działającego
   przycisku „Dodaj".
 - `opcje.bazaZdjec` pozwala panelowi wskazać własną ścieżkę do zdjęć.
@@ -568,6 +576,18 @@ dochodzi `frontend/theming`.
 - [ ] `wina/svenson-red.html` albo usunięcie kafelka odmiany z `#nasze-wina`
 
 ## Changelog
+
+### 2026-09-02 — do potwierdzenia: podział JS na dwa pliki
+
+Wydzielenie `assets/js/produkty.js` z `main.js` łamie decyzję architektoniczną „Front-end bez
+frameworka i bez modułów" w brzmieniu „jeden plik `main.js`". **Zgoda Właściciela z tego dnia
+dotyczyła przeniesienia danych produktów do JSON-a, nie liczby plików JS.** Zapis w
+`.ai/GUARDRAILS.md` został przepisany na wariant dwuplikowy i oznaczony jako wymagający
+potwierdzenia. Do czasu potwierdzenia Etap 2 nie startuje.
+
+Alternatywa, gdyby Właściciel wolał zostać przy jednym pliku: panel kopiuje funkcję renderującą
+do siebie — wtedy podgląd karty i sklep rozjadą się przy pierwszej zmianie wyglądu karty, czyli
+podgląd przestanie spełniać swoją jedyną funkcję.
 
 ### 2026-09-02 — zgoda na zmianę GUARDRAILS (blokada B2 zdjęta)
 

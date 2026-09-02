@@ -59,7 +59,8 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 ## Architectural boundaries
 
 1. `data/wina.json` → **JEDYNE** źródło prawdy o asortymencie i cenach. `index.html` nie zawiera
-   kart produktów, `assets/js/main.js` je renderuje, ale nie definiuje.
+   kart produktów; `assets/js/produkty.js` buduje ich HTML, `assets/js/main.js` wstawia go
+   do strony — żaden z nich nie definiuje danych.
 2. `assets/css/custom.css` → **NIGDY** nie duplikuje klas z bundla Tailwinda; dopisuje tylko to,
    czego w bundlu nie ma.
 3. `wsgi.py` → **NIGDY** nie dostaje logiki biznesowej ani możliwości zapisu na dysk. To serwer
@@ -147,13 +148,25 @@ Zmiana jest gotowa dopiero, gdy:
 - **Konsekwencja**: aktualizacja cennika to praca lokalna zakończona commitem i wdrożeniem —
   nie edycja „na żywo" na serwerze. Nie przenoś panelu do `wsgi.py`, nawet „tymczasowo".
 
-### Front-end bez frameworka i bez modułów
+### Front-end bez frameworka i bez modułów, w dwóch plikach
 
-- **Wybór**: jeden plik `main.js`, ES6, `defer`, funkcje `initX()` spinane w `DOMContentLoaded`.
-- **Dlaczego**: strona ma pięć sekcji i jeden interaktywny element (sklep). Framework kosztowałby
-  więcej niż cały obecny front-end.
-- **Konsekwencja**: nie wprowadzamy `import`/`export`, bundlera ani biblioteki UI bez decyzji
-  Właściciela. Nowa funkcjonalność = nowa funkcja `initX()`.
+- **Wybór**: ES6, `defer`, bez `import`/`export` i bez bundlera. Dokładnie **dwa** pliki JS:
+  - `assets/js/produkty.js` — biblioteka: wyliczenia cen i render karty produktu. Definiuje
+    jeden globalny obiekt `Produkty`, **nie rejestruje żadnych zdarzeń i nie dotyka DOM-u**.
+    Jej wczytanie niczego nie uruchamia.
+  - `assets/js/main.js` — całe zachowanie strony: funkcje `initX()` spinane w `DOMContentLoaded`.
+    Ładowany **po** `produkty.js`.
+- **Dlaczego dwa, a nie jeden**: panel redakcyjny (`tools/panel/`) pokazuje podgląd karty
+  produktu i musi używać dokładnie tego samego kodu, co sklep — inaczej podgląd zacznie kłamać.
+  `main.js` nie da się w panelu wczytać, bo jego `DOMContentLoaded` odpaliłby nawigację, motywy
+  i koszyk, których w panelu nie ma. Alternatywa — skopiowanie funkcji do panelu — gwarantuje
+  rozjazd, czyli dokładnie to, przed czym podgląd ma chronić.
+- **Konsekwencja**: `produkty.js` jest **jedynym** wyjątkiem od wzorca `initX()` +
+  `DOMContentLoaded` i jedynym plikiem JS wolno serwowanym panelowi. Trzeciego pliku JS nie
+  dokładamy bez decyzji Właściciela; nowe zachowanie strony to nadal `initX()` w `main.js`.
+- **Status**: podział wprowadzony 2026-09-02 razem z przejściem danych do JSON.
+  **Wymaga potwierdzenia Właściciela** — jego zgoda z tego dnia dotyczyła danych produktów,
+  nie liczby plików JS. Do czasu potwierdzenia traktuj ten zapis jako propozycję.
 
 ### Koszyk i formularz jako zaślepki
 
