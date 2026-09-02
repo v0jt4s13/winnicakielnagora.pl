@@ -255,9 +255,15 @@ async function zapisz() {
       return;
     }
     oznaczZmiane(false);
+    // Na produkcji cennik zyje poza katalogiem wdrozenia, wiec zmiana dziala od razu
+    // i nie wymaga commita. Lokalnie zapisuje sie plik z repozytorium.
+    const lokalnie = ["localhost", "127.0.0.1"].includes(location.hostname);
+    const skutek = lokalnie
+      ? "Zmiana jest na razie tylko na Twoim dysku — żeby trafiła na stronę, zrób commit i wdrożenie."
+      : "Zmiana jest już widoczna na stronie. Kopia w repozytorium się nie zmienia — to wersja startowa.";
     pokazKomunikat(
-      `✓ Zapisano ${wynik.pozycji} pozycji. Kopia poprzedniej wersji: <code>${wynik.kopia}</code>.<br>` +
-        "Pamiętaj o commicie i wdrożeniu — panel niczego nie publikuje.",
+      `✓ Zapisano ${wynik.pozycji} pozycji.<br>${skutek}<br>` +
+        `<span class="podpowiedz">Poprzednia wersja: <code>${Produkty.escape(wynik.kopia)}</code></span>`,
       "sukces"
     );
   } catch (blad) {

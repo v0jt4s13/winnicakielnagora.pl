@@ -104,9 +104,16 @@ chcecie prowadzić kalendarz konkretnych wydarzeń.
 
 ### 14. Zgody na wizerunek
 
-Część zdjęć pokazuje rozpoznawalne osoby przy zbiorach i gości winnicy. W nazwach plików
-w `attached_assets/photos/` mają one człon **`-osoby-`**. Do czasu potwierdzenia zgód
-na stronie używamy wyłącznie kadrów bez tego członu.
+Osiemnaście zdjęć w `attached_assets/photos/` z członem **`-osoby-`** pokazuje rozpoznawalne
+osoby. Do czasu potwierdzenia zgód strona używa wyłącznie kadrów bez tego członu.
+
+Ponumerowany przegląd: `docs/zgody-wizerunek.jpg` plus lista `docs/zgody-wizerunek.txt`
+(katalog `docs/` jest w `.gitignore`, więc nie trafia do repozytorium).
+
+**Czego potrzebuję, żeby ich użyć:** wyłącznie numery zdjęć, na które są zgody.
+**Nie przysyłaj nazwisk ani dokumentów zgód** — to dane osobowe, a repozytorium jest
+publiczne (`.ai/GUARDRAILS.md` → STOP #2). Dokumenty zostają u Właściciela.
+
 
 ### 15. Brakujące ujęcia
 
