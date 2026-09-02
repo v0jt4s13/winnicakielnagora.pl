@@ -6,35 +6,27 @@ pozycji usuń ją i dopisz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`.
 
 Ostatnia aktualizacja: **2026-09-02**.
 
+Nowa pozycja: **18. Przegląd strony w przeglądarce** — nie mogłem go wykonać, bo rozszerzenie
+Chrome nie było podłączone. Trzeba obejrzeć stronę główną i strony odmian we wszystkich trzech
+motywach (`classic`, `modern`, `rustic`) i sprawdzić konsolę.
+
 ## Do naprawy
 
-### 1. Rozjazd ceny netto na karcie „Chardonnay Premium"
+### ~~1. Rozjazd ceny netto~~ — ZAMKNIĘTE 2026-09-02
 
-- **Gdzie**: `index.html`, sekcja `#sklep` — `grep -n 'data-name="Chardonnay Premium"' index.html`
-- **Problem**: `data-price="59.00"` → netto `59.00 / 1.23 = 47.97`, a w markupie stoi
-  `netto: 48.00 zł` i `data-price-net="48.00"`. Koszyk pokazuje 47.97, karta 48.00.
-- **Status**: znika razem z przejściem sklepu na JSON — cena netto będzie wyliczana, nie
-  przepisywana. Patrz `.ai/specs/SPEC-001-*`.
+Atrapy produktów usunięte, netto jest wyliczane z `cena_brutto`.
 
-### 2. Filtr cenowy ma zaszyty zakres 0–100 zł
+### ~~2. Filtr cenowy ma zaszyty zakres 0–100 zł~~ — ZAMKNIĘTE 2026-09-02
 
-- **Gdzie**: `index.html` → `grep -n 'id="price-m' index.html`; `assets/js/main.js` → `initFilters`
-  (warunek `max < 100` i reset do `"100"`)
-- **Problem**: produkt droższy niż 100 zł zniknie z listy bez żadnego komunikatu.
-- **Status**: objęte SPEC-001 — zakres ma być liczony z danych w JSON.
+Zakres liczy `zakresCen()` z cen w `data/wina.json`.
 
-### 3. Martwe atrybuty `data-price-net` i `data-discount`
+### ~~3. Martwe atrybuty `data-price-net` i `data-discount`~~ — ZAMKNIĘTE 2026-09-02
 
-- **Gdzie**: wszystkie `<article class="product-card">` w `index.html`
-- **Problem**: JS ich nie czyta (`grep -n 'dataset\.' assets/js/main.js`) — netto i rabat są
-  zduplikowane jako zwykły tekst w markupie.
-- **Status**: objęte SPEC-001 — karty przestają być pisane ręcznie.
+Karty renderuje `Produkty.renderProductCard()`; oba atrybuty zniknęły.
 
-### 4. VAT 23% zaszyty w dwóch miejscach
+### ~~4. VAT 23% zaszyty w dwóch miejscach~~ — ZAMKNIĘTE 2026-09-02
 
-- **Gdzie**: `assets/js/main.js` → `renderCart` (`subtotal / 1.23`); `index.html` → etykieta
-  „VAT (23%)" w panelu koszyka
-- **Co zrobić**: jedna stała na górze `main.js`, etykieta budowana z niej.
+Stawka pochodzi z `data/wina.json`, etykieta koszyka budowana jest z niej (`#cart-tax-label`).
 
 ### 5. `wsgi.py` nigdy nie zwraca 404
 
@@ -47,12 +39,10 @@ Ostatnia aktualizacja: **2026-09-02**.
 
 ## Do decyzji Właściciela
 
-### 6. Rozjazd treści: odmiany w „Nasze wina" vs. produkty w sklepie
+### ~~6. Rozjazd treści: odmiany vs. produkty w sklepie~~ — ZAMKNIĘTE 2026-09-02
 
-- **Stan**: „Nasze wina" wymienia 7 odmian faktycznie uprawianych, a sklep sprzedaje
-  demo-produkty („Cabernet Sauvignon Reserve", „Chardonnay Premium", „Rosé Selection").
-- **Status**: kierunek ustalony — sklep ma się budować z zewnętrznego pliku JSON. Brakuje
-  samych danych (patrz #10).
+Zmyślone produkty usunięte. Sklep buduje się z `data/wina.json`, dziś pustego —
+pokazuje „Oferta w przygotowaniu" do czasu wprowadzenia asortymentu (#10).
 
 ### 7. Koszyk i formularz są zaślepkami
 
@@ -85,22 +75,24 @@ ewentualnie NIP i dane do faktury, jeśli ma być sprzedaż.
 
 ### 10. Asortyment i cennik do `data/wina.json`
 
+**To jedyna rzecz, która trzyma sklep pusty.** Wprowadzisz ją sam panelem:
+`python3 tools/panel/serwer.py` → http://127.0.0.1:8765
+
 Potrzebne dla każdej pozycji: nazwa handlowa, kategoria (białe / czerwone / różowe / sok),
 rocznik, zawartość alkoholu, pojemność, cena brutto, ewentualny rabat, opis, dostępność.
 Dotyczy też **soków winogronowych** — z opisu winnicy wynika, że są w ofercie; do ustalenia,
 czy trafiają do cennika jako osobna kategoria, czy tylko do treści.
 
-### 11. Adresy stron poszczególnych win
+### 11. Adresy stron odmian — ładniejsze URL-e bez `.html`
 
-Strony win mają być statycznymi plikami HTML (SEO). Do rozstrzygnięcia, czy adres ma wyglądać
-jak `/wina/souvignier-gris.html`, czy jak `/wina/souvignier-gris` — ta druga forma wymaga
-dopisania w `wsgi.py` próby dołożenia `.html` przed fallbackiem (patrz #5).
+Strony działają pod `/wina/souvignier-gris.html`. Wariant bez rozszerzenia wymaga dopisania
+w `wsgi.py` próby dołożenia `.html` przed fallbackiem (patrz #5). Do decyzji — dziś działa,
+ale adres jest brzydszy.
 
-### 12. Svenson Red — czy ta odmiana jest uprawiana?
+### ~~12. Svenson Red~~ — ZAMKNIĘTE 2026-09-02
 
-Jest folder ze zdjęciami i karta na stronie, ale opis winnicy
-(`docs/materialy-do-wykorzystania/zbiory_i_winnica/Winnica Kielna Góra.txt`) wymienia tylko
-Souvignier Gris, St. Pepin, Vidal Blanc, Seyval Blanc, Monarch i Dornfelder.
+Właściciel potwierdził, że wino z tej odmiany jest produkowane. Strona odmiany powstała.
+Do poprawienia przy okazji: pisany opis winnicy w materiałach jej nie wymienia.
 
 ### 13. Wydarzenia i degustacje
 
