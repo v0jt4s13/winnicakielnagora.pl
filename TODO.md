@@ -333,16 +333,19 @@ Warto sprawdzić, czy inne projekty na tym serwerze nie mają tego samego proble
 lista procesów pokazała po kilka gunicornów na aplikację, co może być normalne (3 workery),
 ale przy `app_moderacja` widać procesy z dwóch różnych godzin.
 
-### 33. Panel i cennik nie są jeszcze skonfigurowane na serwerze
+### ~~33. Panel i cennik na serwerze~~ — ZAMKNIĘTE 2026-09-02
 
-`/zdrowie` zwraca `"panel_wlaczony": false`, a ścieżka cennika to wciąż kopia w repozytorium
-(`/opt/apps/app_winnicakielnagora.pl/app/data/wina.json`) — czyli zmiany wpisane panelem
-zniknęłyby przy następnym wdrożeniu.
+`/zdrowie` potwierdza: `panel_wlaczony: true`, cennik czytany z
+`/opt/apps/app_winnicakielnagora.pl/dane/wina.json`, czyli spoza katalogu wdrożenia.
 
-Do dopisania w `production_projects/winnicakielnagora.env` (szczegóły w `WDROZENIE.md`):
+Sprawdzone z zewnątrz:
 
-```bash
-EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=... PANEL_HASLO_HASH=...'
-```
+| adres | wynik |
+|---|---|
+| `/tools/panel/panel.html`, `.css`, `.js`, `/api/wczytaj` | **401** + `WWW-Authenticate: Basic` |
+| `/tools/panel/serwer.py`, `haslo.py`, `README.md` | **404** mimo włączonego panelu |
+| `/tools/optimize-photos.py` | **404** |
+| `/data/wina.json` | 8 pozycji, zasiane z wersji startowej w repozytorium |
 
-Przed włączeniem panelu przeczytaj #27 — Basic Auth wymaga HTTPS.
+Od tej chwili `data/wina.json` w repozytorium jest **wersją startową** — produkcja żyje
+własnym plikiem (`TODO.md` #26).
