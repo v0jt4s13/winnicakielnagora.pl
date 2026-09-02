@@ -34,6 +34,7 @@ def main() -> int:
     os.environ.pop("CENNIK_SCIEZKA", None)
     importlib.reload(cennik)
     sprawdz("bez zmiennej: uzywa data/wina.json z repo", cennik.CENNIK == cennik.CENNIK_W_REPO)
+    sprawdz("opis kopii w repo jest wzgledny", cennik.opis_kopii() == "data/wina.json.bak")
     w_repo = len(cennik.wczytaj().get("wina", []))
 
     # 2) ze zmienna: plik poza katalogiem projektu
@@ -68,7 +69,17 @@ def main() -> int:
         sprawdz("kopia zapasowa ma te same prawa",
                 oct(cennik.KOPIA.stat().st_mode)[-3:] == "640")
 
-        # 5) ponowny zasiew nie nadpisuje istniejacego pliku
+        # 5) opis kopii nie moze sie wysypac, gdy cennik jest poza projektem.
+        #    Wczesniej KOPIA.relative_to(PROJEKT) rzucalo ValueError JUZ PO udanym
+        #    zapisie, wiec dane sie zapisywaly, a panel dostawal 500.
+        try:
+            opis = cennik.opis_kopii()
+            sprawdz("opis kopii nie rzuca wyjatku poza projektem", True)
+            sprawdz("opis kopii to pelna sciezka", opis == str(cennik.KOPIA))
+        except Exception as blad:
+            sprawdz(f"opis kopii nie rzuca wyjatku poza projektem ({blad})", False)
+
+        # 6) ponowny zasiew nie nadpisuje istniejacego pliku
         cennik.zapewnij_plik()
         sprawdz("zasiew nie nadpisuje istniejacego cennika",
                 json.loads(cennik.CENNIK.read_text(encoding="utf-8"))["wina"] == [])

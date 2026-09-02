@@ -228,7 +228,7 @@ def panel_api(akcja: str):
                           "Sprawdź, czy katalog istnieje i czy użytkownik aplikacji ma "
                           "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wina"]),
-                      "kopia": str(cennik.KOPIA.relative_to(cennik.PROJEKT))})
+                      "kopia": cennik.opis_kopii()})
 
     return _json({"ok": False, "komunikat": "Nieznana akcja"}, 404)
 

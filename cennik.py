@@ -177,6 +177,19 @@ def zapisz(dane: dict) -> None:
         raise
 
 
+def opis_kopii() -> str:
+    """Sciezka kopii zapasowej do pokazania w interfejsie.
+
+    Gdy cennik zyje poza katalogiem projektu (CENNIK_SCIEZKA na produkcji), `relative_to`
+    rzuca ValueError — dlatego zwracamy wtedy pelna sciezke zamiast wysypywac zadanie
+    po udanym zapisie.
+    """
+    try:
+        return str(KOPIA.relative_to(PROJEKT))
+    except ValueError:
+        return str(KOPIA)
+
+
 def stan_poczatkowy() -> dict:
     """Dane, ktorych panel potrzebuje przy starcie."""
     return {

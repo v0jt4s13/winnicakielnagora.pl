@@ -264,7 +264,7 @@ class Panel(BaseHTTPRequestHandler):
             return self._json(500, {"ok": False, "komunikat": f"Nie udało się zapisać: {blad}"})
 
         self._json(200, {"ok": True, "pozycji": len(dane["wina"]),
-                         "kopia": str(cennik.KOPIA.relative_to(cennik.PROJEKT))})
+                         "kopia": cennik.opis_kopii()})
 
     def log_message(self, format: str, *args) -> None:
         print(f"  {self.command} {self.path} → {args[1] if len(args) > 1 else ''}")
