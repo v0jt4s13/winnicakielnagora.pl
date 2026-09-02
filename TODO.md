@@ -237,24 +237,32 @@ Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Poza rzeczami już zrobiony
 `Organization` w JSON-LD celowo pominięte do czasu uzupełnienia adresu, telefonu i logo
 (pozycja #9) — tak też rekomenduje audyt.
 
-### 26. Zmiany cennika na produkcji vs. git
+### ~~26. Zmiany cennika na produkcji vs. git~~ — ROZSTRZYGNIĘTE 2026-09-02
 
-Panel działa teraz także na produkcji (`/tools/panel/`, za hasłem), więc `data/wina.json`
-można zmienić bez dostępu do własnego komputera. **To rozjeżdża produkcję z repozytorium:**
-zmiana zrobiona przez panel nie jest w gicie, a wdrożenie przez `projects_manager`
-najprawdopodobniej nadpisze katalog `data/` wersją z repo — czyli skasuje ceny wpisane na żywo.
+**Wariant A: wdrożenie pomija `data/`.** Żywy cennik mieszka poza katalogiem aplikacji,
+a `data/wina.json` w repozytorium jest wersją startową.
 
-Trzeba to rozstrzygnąć **zanim panel zostanie wystawiony**:
+Do ustawienia w konfiguracji wdrożeniowej:
 
-- **Wariant A** — deploy pomija `data/` (np. plik trzymany poza katalogiem aplikacji albo
-  wykluczony z synchronizacji). Ceny żyją tylko na produkcji, repo ma wersję startową.
-- **Wariant B** — po edycji na produkcji pobierasz `data/wina.json` z serwera i commitujesz.
-  Prościej wdrożeniowo, ale wymaga pamiętania o tym kroku.
-- **Wariant C** — panel sam commituje i wypycha zmianę. Najwygodniejsze, ale wymaga klucza
-  do repozytorium na serwerze; to spora zmiana zakresu.
+```
+CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json
+```
 
-Do sprawdzenia po stronie wdrożenia: czy `projects_manager` nadpisuje katalog aplikacji
-w całości, czy tylko pliki z repo, oraz czy proces gunicorna ma prawo zapisu do `data/`.
+Plus dwie rzeczy po stronie serwera:
+
+1. Katalog `dane/` **poza** katalogiem synchronizowanym z repozytorium, z prawem zapisu
+   dla użytkownika, na którym działa gunicorn.
+2. Wdrożenie ma pomijać `data/` — gdyby jednak je nadpisywało, nic złego się nie stanie,
+   bo aplikacja i tak czyta ze `CENNIK_SCIEZKA`.
+
+Jak to działa: przy pierwszym żądaniu `zapewnij_plik()` kopiuje wersję z repozytorium na
+ścieżkę roboczą; kolejne wdrożenia jej nie ruszają. Bez zmiennej (czyli lokalnie) wszystko
+działa po staremu, na pliku z repozytorium. Sprawdza to `tools/test-cennik-sciezka.py`.
+
+**Konsekwencja do zapamiętania:** `data/wina.json` w repozytorium przestaje odzwierciedlać
+produkcję. Traktuj go jak wersję startową; gdy zechcesz zgrać ceny z powrotem do gita,
+skopiuj plik z serwera ręcznie.
+
 
 ### 27. Panel na produkcji wymaga HTTPS
 

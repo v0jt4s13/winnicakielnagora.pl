@@ -33,6 +33,19 @@ PANEL_HASLO_HASH=...
 Bez nich każde `/tools/panel/…` zwraca **404** — nie 401 — więc brak konfiguracji nie zdradza,
 że cokolwiek tam jest. Hasło i jego hash nigdy nie trafiają do repozytorium.
 
+Do tego trzecia zmienna, żeby wdrożenie nie kasowało cen wpisanych przez panel:
+
+```
+CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json
+```
+
+Katalog `dane/` ma leżeć **poza** tym, co wdrożenie synchronizuje z repozytorium, i mieć prawo
+zapisu dla użytkownika gunicorna. Przy pierwszym żądaniu aplikacja skopiuje tam wersję startową
+z `data/wina.json`; potem plik żyje własnym życiem i żaden deploy go nie tknie.
+
+Od tej chwili `data/wina.json` w repozytorium to **wersja startowa, nie produkcyjna**. Żeby
+zgrać ceny z serwera z powrotem do gita, skopiuj plik ręcznie.
+
 **Zanim to włączysz, przeczytaj `TODO.md` #26 i #27:**
 
 - Basic Auth wysyła hasło przy każdym żądaniu, więc panel wymaga **HTTPS**.

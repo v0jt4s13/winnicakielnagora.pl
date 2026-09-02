@@ -19,7 +19,9 @@ app = Flask(__name__, static_folder=str(STATIC_ROOT), static_url_path="")
 # dostepne bylyby takze wsgi.py, AGENTS.md, TODO.md, tools/ oraz .git/ z cala historia.
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
 PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico", "favicon.svg"}
-KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "data", "filmy"}
+# `data` nie ma tu wpisu celowo: /data/wina.json obsluguje osobna trasa, ktora czyta
+# plik roboczy spoza katalogu wdrozenia.
+KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "filmy"}
 # Z calego tools/ dostepne sa wylacznie te trzy pliki — i to za haslem (patrz PANEL_*).
 PLIKI_PANELU = {"tools/panel/panel.html", "tools/panel/panel.css", "tools/panel/panel.js"}
 
@@ -98,6 +100,22 @@ def _json(dane: dict, kod: int = 200):
                      "Cache-Control": "no-store"})
 
 
+@app.route("/data/wina.json")
+def zywy_cennik():
+    """Cennik czytamy ze sciezki roboczej (CENNIK_SCIEZKA), a nie z kopii w repozytorium.
+
+    Dzieki temu wdrozenie moze pomijac katalog data/ i nie kasuje cen wpisanych przez
+    panel — wariant A z TODO #26.
+    """
+    cennik.zapewnij_plik()
+    if not cennik.CENNIK.is_file():
+        return _json({"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "wina": []})
+    odpowiedz = send_from_directory(cennik.CENNIK.parent, cennik.CENNIK.name)
+    odpowiedz.headers["Cache-Control"] = "no-store"
+    odpowiedz.headers["Content-Type"] = "application/json; charset=utf-8"
+    return odpowiedz
+
+
 @app.route("/tools/panel/api/<akcja>", methods=["GET", "POST"])
 def panel_api(akcja: str):
     if not panel_wlaczony():
@@ -107,6 +125,7 @@ def panel_api(akcja: str):
 
     if akcja == "wczytaj" and request.method == "GET":
         try:
+            cennik.zapewnij_plik()
             return _json(cennik.stan_poczatkowy())
         except json.JSONDecodeError as blad:
             return _json({"ok": False, "komunikat": f"data/wina.json ma błąd składni: {blad}"}, 500)

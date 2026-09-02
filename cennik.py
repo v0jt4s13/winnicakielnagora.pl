@@ -16,10 +16,31 @@ import tempfile
 from pathlib import Path
 
 PROJEKT = Path(__file__).resolve().parent
-CENNIK = PROJEKT / "data" / "wina.json"
-KOPIA = PROJEKT / "data" / "wina.json.bak"
 ZDJECIA = PROJEKT / "attached_assets" / "photos"
 STRONY_ODMIAN = PROJEKT / "wina"
+
+# Wersja startowa, wersjonowana w repozytorium. Na produkcji sluzy tylko do zasiania
+# pliku roboczego przy pierwszym uruchomieniu.
+CENNIK_W_REPO = PROJEKT / "data" / "wina.json"
+
+# Zywy cennik. Na produkcji wskaz go POZA katalog wdrozenia (CENNIK_SCIEZKA), zeby
+# kolejny deploy nie nadpisal cen wpisanych przez panel — decyzja Wlasciciela
+# z 2026-09-02, wariant A z TODO #26. Lokalnie zostaje plik z repozytorium.
+CENNIK = Path(os.environ.get("CENNIK_SCIEZKA") or CENNIK_W_REPO).expanduser()
+KOPIA = CENNIK.with_suffix(CENNIK.suffix + ".bak")
+
+
+def zapewnij_plik() -> None:
+    """Przy pierwszym uruchomieniu kopiuje wersje z repozytorium na sciezke robocza.
+
+    Bez tego panel na swiezym serwerze wystartowalby z pustym cennikiem, mimo ze
+    w repozytorium jest gotowa lista win.
+    """
+    if CENNIK.exists() or CENNIK == CENNIK_W_REPO:
+        return
+    CENNIK.parent.mkdir(parents=True, exist_ok=True)
+    if CENNIK_W_REPO.exists():
+        CENNIK.write_bytes(CENNIK_W_REPO.read_bytes())
 
 SZKIELET = {"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "wina": []}
 

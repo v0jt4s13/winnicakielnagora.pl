@@ -65,7 +65,10 @@ PRZYPADKI = [
     ("index.html",                    "index.html",                  200),
     ("wina/monarch.html",             "wina/monarch.html",           200),
     ("wina/soki.html",                "wina/soki.html",              200),
-    ("data/wina.json",                "data/wina.json",              200),
+    # /data/wina.json obsluguje osobna trasa zywy_cennik(), nie catch-all — sprawdza to
+    # tools/test-cennik-sciezka.py. Tutaj katalog data/ ma byc niedostepny.
+    ("data/wina.json",                "404.html",                    404),
+    ("data/cokolwiek.txt",            "404.html",                    404),
     ("assets/js/produkty.js",         "assets/js/produkty.js",       200),
     ("sitemap.xml",                   "sitemap.xml",                 200),
     ("robots.txt",                    "robots.txt",                  200),

@@ -119,10 +119,11 @@ Zmiana jest gotowa dopiero, gdy:
 - [ ] Nowa reguła, która wyszła w trakcie pracy, trafiła do `.ai/standards/` (`/sync-standards`)
       albo do tego pliku; nowy znany brak — do `TODO.md`
 - [ ] Spec (jeśli istnieje) ma zaktualizowaną sekcję `## Implementation Checklist`
-- [ ] Przechodzą wszystkie trzy zestawy testów:
+- [ ] Przechodzą wszystkie zestawy testów:
       `node tools/test-produkty.js` (ceny i render karty),
       `python3 tools/test-routing.py` (routing i pliki publiczne),
-      `python3 tools/test-panel-auth.py` (dostęp do panelu na produkcji)
+      `python3 tools/test-panel-auth.py` (dostęp do panelu na produkcji),
+      `python3 tools/test-cennik-sciezka.py` (ścieżka żywego cennika)
 
 > Nie ma lintera ani type-checkera. Testy pokrywają logikę, ale wygląd sprawdza wyłącznie
 > podgląd w przeglądarce.
@@ -167,8 +168,9 @@ Zmiana jest gotowa dopiero, gdy:
   - produkcyjny serwer **przestał być tylko-do-odczytu**; zapisuje `data/wina.json`;
   - Basic Auth przesyła hasło przy każdym żądaniu, więc panel **wolno wystawiać wyłącznie
     przez HTTPS**;
-  - zmiana zrobiona na produkcji **nie jest w gicie** i przepadnie przy następnym wdrożeniu,
-    jeśli deploy nadpisuje katalog `data/` — patrz `TODO.md` #26.
+  - żywy cennik mieszka poza katalogiem wdrożenia (`CENNIK_SCIEZKA`), a `data/wina.json`
+    w repozytorium jest **wersją startową**, nie produkcyjną. Zmiany zrobione panelem na
+    produkcji nie są w gicie — to świadomy koszt, nie usterka (`TODO.md` #26).
 
 ### Front-end bez frameworka i bez modułów, w dwóch plikach
 
