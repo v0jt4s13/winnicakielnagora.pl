@@ -315,3 +315,15 @@ serwer nie jest do niczego potrzebny; uruchamianie procesów z żądania HTTP za
 w uwierzytelnianiu w zdalne wykonanie kodu; a przy Basic Auth nie istnieje moment
 „wylogowania", w którym dałoby się taki proces zatrzymać.
 
+### 31. Stary bytecode na serwerze — `__pycache__` był w repozytorium
+
+`__pycache__/wsgi.cpython-311.pyc` był śledzony w gicie od pierwszych commitów do `09178bc`.
+Serwery, które pobrały kod wcześniej, mają w katalogu aplikacji skompilowaną **starą** wersję
+modułu obok nowego źródła. To najlepiej tłumaczy objaw z 2026-09-02: `wsgi.py` na dysku
+identyczny z repozytorium, usługa działa, a zachowanie odpowiada kodowi sprzed kilku commitów.
+
+Naprawa: `sudo rm -rf /opt/apps/app_winnicakielnagora.pl/app/__pycache__` i restart usługi.
+Zapobieganie: `PYTHONDONTWRITEBYTECODE=1` w `EXTRA_SYSTEMD_ENV` (już w `WDROZENIE.md`).
+
+Do sprawdzenia na pozostałych wdrożeniach z tego repozytorium, jeśli takie są.
+

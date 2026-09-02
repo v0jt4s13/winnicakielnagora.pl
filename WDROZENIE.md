@@ -47,7 +47,7 @@ spacjach i zamienia na `Environment=` w unicie systemd, więc **żadna wartość
 spacji**).
 
 ```bash
-EXTRA_SYSTEMD_ENV='CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=<z tools/panel/haslo.py>'
+EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=<z tools/panel/haslo.py>'
 ```
 
 Uwagi:
@@ -136,20 +136,28 @@ a `/data/wina.json` przychodziło z `cache-control: no-cache` zamiast naszego `n
 To znaczy, że żądania obsługuje **inny proces niż nasz** albo nasz proces trzyma starszy kod.
 Do sprawdzenia, w tej kolejności:
 
+> **Uwaga przy odpytywaniu gunicorna wprost.** Unit ustawia `SCRIPT_NAME=/winnicakielnagora.pl`,
+> a gunicorn **odrzuca** każde żądanie, którego ścieżka nie zaczyna się od tego przedrostka —
+> zwraca wtedy „Configuration problem: Request path … does not start with SCRIPT_NAME". To nie
+> jest usterka aplikacji. Odpytując port 8004 bezpośrednio, **zawsze dopisuj prefiks**.
+
 ```bash
 # 1. z jakiego katalogu i czym startuje usluga (+ czy dostala zmienne panelu)
 systemctl show winnicakielnagora -p WorkingDirectory -p ExecStart -p Environment
 
 # 2. czy gunicorn na 8004 odpowiada poprawnie Z POMINIECIEM nginx
-curl -s http://127.0.0.1:8004/zdrowie                                    # znacznik kodu
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8004/wsgi.py  # ma byc 404
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8004/.git/config  # ma byc 404
+#    UWAGA: z prefiksem, patrz ramka wyzej
+P=http://127.0.0.1:8004/winnicakielnagora.pl
+curl -s $P/zdrowie                                            # znacznik kodu
+curl -s -o /dev/null -w "%{http_code}\n" $P/wsgi.py          # ma byc 404
+curl -s -o /dev/null -w "%{http_code}\n" $P/.git/config      # ma byc 404
 
 # 3. dokad nginx kieruje ten prefiks — proxy_pass czy alias/root?
 grep -n -B2 -A14 "winnicakielnagora" /etc/nginx/sites-available/moderacja.conf
 
-# 4. czy nie zostala starsza kopia kodu albo skompilowane bytecode
-find /opt/apps/app_winnicakielnagora.pl -name "wsgi.py" -o -name "__pycache__" -type d
+# 4. stary bytecode albo druga kopia kodu
+ls -la /opt/apps/app_winnicakielnagora.pl/app/__pycache__
+find /opt/apps/app_winnicakielnagora.pl -maxdepth 2 -name "wsgi.py"
 ```
 
 Interpretacja:
@@ -157,8 +165,27 @@ Interpretacja:
 - **Punkt 2 działa poprawnie, a przez nginx nie** → nginx nie kieruje ruchu do naszej usługi;
   w bloku prefiksu jest `alias`/`root` zamiast `proxy_pass`, albo prefiks przejmuje wcześniejszy
   blok innej aplikacji z `moderacja.conf`.
-- **Punkt 2 też zwraca 200 dla `/wsgi.py`** → to nasz proces trzyma stary kod: usuń
-  `__pycache__` w katalogu aplikacji i zrestartuj usługę.
+- **Punkt 2 też zwraca 200 dla `/wsgi.py`** → proces trzyma stary kod. Patrz niżej.
 - **Znajdzie się druga kopia `wsgi.py`** (np. w `${APP_DIR}` obok `${APP_DIR}/app`) → gunicorn
   importuje tamtą; `WorkingDirectory` musi wskazywać katalog z repozytorium.
+
+### Stary bytecode — znany, konkretny przypadek
+
+Plik `__pycache__/wsgi.cpython-311.pyc` był przez pomyłkę **śledzony w repozytorium** od
+pierwszych commitów aż do `09178bc`. Serwery, które pobrały kod wcześniej, dostały skompilowaną
+starą wersję modułu razem ze źródłem.
+
+```bash
+sudo rm -rf /opt/apps/app_winnicakielnagora.pl/app/__pycache__
+sudo systemctl restart winnicakielnagora
+curl -s http://127.0.0.1:8004/winnicakielnagora.pl/zdrowie
+```
+
+Żeby to nie wróciło, warto dopisać do `EXTRA_SYSTEMD_ENV`:
+
+```
+PYTHONDONTWRITEBYTECODE=1
+```
+
+Wtedy proces w ogóle nie tworzy `__pycache__`, kosztem paru milisekund przy starcie.
 
