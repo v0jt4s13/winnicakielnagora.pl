@@ -81,6 +81,11 @@ Uwagi:
   trafia wyłącznie hash.
 - Bez `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` panel na produkcji nie istnieje (404). To celowe.
 
+> **`restart` nie wystarczy po zmianie `.env`.** `production_manager.sh` przepisuje unit
+> systemd (a więc linie `Environment=`) wyłącznie w `setup` i `update`. Samo
+> `systemctl restart` albo `production_manager.sh restart` uruchomi proces ze **starym**
+> zestawem zmiennych. Po każdej zmianie `EXTRA_SYSTEMD_ENV` uruchom `update`.
+
 ### 3. Uruchomić usługę
 
 ```bash
@@ -107,6 +112,18 @@ Te dwie wartości muszą być identyczne. Jeśli `/zdrowie` zwraca 404 albo stro
 **proces nie wykonuje tego kodu** — patrz „Gdy `/zdrowie` nie odpowiada" niżej.
 
 Odpowiedź mówi też, czy panel jest włączony (`panel_wlaczony`) i skąd czytany jest cennik.
+
+Jeśli `panel_wlaczony` jest `false`, a `cennik` wskazuje na `…/app/data/wina.json`, znaczy to,
+że **zmienne z `EXTRA_SYSTEMD_ENV` nie doszły do procesu**. Kolejność sprawdzania:
+
+```bash
+grep EXTRA_SYSTEMD_ENV production_projects/winnicakielnagora.env   # czy w ogole sa
+systemctl show winnicakielnagora -p Environment                     # czy trafily do unitu
+sudo ./production_manager.sh update winnicakielnagora               # przepisuje unit i restartuje
+```
+
+`/tools/panel/…` zwraca wtedy **404, nie 401** — to celowe: bez konfiguracji panel nie istnieje
+i nie zdradza, że cokolwiek pod tym adresem jest.
 
 ### 5. Sprawdzić po wdrożeniu
 
