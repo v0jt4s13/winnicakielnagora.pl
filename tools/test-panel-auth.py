@@ -107,6 +107,22 @@ def main() -> int:
     sprawdz("API wczytaj zwraca cennik", kod(odp) == 200 and "cennik" in json.loads(tresc(odp)))
     sprawdz("nieznana akcja API: 404", kod(wsgi.panel_api("cokolwiek")) == 404)
 
+    # Uszkodzony hash nie moze udawac dzialajacego panelu. Zdarza sie, gdy wartosc
+    # urwie sie na spacji przy przekazywaniu przez EXTRA_SYSTEMD_ENV.
+    poprawny = wsgi.PANEL_HASLO_HASH
+    for zly, opis in [
+        ("<z", "obciety placeholder"),
+        ("abc", "bez separatora"),
+        ("aa:bb", "za krotki"),
+        ("zzzz" * 8 + ":" + "zz" * 32, "nieszesnastkowy"),
+    ]:
+        wsgi.PANEL_HASLO_HASH = zly
+        sprawdz(f"uszkodzony hash ({opis}): panel wylaczony", not wsgi.panel_wlaczony())
+        sprawdz(f"uszkodzony hash ({opis}): 404, nie 401",
+                kod(wsgi.panel_pliki("panel.html")) == 404)
+    wsgi.PANEL_HASLO_HASH = poprawny
+    sprawdz("poprawny hash: panel znow wlaczony", wsgi.panel_wlaczony())
+
     # brak konfiguracji = panelu nie ma; to musi byc 404, a nie 401,
     # zeby nie zdradzac, ze cokolwiek tu istnieje
     wsgi.PANEL_UZYTKOWNIK = ""

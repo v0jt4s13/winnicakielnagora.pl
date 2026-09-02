@@ -90,8 +90,33 @@ PANEL_HASLO_HASH = os.environ.get("PANEL_HASLO_HASH", "").strip()
 PANEL_ITERACJE = 240_000
 
 
+def _powod_wylaczenia() -> str:
+    """Pusty napis = panel dziala. Inaczej krotkie wyjasnienie, co jest nie tak.
+
+    Sam fakt, ze zmienne sa niepuste, nie wystarcza: przy przekazywaniu ich przez
+    EXTRA_SYSTEMD_ENV latwo o wartosc obcieta na spacji. Taki hash nigdy nie pasuje
+    do zadnego hasla, a panel udawalby sprawny.
+    """
+    if not PANEL_UZYTKOWNIK:
+        return "brak PANEL_UZYTKOWNIK"
+    if not PANEL_HASLO_HASH:
+        return "brak PANEL_HASLO_HASH"
+    czesci = PANEL_HASLO_HASH.split(":")
+    if len(czesci) != 2:
+        return "PANEL_HASLO_HASH nie ma formatu sol:hash — czy wartosc nie urwala sie na spacji?"
+    sol_hex, hash_hex = czesci
+    if len(sol_hex) < 32 or len(hash_hex) < 64:
+        return "PANEL_HASLO_HASH jest za krotki — wyglada na obciety"
+    try:
+        bytes.fromhex(sol_hex)
+        bytes.fromhex(hash_hex)
+    except ValueError:
+        return "PANEL_HASLO_HASH nie jest szesnastkowy"
+    return ""
+
+
 def panel_wlaczony() -> bool:
-    return bool(PANEL_UZYTKOWNIK and PANEL_HASLO_HASH)
+    return not _powod_wylaczenia()
 
 
 def _haslo_zgodne(uzytkownik: str, haslo: str) -> bool:
@@ -141,13 +166,18 @@ def zdrowie():
     znacznik = hashlib.sha256(
         b"".join((BASE / p).read_bytes() for p in ("wsgi.py", "cennik.py"))
     ).hexdigest()[:12]
-    return _json({
+    powod = _powod_wylaczenia()
+    odpowiedz = {
         "ok": True,
         "znacznik_kodu": znacznik,
-        "panel_wlaczony": panel_wlaczony(),
+        "panel_wlaczony": not powod,
         "cennik": str(cennik.CENNIK),
         "sciezka_bazowa": SCIEZKA_BAZOWA,
-    })
+    }
+    if powod:
+        # Sam powod, nigdy wartosc hasha.
+        odpowiedz["panel_powod"] = powod
+    return _json(odpowiedz)
 
 
 @app.route("/data/wina.json")

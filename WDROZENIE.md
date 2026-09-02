@@ -62,8 +62,17 @@ spacjach i zamienia na `Environment=` w unicie systemd, więc **żadna wartość
 spacji**).
 
 ```bash
-EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=<z tools/panel/haslo.py>'
+EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=WKLEJ_HASH'
 ```
+
+> **Wartości nie mogą zawierać spacji.** Skrypt dzieli `EXTRA_SYSTEMD_ENV` po spacjach, więc
+> wartość ze spacją urwie się w połowie, a systemd zaloguje
+> `Invalid environment assignment, ignoring: …`. Podstaw prawdziwy hash w miejsce
+> `WKLEJ_HASH` — nie zostawiaj żadnego opisowego placeholdera.
+>
+> Objaw takiej pomyłki: `/zdrowie` pokazuje `"panel_wlaczony": false` i pole `panel_powod`
+> z wyjaśnieniem. Panel wtedy **celowo się nie włącza** — obcięty hash nie pasowałby
+> do żadnego hasła, więc lepiej, żeby nie udawał sprawnego.
 
 Uwagi:
 
