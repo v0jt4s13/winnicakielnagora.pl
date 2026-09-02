@@ -1,4 +1,9 @@
+.DS_Store
 .git
 
-.claude/skills/ 
+.claude/skills/
 .claude/agents/
+
+# materialy zrodlowe (580 MB zdjec i filmow) - do repo trafiaja tylko zoptymalizowane
+# kopie w attached_assets/photos/, generowane przez tools/optimize-photos.py
+docs/
