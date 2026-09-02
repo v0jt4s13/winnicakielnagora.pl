@@ -23,12 +23,27 @@ class _App:
         return lambda funkcja: funkcja
 
 
+class _Resp:
+    def __init__(self, tresc, kod=200, naglowki=None):
+        self.tresc, self.kod, self.headers = tresc, kod, dict(naglowki or {})
+
+
+class _Zadanie:
+    authorization = None
+    method = "GET"
+
+    def get_json(self, silent=False):
+        return None
+
+
 def _send_from_directory(katalog, sciezka):
     return f"PLIK:{sciezka}"
 
 
 flask = types.ModuleType("flask")
 flask.Flask = _App
+flask.Response = _Resp
+flask.request = _Zadanie()
 flask.send_from_directory = _send_from_directory
 sys.modules["flask"] = flask
 
@@ -80,10 +95,11 @@ PRZYPADKI = [
                                       "attached_assets/photos/winnica-panorama-01.jpg", 200),
     ("assets/css/custom.css",         "assets/css/custom.css",       200),
     ("filmy/README.md",               "filmy/README.md",             200),
-    # panel: sam plik publiczny, ale katalogi tools/ juz nie
-    ("tools/panel/panel.html",        "tools/panel/panel.html",      200),
-    ("tools/panel/panel.css",         "tools/panel/panel.css",       200),
-    ("tools/panel/panel.js",          "tools/panel/panel.js",        200),
+    # panel jest za haslem: bez PANEL_UZYTKOWNIK/PANEL_HASLO_HASH nie istnieje.
+    # Uwierzytelnianie sprawdza osobno tools/test-panel-auth.py
+    ("tools/panel/panel.html",        "404.html",                    404),
+    ("tools/panel/panel.css",         "404.html",                    404),
+    ("tools/panel/panel.js",          "404.html",                    404),
     ("tools/panel/README.md",         "404.html",                    404),
     ("tools/panel",                   "404.html",                    404),
     ("tools",                         "404.html",                    404),

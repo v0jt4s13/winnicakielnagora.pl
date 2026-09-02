@@ -1,6 +1,12 @@
+import hmac
+import json
+import os
+from hashlib import pbkdf2_hmac
 from pathlib import Path
 
-from flask import Flask, send_from_directory
+from flask import Flask, Response, request, send_from_directory
+
+import cennik
 
 BASE = Path(__file__).parent
 STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po buildzie, inaczej katalog repo
@@ -14,9 +20,8 @@ app = Flask(__name__, static_folder=str(STATIC_ROOT), static_url_path="")
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
 PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico", "favicon.svg"}
 KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "data", "filmy"}
-# Z calego tools/ publiczne sa wylacznie te trzy pliki. Sam panel i tak nic tu nie zrobi —
-# API zyje tylko w tools/panel/serwer.py, uruchamianym lokalnie.
-WYJATKI_PUBLICZNE = {"tools/panel/panel.html", "tools/panel/panel.css", "tools/panel/panel.js"}
+# Z calego tools/ dostepne sa wylacznie te trzy pliki — i to za haslem (patrz PANEL_*).
+PLIKI_PANELU = {"tools/panel/panel.html", "tools/panel/panel.css", "tools/panel/panel.js"}
 
 
 def _publiczna(wzgledna: Path) -> bool:
@@ -25,8 +30,6 @@ def _publiczna(wzgledna: Path) -> bool:
         return False
     if wzgledna.suffix == ".bak":
         return False
-    if wzgledna.as_posix() in WYJATKI_PUBLICZNE:
-        return True
     if len(czesci) == 1:
         return czesci[0] in PLIKI_PUBLICZNE
     return czesci[0] in KATALOGI_PUBLICZNE
@@ -46,6 +49,97 @@ def _plik(sciezka: str) -> str | None:
         return None
     wzgledna = kandydat.relative_to(korzen)
     return str(wzgledna) if _publiczna(wzgledna) else None
+
+
+# --- panel redakcyjny na produkcji ---------------------------------------------
+# Wlacza sie WYLACZNIE gdy ustawione sa PANEL_UZYTKOWNIK i PANEL_HASLO_HASH.
+# Bez nich kazde /tools/panel/... dostaje 404, jakby panelu nie bylo — brak
+# konfiguracji nie moze przypadkiem odslonic zapisu do pliku.
+#
+# Hash generujesz poleceniem:  python3 tools/panel/haslo.py
+PANEL_UZYTKOWNIK = os.environ.get("PANEL_UZYTKOWNIK", "").strip()
+PANEL_HASLO_HASH = os.environ.get("PANEL_HASLO_HASH", "").strip()
+PANEL_ITERACJE = 240_000
+
+
+def panel_wlaczony() -> bool:
+    return bool(PANEL_UZYTKOWNIK and PANEL_HASLO_HASH)
+
+
+def _haslo_zgodne(uzytkownik: str, haslo: str) -> bool:
+    """Porownanie odporne na pomiar czasu. Format hasha: sol$hash (obie czesci szesnastkowo)."""
+    try:
+        sol_hex, oczekiwany_hex = PANEL_HASLO_HASH.split("$", 1)
+        sol = bytes.fromhex(sol_hex)
+    except ValueError:
+        return False
+    policzony = pbkdf2_hmac("sha256", haslo.encode("utf-8"), sol, PANEL_ITERACJE)
+    zgodny_uzytkownik = hmac.compare_digest(uzytkownik, PANEL_UZYTKOWNIK)
+    zgodne_haslo = hmac.compare_digest(policzony.hex(), oczekiwany_hex)
+    return zgodny_uzytkownik and zgodne_haslo
+
+
+def _prosba_o_haslo():
+    return Response(
+        "Panel redakcyjny wymaga logowania.", 401,
+        {"WWW-Authenticate": 'Basic realm="Panel cennika", charset="UTF-8"'},
+    )
+
+
+def _zalogowany() -> bool:
+    dane = request.authorization
+    return bool(dane and dane.username and dane.password
+                and _haslo_zgodne(dane.username, dane.password))
+
+
+def _json(dane: dict, kod: int = 200):
+    return Response(json.dumps(dane, ensure_ascii=False), kod,
+                    {"Content-Type": "application/json; charset=utf-8",
+                     "Cache-Control": "no-store"})
+
+
+@app.route("/tools/panel/api/<akcja>", methods=["GET", "POST"])
+def panel_api(akcja: str):
+    if not panel_wlaczony():
+        return serve("nieistniejacy-adres")
+    if not _zalogowany():
+        return _prosba_o_haslo()
+
+    if akcja == "wczytaj" and request.method == "GET":
+        try:
+            return _json(cennik.stan_poczatkowy())
+        except json.JSONDecodeError as blad:
+            return _json({"ok": False, "komunikat": f"data/wina.json ma błąd składni: {blad}"}, 500)
+
+    if akcja == "zapisz" and request.method == "POST":
+        dane = request.get_json(silent=True)
+        if dane is None:
+            return _json({"ok": False, "bledy": [
+                {"pozycja": None, "pole": None, "komunikat": "Nieczytelne żądanie"}]}, 400)
+        bledy = cennik.waliduj(dane)
+        if bledy:
+            return _json({"ok": False, "bledy": bledy}, 400)
+        try:
+            cennik.zapisz(dane)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat": f"Nie udało się zapisać: {blad}"}, 500)
+        return _json({"ok": True, "pozycji": len(dane["wina"]),
+                      "kopia": str(cennik.KOPIA.relative_to(cennik.PROJEKT))})
+
+    return _json({"ok": False, "komunikat": "Nieznana akcja"}, 404)
+
+
+@app.route("/tools/panel/<path:plik>")
+def panel_pliki(plik: str):
+    wzgledna = f"tools/panel/{plik}"
+    if not panel_wlaczony() or wzgledna not in PLIKI_PANELU:
+        return serve("nieistniejacy-adres")
+    if not _zalogowany():
+        return _prosba_o_haslo()
+    odpowiedz = send_from_directory(STATIC_ROOT, wzgledna)
+    odpowiedz.headers["Cache-Control"] = "no-store"
+    odpowiedz.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return odpowiedz
 
 
 @app.route("/", defaults={"path": ""})

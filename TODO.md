@@ -237,3 +237,33 @@ Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Poza rzeczami już zrobiony
 `Organization` w JSON-LD celowo pominięte do czasu uzupełnienia adresu, telefonu i logo
 (pozycja #9) — tak też rekomenduje audyt.
 
+### 26. Zmiany cennika na produkcji vs. git
+
+Panel działa teraz także na produkcji (`/tools/panel/`, za hasłem), więc `data/wina.json`
+można zmienić bez dostępu do własnego komputera. **To rozjeżdża produkcję z repozytorium:**
+zmiana zrobiona przez panel nie jest w gicie, a wdrożenie przez `projects_manager`
+najprawdopodobniej nadpisze katalog `data/` wersją z repo — czyli skasuje ceny wpisane na żywo.
+
+Trzeba to rozstrzygnąć **zanim panel zostanie wystawiony**:
+
+- **Wariant A** — deploy pomija `data/` (np. plik trzymany poza katalogiem aplikacji albo
+  wykluczony z synchronizacji). Ceny żyją tylko na produkcji, repo ma wersję startową.
+- **Wariant B** — po edycji na produkcji pobierasz `data/wina.json` z serwera i commitujesz.
+  Prościej wdrożeniowo, ale wymaga pamiętania o tym kroku.
+- **Wariant C** — panel sam commituje i wypycha zmianę. Najwygodniejsze, ale wymaga klucza
+  do repozytorium na serwerze; to spora zmiana zakresu.
+
+Do sprawdzenia po stronie wdrożenia: czy `projects_manager` nadpisuje katalog aplikacji
+w całości, czy tylko pliki z repo, oraz czy proces gunicorna ma prawo zapisu do `data/`.
+
+### 27. Panel na produkcji wymaga HTTPS
+
+HTTP Basic Auth przesyła login i hasło (zakodowane w base64, nie zaszyfrowane) przy **każdym**
+żądaniu. Po HTTP bez TLS każdy po drodze może je odczytać.
+
+Do potwierdzenia: czy `winnicakielnagora.pl` będzie serwowane przez HTTPS z wymuszonym
+przekierowaniem z HTTP. Jeśli nie — nie włączaj `PANEL_UZYTKOWNIK` ani `PANEL_HASLO_HASH`.
+
+Warto też rozważyć ograniczenie `/tools/panel/` po adresie IP na poziomie proxy — wtedy nawet
+wyciek hasła nie wystarczy, żeby wejść.
+

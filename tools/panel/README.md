@@ -16,12 +16,34 @@ Zatrzymanie: `Ctrl+C`. Panel nie wymaga instalowania niczego — działa na samy
 - **Nie wgrywa zdjęć.** Wybiera spośród plików w `attached_assets/photos/`. Nowe zdjęcia
   dokłada `python3 tools/optimize-photos.py`.
 
-## Bezpieczeństwo
+## Panel na produkcji (za hasłem)
 
-Panel **zapisuje pliki i nie ma logowania**. Dlatego nasłuchuje wyłącznie na `127.0.0.1`,
+Ten sam interfejs działa pod `https://winnicakielnagora.pl/tools/panel/panel.html`, obsługiwany
+przez `wsgi.py`. **Włącza się wyłącznie**, gdy w konfiguracji wdrożeniowej są obie zmienne:
+
+```bash
+python3 tools/panel/haslo.py     # wypisze obie linijki do wklejenia
+```
+
+```
+PANEL_UZYTKOWNIK=...
+PANEL_HASLO_HASH=...
+```
+
+Bez nich każde `/tools/panel/…` zwraca **404** — nie 401 — więc brak konfiguracji nie zdradza,
+że cokolwiek tam jest. Hasło i jego hash nigdy nie trafiają do repozytorium.
+
+**Zanim to włączysz, przeczytaj `TODO.md` #26 i #27:**
+
+- Basic Auth wysyła hasło przy każdym żądaniu, więc panel wymaga **HTTPS**.
+- Zmiana zrobiona na produkcji **nie jest w gicie** i może przepaść przy następnym wdrożeniu.
+
+## Bezpieczeństwo wariantu lokalnego
+
+Lokalny `serwer.py` **nie ma logowania**, dlatego nasłuchuje wyłącznie na `127.0.0.1`,
 sprawdza adres klienta przy każdym żądaniu i wymaga nagłówka `Origin` przy zapisie.
 
-**Nigdy go nie wdrażaj i nie uruchamiaj na `0.0.0.0`.**
+**Nigdy nie uruchamiaj go na `0.0.0.0` i nie wdrażaj tego pliku.**
 
 Przed każdym zapisem powstaje kopia `data/wina.json.bak` (jest w `.gitignore`), a sam zapis
 jest atomowy — przerwanie w połowie nie zostawi uszkodzonego pliku.

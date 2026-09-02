@@ -41,9 +41,15 @@ Naruszenie = poprawa przed scaleniem.
    treści witryny, a duży diff jest nie do przejrzenia.
 6. **NEVER** dodawaj zależności (Python, npm, CDN) bez zgody Właściciela — brak zależności jest
    tu decyzją, nie zaniedbaniem.
-7. **NEVER** wystawiaj panelu redakcyjnego poza `127.0.0.1` i nigdy nie wdrażaj go na produkcję —
-   panel zapisuje pliki na dysku i nie ma żadnego uwierzytelniania. Patrz
-   `.ai/specs/SPEC-002-*` oraz decyzja architektoniczna „Panel redakcyjny poza aplikacją produkcyjną".
+7. **NEVER** udostępniaj panelu redakcyjnego bez hasła. Na produkcji panel włącza się
+   **wyłącznie** wtedy, gdy ustawione są `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH`; bez nich każde
+   `/tools/panel/…` musi zwracać 404, a nie 401 — brak konfiguracji nie może odsłonić zapisu
+   do pliku. Sprawdza to `tools/test-panel-auth.py`.
+8. **NEVER** zapisuj hasła ani jego hasha w repozytorium — wyłącznie zmienne środowiskowe.
+   Hash generuje `python3 tools/panel/haslo.py`.
+9. **NEVER** dokładaj do `PLIKI_PANELU` w `wsgi.py` niczego poza `panel.html`, `panel.css`
+   i `panel.js`. `serwer.py`, `haslo.py` i README panelu nie mogą być dostępne przez HTTP,
+   nawet po zalogowaniu.
 
 ## Decision priorities
 
@@ -63,10 +69,13 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
    do strony — żaden z nich nie definiuje danych.
 2. `assets/css/custom.css` → **NIGDY** nie duplikuje klas z bundla Tailwinda; dopisuje tylko to,
    czego w bundlu nie ma.
-3. `wsgi.py` → **NIGDY** nie dostaje logiki biznesowej ani możliwości zapisu na dysk. To serwer
-   plików statycznych; wszystko inne jest zadaniem rozmiaru **L** i wymaga decyzji Właściciela.
-4. `tools/` → skrypty uruchamiane ręcznie na maszynie lokalnej (panel redakcyjny, optymalizacja
-   zdjęć). **NIGDY** nie są częścią wdrożenia i nie mogą być importowane przez `wsgi.py`.
+3. `wsgi.py` → poza panelem redakcyjnym **NIGDY** nie dostaje logiki biznesowej ani zapisu
+   na dysk. Panel jest jedynym wyjątkiem i wymaga hasła; wszystko inne jest zadaniem rozmiaru
+   **L** i wymaga decyzji Właściciela.
+4. `tools/` → skrypty uruchamiane ręcznie (optymalizacja zdjęć, testy, lokalny panel).
+   **NIGDY** nie mogą być importowane przez `wsgi.py` — kod wspólny z produkcją mieszka
+   w `cennik.py` w katalogu głównym. Z `tools/` serwer produkcyjny oddaje wyłącznie trzy pliki
+   interfejsu panelu, i to za hasłem.
 5. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
 
 ## Consistency rules
@@ -92,9 +101,9 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 1. **`alert()` w `initCart` i `initContactForm`** — świadome zaślepki demo, dopóki nie ma backendu.
    Nie rozszerzamy wzorca na nowy kod i pamiętamy, że blokują automatyzację przeglądarki.
 2. **Koszyk w pamięci (`Map`), znikający po odświeżeniu** — świadomy stan demo, nie błąd.
-3. **Panel redakcyjny zapisuje pliki bez logowania** — dopuszczalne wyłącznie dlatego, że
-   nasłuchuje na `127.0.0.1` i nigdy nie jest wdrażany. Poza tym jednym miejscem żaden kod
-   w tym projekcie nie zapisuje niczego na dysk.
+3. **Panel redakcyjny zapisuje pliki** — lokalnie bez logowania (nasłuch tylko na `127.0.0.1`),
+   na produkcji za HTTP Basic Auth. To jedyne miejsce w projekcie, które cokolwiek zapisuje
+   na dysk, i jedyny powód, dla którego produkcyjny serwer nie jest tylko-do-odczytu.
 
 ## Definition of "done"
 
@@ -110,8 +119,13 @@ Zmiana jest gotowa dopiero, gdy:
 - [ ] Nowa reguła, która wyszła w trakcie pracy, trafiła do `.ai/standards/` (`/sync-standards`)
       albo do tego pliku; nowy znany brak — do `TODO.md`
 - [ ] Spec (jeśli istnieje) ma zaktualizowaną sekcję `## Implementation Checklist`
+- [ ] Przechodzą wszystkie trzy zestawy testów:
+      `node tools/test-produkty.js` (ceny i render karty),
+      `python3 tools/test-routing.py` (routing i pliki publiczne),
+      `python3 tools/test-panel-auth.py` (dostęp do panelu na produkcji)
 
-> Nie ma lintera, type-checkera ani testów. Podgląd w przeglądarce jest jedynym dowodem.
+> Nie ma lintera ani type-checkera. Testy pokrywają logikę, ale wygląd sprawdza wyłącznie
+> podgląd w przeglądarce.
 
 ## Architectural decisions
 
@@ -138,15 +152,23 @@ Zmiana jest gotowa dopiero, gdy:
   `index.html` przez `file://` zablokuje `fetch`. Treść sklepu nie jest widoczna dla robotów,
   dlatego każda odmiana ma własną statyczną stronę `wina/<slug>.html`.
 
-### Panel redakcyjny poza aplikacją produkcyjną
+### Panel redakcyjny lokalnie i na produkcji, zawsze za hasłem na produkcji
 
-- **Wybór**: `data/wina.json` edytuje się lokalnym panelem (`tools/panel/`), uruchamianym
-  ręcznie i nasłuchującym wyłącznie na `127.0.0.1`. Nie jest częścią `wsgi.py` ani wdrożenia.
-- **Dlaczego**: panel musi zapisywać plik, a produkcyjny serwer ma pozostać serwerem plików
-  statycznych bez prawa zapisu. Rozdzielenie ich sprawia, że nawet błąd w konfiguracji
-  wdrożenia nie wystawi zapisu do internetu.
-- **Konsekwencja**: aktualizacja cennika to praca lokalna zakończona commitem i wdrożeniem —
-  nie edycja „na żywo" na serwerze. Nie przenoś panelu do `wsgi.py`, nawet „tymczasowo".
+- **Wybór**: `data/wina.json` edytuje panel o dwóch wejściach:
+  - **lokalnie** — `python3 tools/panel/serwer.py`, nasłuch tylko na `127.0.0.1`, bez hasła;
+  - **na produkcji** — `/tools/panel/panel.html` obsługiwane przez `wsgi.py`, za HTTP Basic
+    Auth, włączane zmiennymi `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH`.
+
+  Walidacja, zapis atomowy i kopia `.bak` są wspólne — mieszkają w `cennik.py` w katalogu
+  głównym, żeby obie drogi zachowywały się identycznie.
+- **Dlaczego**: Właściciel chce zmieniać wina i ceny bez dostępu do własnego komputera
+  (decyzja z 2026-09-02). Wcześniejszy zapis zabraniał panelu na produkcji w ogóle.
+- **Konsekwencja i ryzyko** — to nie jest zmiana bez kosztu:
+  - produkcyjny serwer **przestał być tylko-do-odczytu**; zapisuje `data/wina.json`;
+  - Basic Auth przesyła hasło przy każdym żądaniu, więc panel **wolno wystawiać wyłącznie
+    przez HTTPS**;
+  - zmiana zrobiona na produkcji **nie jest w gicie** i przepadnie przy następnym wdrożeniu,
+    jeśli deploy nadpisuje katalog `data/` — patrz `TODO.md` #26.
 
 ### Front-end bez frameworka i bez modułów, w dwóch plikach
 

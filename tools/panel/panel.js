@@ -39,7 +39,7 @@ function oznaczZmiane(stan = true) {
 
 async function wczytaj() {
   try {
-    const odp = await fetch("/api/wczytaj");
+    const odp = await fetch("api/wczytaj");
     const dane = await odp.json();
     if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
     cennik = dane.cennik;
@@ -142,7 +142,7 @@ function renderPodglad() {
   qs("#podglad-karty").innerHTML = Produkty.renderProductCard(wino, cennik.stawka_vat, {
     przyciskKoszyka: false,
     linkOdmiany: false,
-    bazaZdjec: "/photos/",
+    bazaZdjec: "../../attached_assets/photos/",
   });
 }
 
@@ -223,7 +223,7 @@ async function zapisz() {
 
   qs("#zapisz").disabled = true;
   try {
-    const odp = await fetch("/api/zapisz", {
+    const odp = await fetch("api/zapisz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cennik),
@@ -380,7 +380,7 @@ qs("#przygotuj").addEventListener("click", async () => {
   przycisk.disabled = true;
   przycisk.textContent = "Przygotowuję…";
   try {
-    const odp = await fetch("/api/opisz", {
+    const odp = await fetch("api/opisz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
