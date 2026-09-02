@@ -52,7 +52,13 @@ async function wczytaj() {
     }
     renderWszystko();
   } catch (blad) {
-    pokazKomunikat(`Nie udało się wczytać cennika: ${blad.message}`, "blad");
+    pokazKomunikat(
+      `Nie udało się wczytać cennika: ${Produkty.escape(blad.message)}.<br>` +
+        "Jeśli otworzyłeś tę stronę przez zwykły serwer plików, panel nie ma skąd wziąć " +
+        "danych — uruchom <code>python3 tools/panel/serwer.py</code> i wejdź na " +
+        "<code>http://127.0.0.1:8765</code>.",
+      "blad"
+    );
   }
 }
 

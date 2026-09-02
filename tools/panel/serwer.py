@@ -286,6 +286,11 @@ class Panel(BaseHTTPRequestHandler):
                           f"http://localhost:{self.server.server_port}")
 
     def _plik_dozwolony(self, sciezka: str) -> Path | None:
+        # Panel bywa otwierany takze jako /tools/panel/panel.html — sciezka, pod ktora
+        # plik lezy w repozytorium. Sprowadzamy oba warianty do tego samego.
+        if sciezka.startswith("/tools/panel/"):
+            sciezka = sciezka[len("/tools/panel"):]
+
         if sciezka in POJEDYNCZE_PLIKI:
             kandydat = POJEDYNCZE_PLIKI[sciezka]
         elif sciezka.startswith("/photos/"):

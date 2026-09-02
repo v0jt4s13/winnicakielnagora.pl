@@ -13,7 +13,10 @@ app = Flask(__name__, static_folder=str(STATIC_ROOT), static_url_path="")
 # dostepne bylyby takze wsgi.py, AGENTS.md, TODO.md, tools/ oraz .git/ z cala historia.
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
 PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico"}
-KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "data"}
+KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "data", "filmy"}
+# Z calego tools/ publiczne sa wylacznie te trzy pliki. Sam panel i tak nic tu nie zrobi —
+# API zyje tylko w tools/panel/serwer.py, uruchamianym lokalnie.
+WYJATKI_PUBLICZNE = {"tools/panel/panel.html", "tools/panel/panel.css", "tools/panel/panel.js"}
 
 
 def _publiczna(wzgledna: Path) -> bool:
@@ -22,6 +25,8 @@ def _publiczna(wzgledna: Path) -> bool:
         return False
     if wzgledna.suffix == ".bak":
         return False
+    if wzgledna.as_posix() in WYJATKI_PUBLICZNE:
+        return True
     if len(czesci) == 1:
         return czesci[0] in PLIKI_PUBLICZNE
     return czesci[0] in KATALOGI_PUBLICZNE
