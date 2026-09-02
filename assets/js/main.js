@@ -110,6 +110,14 @@ const cart = new Map();
 let cennik = null;
 const STAWKA_VAT_DOMYSLNA = 0.23;
 
+// Korzen witryny liczony z adresu tego skryptu (assets/js/main.js). Dzieki temu
+// te same pliki dzialaja na stronie glownej i w podkatalogu wina/, a takze gdyby
+// witryna kiedys stanela w podkatalogu domeny.
+const KORZEN = (() => {
+  const skrypt = document.querySelector('script[src$="main.js"]');
+  return skrypt ? new URL("../../", skrypt.src).href : "/";
+})();
+
 function stawkaVat() {
   return cennik?.stawka_vat ?? STAWKA_VAT_DOMYSLNA;
 }
@@ -474,7 +482,7 @@ function initCart() {
 /** Wczytuje data/wina.json. Zwraca null, jeśli się nie udało — komunikat pokazuje initShop. */
 async function wczytajCennik() {
   try {
-    const odpowiedz = await fetch("./data/wina.json", { cache: "no-store" });
+    const odpowiedz = await fetch(`${KORZEN}data/wina.json`, { cache: "no-store" });
     if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
     const dane = await odpowiedz.json();
     if (!Array.isArray(dane?.wina)) throw new Error("brak tablicy 'wina'");
@@ -542,7 +550,10 @@ function renderSklep() {
   }
 
   wrap.innerHTML = dostepne
-    .map((wino) => Produkty.renderProductCard(wino, stawkaVat()))
+    .map((wino) => Produkty.renderProductCard(wino, stawkaVat(), {
+      bazaZdjec: `${KORZEN}attached_assets/photos/`,
+      bazaOdmian: `${KORZEN}wina/`,
+    }))
     .join("");
   return true;
 }
@@ -570,7 +581,7 @@ function initWineOffer() {
               <p class="text-sm text-muted-foreground">${Produkty.escape(opis)}</p>
             </div>
             <div class="flex items-center gap-4">${cena}
-              <a href="../index.html#sklep" class="btn-primary">Zobacz w sklepie</a>
+              <a href="${KORZEN}index.html#sklep" class="btn-primary">Zobacz w sklepie</a>
             </div>
           </div>`;
     })

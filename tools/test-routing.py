@@ -79,6 +79,14 @@ PRZYPADKI = [
     ("attached_assets/photos/winnica-panorama-01.jpg",
                                       "attached_assets/photos/winnica-panorama-01.jpg", 200),
     ("assets/css/custom.css",         "assets/css/custom.css",       200),
+    ("filmy/README.md",               "filmy/README.md",             200),
+    # panel: sam plik publiczny, ale katalogi tools/ juz nie
+    ("tools/panel/panel.html",        "tools/panel/panel.html",      200),
+    ("tools/panel/panel.css",         "tools/panel/panel.css",       200),
+    ("tools/panel/panel.js",          "tools/panel/panel.js",        200),
+    ("tools/panel/README.md",         "404.html",                    404),
+    ("tools/panel",                   "404.html",                    404),
+    ("tools",                         "404.html",                    404),
     ("404.html",                      "404.html",                    200),
 ]
 

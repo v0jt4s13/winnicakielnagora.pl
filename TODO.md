@@ -129,16 +129,17 @@ Po świeżym klonie nie ma komend `/…` ani subagentów. Odtworzyć powinien je
 w repo nie ma** — dziś jedyna kopia frameworka to lokalne `.claude/`. Do rozstrzygnięcia:
 commitować `.claude/`, czy dodać katalogi źródłowe.
 
-### 18. Przegląd strony w przeglądarce
+### ~~18. Przegląd strony w przeglądarce~~ — WYKONANY 2026-09-02
 
-Zmiany z 2026-09-02 (sklep z JSON, osiem stron odmian, podmienione zdjęcia) **nie zostały
-obejrzane w przeglądarce** — rozszerzenie Chrome nie było podłączone. Sprawdzone zostało
-tylko to, co da się sprawdzić bez niej: kody HTTP wszystkich adresów, poprawność JSON-LD
-i `sitemap.xml`, istnienie każdego pliku ze zdjęciem oraz 20 testów logiki cen
-(`node tools/test-produkty.js`).
+Sprawdzone: strona główna i strona odmiany w motywach `classic`, `modern` i `rustic`, sklep
+renderowany z cennika (8 pozycji), zakres filtra policzony z danych (15–222 zł), opcje kategorii
+z JSON-a, dodanie do koszyka, etykieta VAT, blok „Wina z tej odmiany", konsola bez błędów.
 
-Do obejrzenia: strona główna i strony odmian w motywach `classic`, `modern` i `rustic`,
-konsola przeglądarki bez błędów, układ na telefonie.
+**Przegląd od razu wykrył błąd**, którego testy nie widziały: `fetch("./data/wina.json")`
+działał na stronie głównej, ale na `/wina/*.html` szukał `/wina/data/wina.json` i cicho
+wpadał w tekst zastępczy. Naprawione — ścieżki liczą się teraz z adresu `main.js`.
+
+Zostaje do obejrzenia: **układ na telefonie** (nie sprawdzałem szerokości mobilnych).
 
 ### 19. Treści stron odmian nie były weryfikowane wobec źródeł
 
@@ -163,4 +164,26 @@ Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pytho
   do logów). Pierwsze użycie z realnym kluczem warto obejrzeć.
 - **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać przy
   wklejaniu czegokolwiek poza notatkami o winie.
+
+### 21. Kategorie Dornfeldera i Monarcha w cenniku
+
+W `data/wina.json` obie pozycje mają `kategoria: "Białe"`, a to odmiany czerwone — tak też
+opisuje je sekcja „Nasze odmiany" i Twój opis winnicy („na wina czerwone i różowe odmian
+Monarch i Dornfelder"). Skutek: filtr „Czerwone" w sklepie pokazuje tylko jedną pozycję,
+a karta Dornfeldera ma etykietę „Białe" przy zdjęciu czerwonego wina.
+
+Opis Monarcha wygenerowany w panelu poszedł za tą kategorią i mówi „to białe wino”.
+Jeśli z tych odmian faktycznie powstaje białe wino (co jest możliwe), warto to w opisie
+napisać wprost. Jeśli to pomyłka przy wprowadzaniu — zmiana kategorii w panelu zajmie chwilę.
+**Nie ruszałem tych danych.**
+
+### 22. „Swenson Red" czy „Svenson Red"?
+
+W cenniku wpisano **Swenson Red 2023**, a strona, slug (`svenson-red`), tytuł strony odmiany
+i `sitemap.xml` używają formy **Svenson**. Wikipedia w Twoim pliku `.txt` to
+`en.wikipedia.org/wiki/Swenson_Red`, więc poprawna wydaje się forma przez „w".
+
+Poprawienie samej treści jest proste. Zmiana sluga na `swenson-red` pociąga za sobą
+aktualizację linku w `#nasze-wina`, `sitemap.xml`, `canonical` i pola `odmiana_slug`
+w cenniku — do zrobienia razem, żeby nie zostawić martwego adresu.
 

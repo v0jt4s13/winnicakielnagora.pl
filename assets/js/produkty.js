@@ -6,7 +6,10 @@
  * Patrz .ai/GUARDRAILS.md → "Front-end bez frameworka i bez modułów, w dwóch plikach".
  */
 const Produkty = {
+  // Domyslne sciezki dzialaja dla strony w korzeniu. Strony w podkatalogach
+  // (wina/*.html) i panel przekazuja wlasne przez `opcje` — patrz KORZEN w main.js.
   BAZA_ZDJEC: "./attached_assets/photos/",
+  BAZA_ODMIAN: "./wina/",
 
   /** Jedyna funkcja formatująca kwoty w projekcie. */
   formatujCene(wartosc) {
@@ -45,7 +48,10 @@ const Produkty = {
    * nie da się dobudować (.ai/standards/frontend/styling.md).
    */
   renderProductCard(wino, stawkaVat, opcje = {}) {
-    const { linkOdmiany = true, przyciskKoszyka = true, bazaZdjec = this.BAZA_ZDJEC } = opcje;
+    const {
+      linkOdmiany = true, przyciskKoszyka = true,
+      bazaZdjec = this.BAZA_ZDJEC, bazaOdmian = this.BAZA_ODMIAN,
+    } = opcje;
     const ceny = this.policzCeny(wino, stawkaVat);
     const zdjecie = `${bazaZdjec}${wino.zdjecie}-sm.jpg`;
     const nazwa = this.escape(wino.nazwa);
@@ -61,7 +67,7 @@ const Produkty = {
       .map((cz) => `<span>${this.escape(cz)}</span>`)
       .join("");
     const tytul = linkOdmiany
-      ? `<a href="./wina/${this.escape(wino.odmiana_slug)}.html" class="hover:text-ring">${nazwa}</a>`
+      ? `<a href="${bazaOdmian}${this.escape(wino.odmiana_slug)}.html" class="hover:text-ring">${nazwa}</a>`
       : nazwa;
     const przycisk = przyciskKoszyka
       ? `<button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>`
