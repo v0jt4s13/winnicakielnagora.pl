@@ -205,6 +205,32 @@ function wymuszonaPoraHero() {
   return ["poranek", "dzien", "zachod", "noc"].includes(zadana) ? zadana : null;
 }
 
+/** Ciemny motyw po zmroku.
+ *
+ * Celowo osobno od initHeroImage: podstrony odmian laduja ten sam skrypt, ale nie maja
+ * <img id="hero-image">, wiec logika wpieta w inicjalizator zdjecia nigdy sie tam nie
+ * wykonywala i po zmroku strona glowna byla ciemna, a kazda podstrona jasna.
+ */
+function initTimeTheme() {
+  const wymuszona = wymuszonaPoraHero();
+  let poprzedniaPora = null;
+
+  function zastosuj() {
+    const pora = wymuszona || heroPeriodForHour(wineryHour());
+    // Bez zmiany pory nie ruszamy motywu — dzieki temu wybor z menu stylu zlozony
+    // w trakcie nocy zostaje na ekranie az do switu.
+    if (!pora || pora === poprzedniaPora) return;
+    const bylaNoc = poprzedniaPora === "noc";
+    poprzedniaPora = pora;
+    if (pora === "noc") setTheme("modern", false);
+    else if (bylaNoc) setTheme(preferredTheme(), false);
+  }
+
+  zastosuj();
+  // Przy wymuszonej porze zegar jest zbedny — inaczej po minucie nadpisalby wybor.
+  if (!wymuszona) window.setInterval(zastosuj, 60_000);
+}
+
 function initHeroImage() {
   const image = qs("#hero-image");
   if (!image) return;
@@ -212,7 +238,6 @@ function initHeroImage() {
   const wymuszona = wymuszonaPoraHero();
 
   const fallbackSrc = image.dataset.fallbackSrc;
-  let selectedPeriod = null;
   let selectedSrc = null;
   let failedSrc = null;
 
@@ -227,13 +252,6 @@ function initHeroImage() {
     const period = wymuszona || heroPeriodForHour(wineryHour());
     const nextSrc = period ? image.dataset[`${period}Src`] : null;
     if (!nextSrc) return;
-
-    if (period !== selectedPeriod) {
-      const wasNight = selectedPeriod === "noc";
-      selectedPeriod = period;
-      if (period === "noc") setTheme("modern", false);
-      else if (wasNight) setTheme(preferredTheme(), false);
-    }
 
     if (nextSrc !== selectedSrc) {
       selectedSrc = nextSrc;
@@ -775,6 +793,7 @@ function initContactForm() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   initStyleSwitcher();
+  initTimeTheme();
   initHeroImage();
   initScrollReveal();
   initNavigation();
