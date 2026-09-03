@@ -26,8 +26,10 @@ t-shirt-size-install.sh
 
 # --- materialy zrodlowe: 580 MB zdjec i filmow ---
 # Do repozytorium trafiaja wylacznie zoptymalizowane kopie w attached_assets/photos/,
-# generowane przez tools/optimize-photos.py
-docs/
+# generowane przez tools/optimize-photos.py i tools/optimize-hero.py.
+# Ukosnik z przodu jest istotny: bez niego wzorzec lapal katalog "docs" na kazdym
+# poziomie, wiec attached_assets/docs/ bylo po cichu pomijane przy commitowaniu.
+/docs/
 
 # --- kopia zapasowa robiona przez panel redakcyjny ---
 data/wina.json.bak
