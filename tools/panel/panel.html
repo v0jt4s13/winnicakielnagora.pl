@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cennik — Winnica Kielna Góra</title>
+  <title>Panel redakcyjny — Winnica Kielna Góra</title>
   <!-- style.css jest tu tylko po to, zeby podglad karty wygladal jak w sklepie.
        Panel ma wlasny, neutralny wyglad w panel.css. -->
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
+  <!-- Pasek trzyma juz tylko tytul i wskaznik niezapisanej pracy. Zapis nalezy do sekcji,
+       bo panel edytuje dwa niezalezne pliki — patrz SPEC-005. -->
   <header class="pasek">
     <div>
-      <h1>Cennik</h1>
-      <p class="sciezka" id="sciezka">data/wina.json</p>
+      <h1>Panel redakcyjny</h1>
+      <p class="sciezka">Cennik i wydarzenia winnicy</p>
     </div>
     <div class="pasek-akcje">
       <span id="stan-zmian" class="stan"></span>
-      <button type="button" id="odrzuc" class="przycisk">Odrzuć zmiany</button>
-      <button type="button" id="zapisz" class="przycisk glowny">Zapisz</button>
     </div>
   </header>
 
@@ -27,13 +27,27 @@
   <main>
     <section class="sekcja">
       <div class="naglowek-sekcji">
-        <h2>Pozycje <span id="licznik" class="licznik"></span></h2>
-        <button type="button" id="dodaj" class="przycisk">+ Dodaj pozycję</button>
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="true" aria-controls="cialo-pozycje">
+            <span class="strzalka" aria-hidden="true"></span>Pozycje
+          </button>
+          <span id="licznik" class="licznik"></span>
+        </h2>
+        <div class="akcje-sekcji">
+          <span class="sciezka" id="sciezka">data/wina.json</span>
+          <button type="button" id="odrzuc" class="przycisk">Odrzuć zmiany</button>
+          <button type="button" id="zapisz" class="przycisk glowny">Zapisz</button>
+          <button type="button" id="dodaj" class="przycisk">+ Dodaj pozycję</button>
+        </div>
       </div>
-      <ul id="lista" class="lista"></ul>
-      <p id="pusto" class="pusto" hidden>Cennik jest pusty. Dodaj pierwszą pozycję.</p>
+      <div class="cialo-sekcji" id="cialo-pozycje">
+        <ul id="lista" class="lista"></ul>
+        <p id="pusto" class="pusto" hidden>Cennik jest pusty. Dodaj pierwszą pozycję.</p>
+      </div>
     </section>
 
+    <!-- Sekcje formularzy nie maja przelacznika zwijania: pojawiaja sie same po wybraniu
+         pozycji z listy. Drugi mechanizm widocznosci dawalby stan „rozwinieta, ale pusta". -->
     <section class="sekcja" id="sekcja-formularza" hidden>
       <div class="naglowek-sekcji">
         <h2 id="tytul-formularza">Pozycja</h2>
@@ -130,12 +144,69 @@
     </section>
 
     <section class="sekcja">
-      <h2>Kategorie</h2>
-      <p class="podpowiedz">Filtr w sklepie buduje swoje opcje z tej listy.</p>
-      <ul id="lista-kategorii" class="znaczniki"></ul>
-      <div class="dodaj-kategorie">
-        <input type="text" id="nowa-kategoria" placeholder="np. Soki">
-        <button type="button" id="dodaj-kategorie" class="przycisk">Dodaj kategorię</button>
+      <div class="naglowek-sekcji">
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="true" aria-controls="cialo-wydarzen">
+            <span class="strzalka" aria-hidden="true"></span>Wydarzenia
+          </button>
+          <span id="licznik-wydarzen" class="licznik"></span>
+        </h2>
+        <div class="akcje-sekcji">
+          <span class="sciezka" id="sciezka-wydarzen">data/wydarzenia.json</span>
+          <button type="button" id="odrzuc-wydarzenia" class="przycisk">Odrzuć zmiany</button>
+          <button type="button" id="zapisz-wydarzenia" class="przycisk glowny">Zapisz</button>
+          <button type="button" id="dodaj-wydarzenie" class="przycisk">+ Dodaj wpis</button>
+        </div>
+      </div>
+      <div class="cialo-sekcji" id="cialo-wydarzen">
+        <p class="podpowiedz">
+          Wpis pokazuje się na stronie tylko w dniach od „data od” do „data do” włącznie.
+          Poza tym przedziałem nie trafia nawet do przeglądarki odwiedzającego.
+        </p>
+        <ul id="lista-wydarzen-panel" class="lista"></ul>
+        <p id="pusto-wydarzenia" class="pusto" hidden>Brak wydarzeń. Dodaj pierwszy wpis.</p>
+      </div>
+    </section>
+
+    <section class="sekcja" id="sekcja-formularza-wydarzenia" hidden>
+      <div class="naglowek-sekcji">
+        <h2 id="tytul-formularza-wydarzenia">Wydarzenie</h2>
+        <button type="button" id="usun-wydarzenie" class="przycisk niebezpieczny">Usuń wpis</button>
+      </div>
+
+      <form id="formularz-wydarzenia" class="formularz" autocomplete="off">
+        <label class="pole-szerokie">Tytuł
+          <input name="tytul" type="text" maxlength="120" required>
+        </label>
+        <label>Data od
+          <input name="data_od" type="date" required>
+        </label>
+        <label>Data do
+          <input name="data_do" type="date" required>
+          <small>Ten sam dzień co „data od” = wydarzenie jednodniowe.</small>
+        </label>
+        <label class="pole-szerokie">Treść
+          <textarea name="tresc" rows="5" maxlength="2000" required></textarea>
+          <small>Zwykły tekst. Puste linie zostaną zachowane na stronie.</small>
+        </label>
+      </form>
+    </section>
+
+    <section class="sekcja">
+      <div class="naglowek-sekcji">
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="true" aria-controls="cialo-kategorie">
+            <span class="strzalka" aria-hidden="true"></span>Kategorie
+          </button>
+        </h2>
+      </div>
+      <div class="cialo-sekcji" id="cialo-kategorie">
+        <p class="podpowiedz">Filtr w sklepie buduje swoje opcje z tej listy.</p>
+        <ul id="lista-kategorii" class="znaczniki"></ul>
+        <div class="dodaj-kategorie">
+          <input type="text" id="nowa-kategoria" placeholder="np. Soki">
+          <button type="button" id="dodaj-kategorie" class="przycisk">Dodaj kategorię</button>
+        </div>
       </div>
     </section>
   </main>

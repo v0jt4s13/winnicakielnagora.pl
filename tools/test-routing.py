@@ -7,6 +7,7 @@ i sprawdzamy same decyzje: ktory plik zostanie oddany i z jakim kodem.
 
 Uruchomienie: python3 tools/test-routing.py
 """
+import json
 import sys
 import types
 from pathlib import Path
@@ -91,6 +92,8 @@ PRZYPADKI = [
     # /data/wina.json obsluguje osobna trasa zywy_cennik(), nie catch-all — sprawdza to
     # tools/test-cennik-sciezka.py. Tutaj katalog data/ ma byc niedostepny.
     ("data/wina.json",                "404.html",                    404),
+    ("data/wydarzenia.json",          "404.html",                    404),
+    ("data/wydarzenia.json.bak",      "404.html",                    404),
     ("data/cokolwiek.txt",            "404.html",                    404),
     ("assets/js/produkty.js",         "assets/js/produkty.js",       200),
     ("sitemap.xml",                   "sitemap.xml",                 200),
@@ -131,6 +134,50 @@ PRZYPADKI = [
     ("tools",                         "404.html",                    404),
     ("404.html",                      "404.html",                    200),
 ]
+
+
+def sprawdz_wydarzenia() -> int:
+    """Trasa publiczna wydarzen: filtr dat dziala i nie mieszka w wsgi.py."""
+    bledy = 0
+
+    def sprawdz(opis, warunek):
+        nonlocal bledy
+        print(f"{'OK  ' if warunek else 'BLAD'}  {opis}")
+        if not warunek:
+            bledy += 1
+
+    def wpis(ident, od, do):
+        return {"id": ident, "tytul": ident, "tresc": "x", "data_od": od, "data_do": do}
+
+    # Podstawiamy dane zamiast bawic sie zmienna srodowiskowa — interesuje nas trasa,
+    # nie odczyt pliku (ten sprawdza tools/test-wydarzenia.py).
+    oryginalne = wsgi.wydarzenia.wczytaj
+    wsgi.wydarzenia.wczytaj = lambda: {"wydarzenia": [
+        wpis("trwajace", "2000-01-01", "2100-01-01"),
+        wpis("przyszle", "2099-01-01", "2099-01-02"),
+        wpis("zakonczone", "2000-01-01", "2000-01-02"),
+    ]}
+    try:
+        odpowiedz = wsgi.zywe_wydarzenia()
+        dane = json.loads(odpowiedz.tresc)
+        widoczne = [w["id"] for w in dane["wydarzenia"]]
+        sprawdz("trasa oddaje wpis aktywny", widoczne == ["trwajace"])
+        sprawdz("wpis przyszly nie opuszcza serwera", "przyszle" not in odpowiedz.tresc)
+        sprawdz("wpis zakonczony nie opuszcza serwera", "zakonczone" not in odpowiedz.tresc)
+        sprawdz("odpowiedz ma no-store",
+                odpowiedz.headers.get("Cache-Control") == "no-store")
+        sprawdz("odpowiedz jest JSON-em",
+                odpowiedz.headers.get("Content-Type", "").startswith("application/json"))
+    finally:
+        wsgi.wydarzenia.wczytaj = oryginalne
+
+    # GUARDRAILS #3: wsgi.py poza panelem nie dostaje logiki biznesowej. Gdyby ktos
+    # przeniosl filtr dat do handlera, ten test to wychwyci.
+    zrodlo = (PROJEKT / "wsgi.py").read_text(encoding="utf-8")
+    sprawdz("wsgi.py nie porownuje dat wydarzen",
+            "data_od" not in zrodlo and "data_do" not in zrodlo)
+
+    return bledy
 
 
 def sprawdz_hero() -> int:
@@ -222,6 +269,7 @@ def main() -> int:
     wsgi.request.script_root = ""
 
     bledy += sprawdz_hero()
+    bledy += sprawdz_wydarzenia()
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")
     return 0 if bledy == 0 else 1

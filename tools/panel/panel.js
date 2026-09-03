@@ -17,6 +17,11 @@ let odmiany = [];
 let wybrany = null; // indeks edytowanej pozycji
 let zmienione = false;
 
+// Wydarzenia to drugi, niezalezny plik danych — wlasny stan i wlasny zapis.
+let wydarzenia = [];
+let wybraneWydarzenie = null; // indeks edytowanego wpisu
+let zmienioneWydarzenia = false;
+
 // --- komunikaty -----------------------------------------------------------
 
 function pokazKomunikat(tresc, rodzaj = "") {
@@ -30,9 +35,21 @@ function ukryjKomunikat() {
   qs("#komunikat").hidden = true;
 }
 
+/** Jeden wskaznik na caly panel: przyciski zapisu naleza do sekcji, ale ostrzezenie
+ *  „masz niezapisana prace" ma byc widoczne niezaleznie od tego, ktora sekcje widac. */
+function odswiezWskaznikZmian() {
+  const cos = zmienione || zmienioneWydarzenia;
+  qs("#stan-zmian").textContent = cos ? "● niezapisane zmiany" : "";
+}
+
 function oznaczZmiane(stan = true) {
   zmienione = stan;
-  qs("#stan-zmian").textContent = stan ? "● niezapisane zmiany" : "";
+  odswiezWskaznikZmian();
+}
+
+function oznaczZmianeWydarzen(stan = true) {
+  zmienioneWydarzenia = stan;
+  odswiezWskaznikZmian();
 }
 
 // --- wczytanie ------------------------------------------------------------
@@ -464,10 +481,216 @@ qs("#odrzuc").addEventListener("click", async () => {
   await wczytaj();
 });
 
+
+// --- wydarzenia -----------------------------------------------------------
+// Drugi plik danych, wlasna walidacja po stronie serwera, wlasny zapis. Panel widzi
+// WSZYSTKIE wpisy — take nieaktywne; o tym, co zobaczy odwiedzajacy, decyduje serwer
+// (wydarzenia.aktywne w Pythonie). Znacznik stanu ponizej jest tylko informacja.
+
+/** Dzisiejsza data w strefie winnicy jako "RRRR-MM-DD". Locale sv-SE daje wlasnie ten format. */
+function dzisWWinnicy() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date());
+}
+
+function stanWydarzenia(wpis) {
+  const dzis = dzisWWinnicy();
+  if (!wpis.data_od || !wpis.data_do) return { klasa: "stan-zakonczone", opis: "brak dat" };
+  if (dzis < wpis.data_od) return { klasa: "stan-przyszle", opis: "przyszłe" };
+  if (dzis > wpis.data_do) return { klasa: "stan-zakonczone", opis: "zakończone" };
+  return { klasa: "stan-aktywne", opis: "aktywne" };
+}
+
+async function wczytajWydarzenia() {
+  try {
+    const odp = await fetch("api/wydarzenia-wczytaj");
+    const dane = await odp.json();
+    if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
+    wydarzenia = Array.isArray(dane.wydarzenia) ? dane.wydarzenia : [];
+    qs("#sciezka-wydarzen").textContent = dane.sciezka;
+    renderListeWydarzen();
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się wczytać wydarzeń: ${Produkty.escape(blad.message)}`, "blad");
+  }
+}
+
+function renderListeWydarzen() {
+  const lista = qs("#lista-wydarzen-panel");
+  qs("#licznik-wydarzen").textContent = wydarzenia.length ? `(${wydarzenia.length})` : "";
+  qs("#pusto-wydarzenia").hidden = wydarzenia.length > 0;
+
+  lista.innerHTML = wydarzenia
+    .map((wpis, i) => {
+      const stan = stanWydarzenia(wpis);
+      const okres = wpis.data_od === wpis.data_do
+        ? Produkty.escape(wpis.data_od || "—")
+        : `${Produkty.escape(wpis.data_od || "—")} – ${Produkty.escape(wpis.data_do || "—")}`;
+      return `
+        <li data-wydarzenie="${i}" class="${i === wybraneWydarzenie ? "wybrana" : ""}">
+          <span class="nazwa">${Produkty.escape(wpis.tytul || "(bez tytułu)")}</span>
+          <span class="meta okres">${okres}</span>
+          <span class="znacznik-stanu ${stan.klasa}">${stan.opis}</span>
+        </li>`;
+    })
+    .join("");
+}
+
+function renderFormularzWydarzenia() {
+  const wpis = wydarzenia[wybraneWydarzenie];
+  const sekcja = qs("#sekcja-formularza-wydarzenia");
+  if (!wpis) {
+    sekcja.hidden = true;
+    return;
+  }
+  sekcja.hidden = false;
+  qs("#tytul-formularza-wydarzenia").textContent = wpis.tytul || "Wydarzenie";
+  const formularz = qs("#formularz-wydarzenia");
+  ["tytul", "tresc", "data_od", "data_do"].forEach((pole) => {
+    formularz.elements[pole].value = wpis[pole] || "";
+  });
+}
+
+function wybierzWydarzenie(indeks) {
+  wybraneWydarzenie = indeks;
+  renderListeWydarzen();
+  renderFormularzWydarzenia();
+}
+
+function zbierzFormularzWydarzenia() {
+  if (wybraneWydarzenie === null) return;
+  const formularz = qs("#formularz-wydarzenia");
+  const wpis = wydarzenia[wybraneWydarzenie];
+  ["tytul", "tresc", "data_od", "data_do"].forEach((pole) => {
+    wpis[pole] = formularz.elements[pole].value;
+  });
+  // Identyfikator nie jest polem formularza — wynika z tytulu i musi zostac unikalny,
+  // bo to on rozroznia wpisy przy zapisie.
+  wpis.id = unikalneIdWydarzenia(wpis.tytul, wybraneWydarzenie);
+  qs("#tytul-formularza-wydarzenia").textContent = wpis.tytul || "Wydarzenie";
+}
+
+/** Sam slug, bez deduplikacji — proponujId() jest cennikowe: siega do cennik.wina
+ *  i do `wybrany`, a wydarzenia moga wczytac sie zanim cennik w ogole dojdzie. */
+function slugWydarzenia(tytul) {
+  return (tytul || "")
+    .toLowerCase()
+    .replace(/[ąćęłńóśźż]/g, (z) => ZNAKI[z])
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function unikalneIdWydarzenia(tytul, pomijanyIndeks) {
+  const podstawa = slugWydarzenia(tytul) || "wydarzenie";
+  const zajete = new Set(
+    wydarzenia.filter((_, i) => i !== pomijanyIndeks).map((w) => w.id)
+  );
+  if (!zajete.has(podstawa)) return podstawa;
+  let n = 2;
+  while (zajete.has(`${podstawa}-${n}`)) n += 1;
+  return `${podstawa}-${n}`;
+}
+
+async function zapiszWydarzenia() {
+  qs("#zapisz-wydarzenia").disabled = true;
+  try {
+    const odp = await fetch("api/wydarzenia-zapisz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wydarzenia }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) {
+      const lista = (wynik.bledy || [])
+        .map((b) => `<li>${b.pozycja === null ? "cały plik" : `wydarzenie ${b.pozycja + 1}`}: ` +
+                    `${Produkty.escape(b.komunikat)}${b.pole ? ` (${Produkty.escape(b.pole)})` : ""}</li>`)
+        .join("");
+      const tresc = lista
+        ? `Serwer odrzucił zapis wydarzeń:<ul>${lista}</ul>`
+        : `Nie udało się zapisać wydarzeń (HTTP ${odp.status}): ` +
+          `${Produkty.escape(wynik.komunikat || "serwer nie podał powodu")}`;
+      pokazKomunikat(tresc, "blad");
+      return;
+    }
+    oznaczZmianeWydarzen(false);
+    const lokalnie = ["localhost", "127.0.0.1"].includes(location.hostname);
+    const skutek = lokalnie
+      ? "Zmiana jest na razie tylko na Twoim dysku — żeby trafiła na stronę, zrób commit i wdrożenie."
+      : "Zmiana jest już widoczna na stronie.";
+    pokazKomunikat(
+      `✓ Zapisano ${wynik.pozycji} wydarzeń.<br>${skutek}<br>` +
+        `<span class="podpowiedz">Poprzednia wersja: <code>${Produkty.escape(wynik.kopia)}</code></span>`,
+      "sukces"
+    );
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się zapisać wydarzeń: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    qs("#zapisz-wydarzenia").disabled = false;
+  }
+}
+
+qs("#lista-wydarzen-panel").addEventListener("click", (e) => {
+  const wiersz = e.target.closest("li[data-wydarzenie]");
+  if (wiersz) wybierzWydarzenie(Number(wiersz.dataset.wydarzenie));
+});
+
+qs("#formularz-wydarzenia").addEventListener("input", () => {
+  zbierzFormularzWydarzenia();
+  oznaczZmianeWydarzen();
+  renderListeWydarzen();
+});
+
+qs("#dodaj-wydarzenie").addEventListener("click", () => {
+  const dzis = dzisWWinnicy();
+  wydarzenia.push({ id: "", tytul: "", tresc: "", data_od: dzis, data_do: dzis });
+  wybraneWydarzenie = wydarzenia.length - 1;
+  wydarzenia[wybraneWydarzenie].id = unikalneIdWydarzenia("", wybraneWydarzenie);
+  oznaczZmianeWydarzen();
+  renderListeWydarzen();
+  renderFormularzWydarzenia();
+  qs("#formularz-wydarzenia").elements.tytul.focus();
+});
+
+qs("#usun-wydarzenie").addEventListener("click", () => {
+  if (wybraneWydarzenie === null) return;
+  wydarzenia.splice(wybraneWydarzenie, 1);
+  wybraneWydarzenie = null;
+  oznaczZmianeWydarzen();
+  renderListeWydarzen();
+  renderFormularzWydarzenia();
+});
+
+qs("#zapisz-wydarzenia").addEventListener("click", zapiszWydarzenia);
+
+qs("#odrzuc-wydarzenia").addEventListener("click", async () => {
+  wybraneWydarzenie = null;
+  qs("#sekcja-formularza-wydarzenia").hidden = true;
+  oznaczZmianeWydarzen(false);
+  ukryjKomunikat();
+  await wczytajWydarzenia();
+});
+
+// --- zwijanie sekcji ------------------------------------------------------
+// Stan nie jest zapamietywany: po odswiezeniu wszystko jest rozwiniete. Zwijanie ma
+// skracac przewijanie w trakcie pracy, a nie konfigurowac panel na stale.
+
+function initZwijanieSekcji() {
+  qsa(".przelacznik-sekcji").forEach((przycisk) => {
+    przycisk.addEventListener("click", () => {
+      const cialo = qs(`#${przycisk.getAttribute("aria-controls")}`);
+      if (!cialo) return;
+      const rozwiniete = przycisk.getAttribute("aria-expanded") === "true";
+      przycisk.setAttribute("aria-expanded", String(!rozwiniete));
+      cialo.hidden = rozwiniete;
+    });
+  });
+}
+
+initZwijanieSekcji();
+
 window.addEventListener("beforeunload", (e) => {
-  if (!zmienione) return;
+  if (!zmienione && !zmienioneWydarzenia) return;
   e.preventDefault();
   e.returnValue = "";
 });
 
 wczytaj();
+wczytajWydarzenia();

@@ -26,6 +26,7 @@ from pathlib import Path
 PROJEKT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJEKT))
 import cennik  # noqa: E402  (import po ustaleniu sciezki projektu)
+import wydarzenia  # noqa: E402
 
 PANEL = PROJEKT / "tools" / "panel"
 CENNIK = cennik.CENNIK
@@ -223,6 +224,18 @@ class Panel(BaseHTTPRequestHandler):
                                         "komunikat": f"data/wina.json ma błąd składni: {blad}"})
             return self._json(200, cennik.stan_poczatkowy())
 
+        if sciezka == "/api/wydarzenia-wczytaj":
+            try:
+                wydarzenia.zapewnij_plik()
+            except OSError as blad:
+                return self._json(500, {"ok": False, "komunikat": str(blad)})
+            try:
+                return self._json(200, wydarzenia.stan_poczatkowy())
+            except json.JSONDecodeError as blad:
+                return self._json(500, {
+                    "ok": False,
+                    "komunikat": f"data/wydarzenia.json ma błąd składni: {blad}"})
+
         plik = self._plik_dozwolony(sciezka)
         if not plik:
             return self._json(404, {"ok": False, "komunikat": "Nie ma takiego pliku"})
@@ -232,7 +245,7 @@ class Panel(BaseHTTPRequestHandler):
         if not self._lokalny():
             return self._json(403, {"ok": False, "komunikat": "Panel działa tylko lokalnie"})
         sciezka = self._bez_prefiksu(self.path.split("?")[0])
-        if sciezka not in ("/api/zapisz", "/api/opisz"):
+        if sciezka not in ("/api/zapisz", "/api/opisz", "/api/wydarzenia-zapisz"):
             return self._json(404, {"ok": False, "komunikat": "Nieznany adres"})
         if not self._origin_ok():
             return self._json(403, {"ok": False, "komunikat": "Niedozwolone źródło żądania"})
@@ -253,6 +266,18 @@ class Panel(BaseHTTPRequestHandler):
             if komunikat:
                 return self._json(kod, {"ok": False, "komunikat": komunikat})
             return self._json(200, {"ok": True, **wynik})
+
+        if sciezka == "/api/wydarzenia-zapisz":
+            bledy = wydarzenia.waliduj(dane)
+            if bledy:
+                return self._json(400, {"ok": False, "bledy": bledy})
+            try:
+                wydarzenia.zapisz(dane)
+            except OSError as blad:
+                return self._json(500, {"ok": False,
+                                        "komunikat": f"Nie udało się zapisać: {blad}"})
+            return self._json(200, {"ok": True, "pozycji": len(dane["wydarzenia"]),
+                                    "kopia": wydarzenia.opis_kopii()})
 
         bledy = cennik.waliduj(dane)
         if bledy:

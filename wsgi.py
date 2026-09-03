@@ -10,6 +10,7 @@ from pathlib import Path
 from flask import Flask, Response, request, send_from_directory
 
 import cennik
+import wydarzenia
 
 BASE = Path(__file__).parent
 STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po buildzie, inaczej katalog repo
@@ -219,7 +220,8 @@ def zdrowie():
     Rozne wartosci = serwer trzyma inny kod, niz jest w repozytorium.
     """
     znacznik = hashlib.sha256(
-        b"".join((BASE / p).read_bytes() for p in ("wsgi.py", "cennik.py"))
+        b"".join((BASE / p).read_bytes()
+                 for p in ("wsgi.py", "cennik.py", "wydarzenia.py"))
     ).hexdigest()[:12]
     powod = _powod_wylaczenia()
     odpowiedz = {
@@ -227,6 +229,7 @@ def zdrowie():
         "znacznik_kodu": znacznik,
         "panel_wlaczony": not powod,
         "cennik": str(cennik.CENNIK),
+        "wydarzenia": str(wydarzenia.WYDARZENIA),
         "sciezka_bazowa": SCIEZKA_BAZOWA,
     }
     if powod:
@@ -249,6 +252,23 @@ def zywy_cennik():
     odpowiedz.headers["Cache-Control"] = "no-store"
     odpowiedz.headers["Content-Type"] = "application/json; charset=utf-8"
     return odpowiedz
+
+
+@app.route("/data/wydarzenia.json")
+def zywe_wydarzenia():
+    """Wydarzenia widoczne DZIS. Wpisy przyszle i zakonczone nie opuszczaja serwera.
+
+    Filtr siedzi w wydarzenia.aktywne(), nie tutaj: `.ai/GUARDRAILS.md` → "Architectural
+    boundaries" #3 mowi, ze wsgi.py poza panelem redakcyjnym nie dostaje logiki biznesowej.
+    Ta funkcja ma wylacznie wczytac, zawezic i oddac.
+    """
+    wydarzenia.zapewnij_plik()
+    try:
+        return _json(wydarzenia.aktywne(wydarzenia.wczytaj()))
+    except json.JSONDecodeError:
+        # Uszkodzony plik nie moze wywalic sekcji na stronie glownej — main.js dostanie
+        # pusta liste i zostawi statyczna tresc o degustacjach.
+        return _json({"wydarzenia": []}, 500)
 
 
 @app.route("/tools/panel/api/<akcja>", methods=["GET", "POST"])
@@ -284,6 +304,32 @@ def panel_api(akcja: str):
                           "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wina"]),
                       "kopia": cennik.opis_kopii()})
+
+    if akcja == "wydarzenia-wczytaj" and request.method == "GET":
+        try:
+            wydarzenia.zapewnij_plik()
+            return _json(wydarzenia.stan_poczatkowy())
+        except json.JSONDecodeError as blad:
+            return _json({"ok": False,
+                          "komunikat": f"data/wydarzenia.json ma błąd składni: {blad}"}, 500)
+
+    if akcja == "wydarzenia-zapisz" and request.method == "POST":
+        dane = request.get_json(silent=True)
+        if dane is None:
+            return _json({"ok": False, "bledy": [
+                {"pozycja": None, "pole": None, "komunikat": "Nieczytelne żądanie"}]}, 400)
+        bledy = wydarzenia.waliduj(dane)
+        if bledy:
+            return _json({"ok": False, "bledy": bledy}, 400)
+        try:
+            wydarzenia.zapisz(dane)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat":
+                          f"Nie udało się zapisać do {wydarzenia.WYDARZENIA}: {blad}. "
+                          "Sprawdź, czy katalog istnieje i czy użytkownik aplikacji ma "
+                          "do niego prawo zapisu."}, 500)
+        return _json({"ok": True, "pozycji": len(dane["wydarzenia"]),
+                      "kopia": wydarzenia.opis_kopii()})
 
     return _json({"ok": False, "komunikat": "Nieznana akcja"}, 404)
 

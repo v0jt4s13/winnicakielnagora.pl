@@ -202,3 +202,66 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 }
 .wynik-naglowek h4 { margin: 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--przygaszony); }
 .wynik-tresc { margin: 0.6rem 0 0; }
+
+/* --- zwijanie sekcji ------------------------------------------------------
+   Przelacznik siedzi WEWNATRZ <h2>, a nie odwrotnie: <h2> w <button> to
+   nieprawidlowy HTML (button przyjmuje tylko tresc frazowa). Przyciski akcji
+   sekcji sa rodzenstwem przelacznika, nie jego dziecmi — zagniezdzony <button>
+   przestalby dzialac. */
+.przelacznik-sekcji {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.przelacznik-sekcji:hover { color: var(--akcent); }
+.przelacznik-sekcji:focus-visible { outline: 2px solid var(--akcent); outline-offset: 3px; }
+
+.strzalka::before {
+  content: "";
+  display: block;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform 0.15s ease;
+}
+.przelacznik-sekcji[aria-expanded="false"] .strzalka::before {
+  transform: rotate(-45deg) translate(-1px, 1px);
+}
+
+/* Nagłówek sekcji miesci teraz sciezke pliku i przyciski zapisu, wiec musi umiec
+   zawinac sie na waskim ekranie. Bez tego dluga sciezka robocza (na produkcji
+   /opt/apps/.../dane/wydarzenia.json) wypychala cala strone w poziomie. */
+.naglowek-sekcji { flex-wrap: wrap; }
+.akcje-sekcji {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.akcje-sekcji .sciezka {
+  margin: 0 0.2rem 0 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- wydarzenia -----------------------------------------------------------  */
+.lista .okres { color: var(--przygaszony); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.znacznik-stanu {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.stan-aktywne { color: var(--sukces); }
+.stan-przyszle { color: var(--ostrzezenie); }
+.stan-zakonczone { color: var(--przygaszony); }

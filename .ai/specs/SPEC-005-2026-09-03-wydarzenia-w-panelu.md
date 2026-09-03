@@ -240,6 +240,27 @@ parę `#zapisz` / `#odrzuc` w sticky pasku. Dokładanie drugiej sekcji wymaga ro
 - **`beforeunload`** rozszerza istniejący warunek do `zmienione || zmienioneWydarzenia`.
 - **Zapis jednej sekcji nie dotyka drugiej**: osobne akcje API, osobne pliki, osobna walidacja.
 
+### Zwijanie sekcji
+
+Panel po dodaniu wydarzeń ma pięć sekcji i nie mieści się na ekranie. Nagłówek każdej
+**sekcji treściowej** staje się klikalny i chowa albo pokazuje jej zawartość.
+
+- Zwijane są: **Pozycje**, **Wydarzenia**, **Kategorie**.
+- **Nie są zwijane sekcje formularzy** (`#sekcja-formularza` i jej odpowiednik dla wydarzeń).
+  Mają już własny mechanizm widoczności — pojawiają się po wybraniu pozycji z listy.
+  Drugi, niezależny przełącznik dawałby stan „sekcja rozwinięta, ale pusta, bo nic nie wybrano"
+  i dwa powody, dla których to samo miejsce bywa puste.
+- Markup: w `.naglowek-sekcji` ląduje `<button type="button" class="przelacznik-sekcji"
+  aria-expanded="true" aria-controls="<id ciała>">` z tytułem i strzałką, a ciało sekcji jest
+  owinięte w `<div class="cialo-sekcji" id="...">`. Przyciski akcji („Zapisz", „Dodaj
+  pozycję") zostają **rodzeństwem** przełącznika, nie jego dziećmi — zagnieżdżony `<button>`
+  to nieprawidłowy HTML i przestałby działać.
+- Obsługa: `initZwijanieSekcji()` w `panel.js` — klik przełącza `hidden` na ciele
+  i `aria-expanded` na przycisku.
+- **Stan nie jest zapamiętywany.** Po odświeżeniu wszystkie sekcje są rozwinięte. Panel nie
+  trzyma niczego w `localStorage` i ta zmiana tego nie otwiera; zwijanie ma skracać przewijanie
+  w trakcie pracy, a nie konfigurować panel na stałe.
+
 > To jedyne miejsce, gdzie zmiana rusza istniejący markup i kod panelu.
 > **Do wycięcia, jeśli Właściciel woli zostawić sticky pasek cennikowi** — wtedy wydarzenia
 > dostają zapis wyłącznie we własnym nagłówku, a pasek zostaje bez zmian.
@@ -351,6 +372,9 @@ Panel działa tylko przy ustawionych `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` —
 - Pusta lista albo same nieaktywne wpisy → sekcja `#wydarzenia` wygląda dokładnie jak dziś.
 - Brak pliku albo błąd składni → sekcja jak dziś + `console.error`, bez komunikatu dla użytkownika.
 - Panel pokazuje wszystkie wpisy, także nieaktywne, z czytelnym znacznikiem stanu.
+- Klik w nagłówek sekcji Pozycje, Wydarzenia albo Kategorie chowa i pokazuje jej zawartość;
+  `aria-expanded` odzwierciedla stan, a przyciski akcji w nagłówku dalej działają.
+- Sekcje formularzy nie mają przełącznika zwijania.
 - `data_do` wcześniejsza niż `data_od` → `400`, komunikat przy polu, plik nietknięty.
 - Pusty tytuł, pusta treść, zła data, data nieistniejąca, zduplikowane `id` → błąd walidacji,
   plik nietknięty.
@@ -366,31 +390,79 @@ Panel działa tylko przy ustawionych `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` —
 
 - [x] Wstrzyknąć standardy: `content/wina-json`, `content/html-editing`,
   `frontend/js-conventions`, `frontend/theming`.
-- [ ] `data/wydarzenia.json` — pusta wersja startowa.
-- [ ] `wydarzenia.py` — odczyt, walidacja, zapis atomowy, kopia `.bak`,
+- [x] `data/wydarzenia.json` — pusta wersja startowa.
+- [x] `wydarzenia.py` — odczyt, walidacja, zapis atomowy, kopia `.bak`,
   `dzis_w_winnicy()`, `aktywne()`.
-- [ ] `tools/test-wydarzenia.py` — odpowiednik `tools/test-cennik-sciezka.py`: zasiew pliku,
+- [x] `tools/test-wydarzenia.py` — odpowiednik `tools/test-cennik-sciezka.py`: zasiew pliku,
   `WYDARZENIA_SCIEZKA` poza projektem, kopia `.bak`, plus granice `aktywne()` przez
   wstrzyknięty `dzis`.
-- [ ] `wsgi.py` — trasa publiczna (bez logiki dat) + dwie akcje panelu.
-- [ ] `tools/panel/serwer.py` — `"/api/wydarzenia-wczytaj"` w `do_GET`,
+- [x] `wsgi.py` — trasa publiczna (bez logiki dat) + dwie akcje panelu.
+- [x] `tools/panel/serwer.py` — `"/api/wydarzenia-wczytaj"` w `do_GET`,
   `"/api/wydarzenia-zapisz"` w krotce dozwolonych ścieżek `do_POST`.
-- [ ] `tools/panel/panel.html` — sekcja, lista, formularz; przeniesienie `#sciezka`
+- [x] `tools/panel/panel.html` — sekcja, lista, formularz; przeniesienie `#sciezka`
   i przycisków cennika ze sticky paska do nagłówka sekcji „Pozycje".
-- [ ] `tools/panel/panel.js` — nowy stan, nowe ID, wspólny `#komunikat`,
-  rozszerzony `beforeunload`.
-- [ ] `tools/panel/panel.css` — style nowej sekcji, jeśli istniejące klasy nie wystarczą.
-- [ ] `index.html` — kontener `#lista-wydarzen` w sekcji `#wydarzenia`.
-- [ ] `assets/css/custom.css` — `.wydarzenie-tresc { white-space: pre-line; }`.
-- [ ] `assets/js/main.js` — `initWydarzenia()` + rejestracja w `DOMContentLoaded`.
-- [ ] `tools/test-routing.py` — nowa trasa publiczna i jej nagłówki.
+- [x] `tools/panel/panel.js` — nowy stan, nowe ID, wspólny `#komunikat`,
+  rozszerzony `beforeunload`, `initZwijanieSekcji()`.
+- [x] `tools/panel/panel.css` — style nowej sekcji oraz przełącznika zwijania.
+- [x] `index.html` — kontener `#lista-wydarzen` w sekcji `#wydarzenia`.
+- [x] `assets/css/custom.css` — `.wydarzenie-tresc { white-space: pre-line; }`.
+- [x] `assets/js/main.js` — `initWydarzenia()` + rejestracja w `DOMContentLoaded`.
+- [x] `tools/test-routing.py` — nowa trasa publiczna i jej nagłówki.
 - [ ] `TODO.md` — dopisać `WYDARZENIA_SCIEZKA` do opisu wdrożenia obok `CENNIK_SCIEZKA`
   (dokument uzgadniany z Właścicielem — zmiana dopiero po jego zgodzie).
-- [ ] Przegląd w przeglądarce: cztery motywy, telefon, stany pusty / aktywny / błędny.
+- [x] Przegląd w przeglądarce: cztery motywy, telefon, stany pusty / aktywny / błędny.
 
 ## Implementation Review
 
-_(do uzupełnienia po wdrożeniu)_
+Weryfikacja na obu wejściach panelu naraz: `tools/panel/serwer.py` (port 8765) i Flask
+z `wsgi.py` (port 8007), oba ze `WYDARZENIA_SCIEZKA` wskazującą katalog poza repozytorium —
+dzięki temu sprawdzona została też sama zmienna, a `data/wydarzenia.json` w repo pozostał pusty.
+
+**Panel**
+
+- Trzy wpisy dodane formularzem: aktywny, przyszły i zakończony. Znaczniki stanu policzone
+  w przeglądarce zgodziły się z datami (`aktywne`, `przyszłe`, `zakończone`).
+- Identyfikatory wygenerowane z polskich tytułów: `dzien-otwarty`, `winobranie-2026`,
+  `zakonczone-spotkanie`.
+- Zapis z `data_do` wcześniejszą niż `data_od` odrzucony przez serwer z komunikatem
+  „wydarzenie 3: „data do” nie może być wcześniejsza niż „data od” (data_do)”.
+  **Plik roboczy pozostał wtedy pusty** — walidacja jest przed zapisem.
+- Po poprawieniu dat zapis się powiódł, powstała kopia `.bak`, `#stan-zmian` się wyczyścił,
+  a stan cennika (`zmienione`) pozostał nietknięty — zapis jednej sekcji nie dotyka drugiej.
+- Zwijanie: kliknięcie nagłówka „Pozycje” ustawiło `aria-expanded="false"` i schowało ciało
+  sekcji; przełączniki istnieją dokładnie przy trzech sekcjach treściowych
+  (Pozycje, Wydarzenia, Kategorie), a przyciski akcji w nagłówku działają dalej.
+
+**Strona**
+
+- `/data/wydarzenia.json` oddał **wyłącznie** wpis aktywny; `winobranie-2026`
+  i `zakonczone-spotkanie` nie pojawiły się w treści odpowiedzi. Nagłówki: `no-store`,
+  `application/json; charset=utf-8`.
+- Sekcja `#wydarzenia` pokazała jedną kartę nad kartą degustacji, z zakresem
+  „1 września – 30 września 2026” i zachowaną pustą linią w treści
+  (`white-space` policzone jako `pre-line`, czyli reguła z `custom.css` działa).
+- Cztery motywy: tło karty i kolor tytułu idą za tokenami motywu
+  (`classic` #f6f5f3/#2e2e2e, `modern` #ffffff/#1a1a1a, `rustic` #f1ece4/#2e251f,
+  `dark` #191b1f/#f3f1ed).
+- Pusty plik → sekcja bez zmian. Uszkodzony JSON → trasa oddaje `500` z pustą listą,
+  strona główna dalej `200`, kontener zostaje ukryty, karta degustacji nietknięta,
+  a w konsoli ląduje `console.error` — odwiedzający nie widzi żadnego komunikatu o błędzie.
+
+**Testy** — pięć zestawów przechodzi: `test-routing` (rozszerzony o trasę wydarzeń i o kontrolę,
+że `wsgi.py` nie porównuje dat), `test-wydarzenia` (36 asercji), `test-cennik-sciezka`,
+`test-panel-auth`, `test-serwowanie`.
+
+**Znalezione i naprawione w trakcie**
+
+- `proponujId()` w `panel.js` jest cennikowe — sięga do `cennik.wina` i `wybrany`. Użyte dla
+  wydarzeń deduplikowałoby identyfikatory po ID win i wywalałoby się, gdyby wydarzenia
+  wczytały się przed cennikiem. Wydzielone `slugWydarzenia()`.
+- Długa ścieżka pliku w nagłówku sekcji wypychała stronę w poziomie. Nagłówek dostał
+  `flex-wrap`, ścieżka `overflow-wrap: anywhere`.
+
+**Znane, nienaprawione (poza zakresem)** — panel przewija się w poziomie przy szerokości
+360 px przez spany `.kropka` w liście cennika. To istniejący markup, nie ta zmiana; panel
+jest narzędziem desktopowym.
 
 ## Changelog
 
@@ -411,3 +483,7 @@ _(do uzupełnienia po wdrożeniu)_
   w sticky pasku oraz pole `sciezka` w odpowiedzi `wydarzenia-wczytaj`, żeby nagłówek sekcji
   pokazywał realny plik roboczy. Potwierdzone bezpośrednim grepem: jedyna klasa `whitespace-*`
   w bundlu Tailwinda to `whitespace-nowrap`.
+- Na wniosek Właściciela dodane zwijanie sekcji treściowych panelu (Pozycje, Wydarzenia,
+  Kategorie) klikalnym nagłówkiem; sekcje formularzy zostają bez przełącznika.
+- Wdrożone. Odstępstwo od specyfikacji: identyfikator wpisu nadaje `slugWydarzenia()`,
+  a nie `proponujId()` — ta druga funkcja jest cennikowa i zależy od stanu cennika.

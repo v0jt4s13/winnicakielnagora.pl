@@ -817,6 +817,66 @@ function initPrzelacznikHero() {
   document.body.appendChild(pasek);
 }
 
+/** Zakres dat wpisu po polsku; wydarzenie jednodniowe pokazuje jedną datę, nie zakres. */
+function zakresDatWydarzenia(od, do_) {
+  const dzien = (iso) => new Date(`${iso}T00:00:00`);
+  const pelny = new Intl.DateTimeFormat("pl-PL", { day: "numeric", month: "long", year: "numeric" });
+  if (od === do_) return pelny.format(dzien(od));
+  const bezRoku = new Intl.DateTimeFormat("pl-PL", { day: "numeric", month: "long" });
+  const tenSamRok = od.slice(0, 4) === do_.slice(0, 4);
+  return `${(tenSamRok ? bezRoku : pelny).format(dzien(od))} – ${pelny.format(dzien(do_))}`;
+}
+
+/** Wydarzenia z /data/wydarzenia.json.
+ *
+ * Serwer oddaje wyłącznie wpisy aktywne dziś (wydarzenia.aktywne w Pythonie), więc tutaj
+ * NIE MA żadnej logiki dat — renderujemy to, co przyszło. Pusta lista zostawia sekcję
+ * dokładnie taką, jaka jest w HTML-u: samą kartę o degustacjach.
+ */
+async function initWydarzenia() {
+  const lista = qs("#lista-wydarzen");
+  if (!lista) return;
+
+  let wpisy;
+  try {
+    const odpowiedz = await fetch(`${KORZEN}data/wydarzenia.json`, { cache: "no-store" });
+    if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
+    const dane = await odpowiedz.json();
+    if (!Array.isArray(dane?.wydarzenia)) throw new Error("brak tablicy 'wydarzenia'");
+    wpisy = dane.wydarzenia;
+  } catch (blad) {
+    // Cicho dla odwiedzającego: brak wydarzeń to normalny stan winnicy, nie awaria sklepu.
+    console.error("Nie udało się wczytać data/wydarzenia.json:", blad);
+    return;
+  }
+
+  if (wpisy.length === 0) return;
+
+  wpisy.forEach((wpis) => {
+    const karta = document.createElement("article");
+    karta.className = "rounded-md border border-card-border bg-card p-8";
+
+    const daty = document.createElement("div");
+    daty.className = "text-sm text-muted-foreground mb-2";
+    daty.textContent = zakresDatWydarzenia(wpis.data_od, wpis.data_do);
+
+    const tytul = document.createElement("h3");
+    tytul.className = "font-serif text-2xl font-bold mb-3";
+    tytul.textContent = wpis.tytul;
+
+    const tresc = document.createElement("p");
+    tresc.className = "text-muted-foreground wydarzenie-tresc";
+    // textContent, nigdy innerHTML — to jedyne miejsce, gdzie tekst wpisany przez człowieka
+    // w panelu trafia do markupu strony publicznej.
+    tresc.textContent = wpis.tresc;
+
+    karta.append(daty, tytul, tresc);
+    lista.appendChild(karta);
+  });
+
+  lista.hidden = false;
+}
+
 function initContactForm() {
   const form = qs("#contact-form");
   form?.addEventListener("submit", (e) => {
@@ -835,6 +895,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initContactForm();
   initPrzelacznikHero();
 
+  initWydarzenia();
   cennik = await wczytajCennik();
   renderKategorie();
   if (renderSklep()) initFilters();
