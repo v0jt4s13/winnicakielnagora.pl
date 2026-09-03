@@ -1,31 +1,30 @@
 # Kadry zdjecia wejsciowego (hero)
 
-## Co jest czym
+Cztery kadry pory dnia: `poranek`, `dzien`, `zachod`, `noc`. Uzywaja ich `index.html`
+i `404.html`; kadr dla strony glownej wybiera serwer (`wsgi.py`, patrz SPEC-003).
 
-| Plik | Rola |
-|---|---|
-| `*.webp` | to, co dostaje przegladarka — jedyne pliki uzywane przez `index.html` i `404.html` |
-| `*.png` | master, z ktorego powstal WebP; **nic ich juz nie wczytuje** |
+## Co tu lezy, a czego nie
 
-WebP powstaje z PNG przez `python3 tools/optimize-hero.py` (q80, bez zmiany rozdzielczosci).
+W repozytorium sa **wylacznie `*.webp`** — to one ida do przegladarki.
 
-## Notka dla designera — do decyzji
+Mastery (PNG, ok. 2 MB kazdy) leza **poza repozytorium**, w
+`docs/materialy-do-wykorzystania/hero/`. Katalog `docs/` jest w `.gitignore`, tak samo jak
+material zrodlowy dla `tools/optimize-photos.py`. Wczesniej kopie PNG lezaly rowniez tutaj
+i jechaly na wdrozenie (8,2 MB), mimo ze zadna strona ich nie wczytywala — zostaly usuniete.
 
-Cztery PNG waza razem **8,2 MB** i leza w katalogu publicznym, wiec jada na wdrozenie,
-mimo ze zadna strona ich nie wczytuje. Zostawilismy je celowo, bo to material zrodlowy,
-a nie nasza decyzja, czy jest jeszcze potrzebny.
-
-**Jesli sa zbedne** — usun je albo przenies do `docs/materialy-do-wykorzystania/hero/`
-(ten katalog nie jest serwowany, patrz `KATALOGI_PUBLICZNE` w `wsgi.py`). Same PNG-i nie
-sa potrzebne do dzialania strony; potrzebne sa tylko wtedy, gdy ktos bedzie chcial
-przekodowac kadry ponownie w innej jakosci.
-
-**Jesli zostaja** — nie usuwaj `*.webp` i nie podmieniaj sciezek w HTML-u z powrotem na PNG:
-kadr hero jest elementem LCP strony glownej, a PNG po ok. 2 MB psuje czas ladowania.
+Konsekwencja: **swiezy klon nie ma z czego przekodowac kadrow.** Potrzebne sa oryginaly
+od Wlasciciela. To swiadome — repozytorium nie jest magazynem materialu zrodlowego.
 
 ## Podmiana kadru
 
-1. Wrzuc nowy PNG pod ta sama nazwa (`poranek` / `dzien` / `zachod` / `noc`).
-2. Zachowaj **1534x1025** — inny rozmiar zmieni kadrowanie i wywola przeskok ukladu
-   (`width`/`height` sa zaszyte w `index.html` i `404.html`).
-3. Uruchom `python3 tools/optimize-hero.py`.
+1. Wrzuc nowy PNG do `docs/materialy-do-wykorzystania/hero/` pod ta sama nazwa
+   (`poranek` / `dzien` / `zachod` / `noc`).
+2. Zachowaj **1534x1025**. Inny rozmiar zmieni kadrowanie i wywola przeskok ukladu —
+   `width` i `height` sa zaszyte w `index.html` i `404.html`.
+3. `python3 tools/optimize-hero.py` — nadpisze `*.webp` w tym katalogu (q80).
+4. Obejrzyj strone glowna we wszystkich trzech motywach; nocny kadr wlacza ciemny `modern`.
+
+## Czego nie robic
+
+Nie przepinaj sciezek w HTML-u z powrotem na PNG. Kadr hero jest elementem LCP strony
+glownej — plik po 2 MB kasuje caly zysk z preloadu wstawianego przez serwer.

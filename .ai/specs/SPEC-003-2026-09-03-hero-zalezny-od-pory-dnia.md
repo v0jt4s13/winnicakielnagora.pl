@@ -13,10 +13,11 @@ na stronie głównej, na stronie 404 **i na podstronach odmian**, które nie maj
 Źródła dostarczone przez Właściciela znajdują się w
 `docs/materialy-do-wykorzystania/hero/`. `wsgi.py` dopuszcza publicznie tylko katalogi
 z `KATALOGI_PUBLICZNE`, gdzie znajduje się `attached_assets`, ale nie `docs`. Dlatego do
-`attached_assets/photos/hero/` trafią kopie dostarczonych PNG bez konwersji i utraty jakości.
-Do przeglądarki idzie jednak **WebP** wygenerowany z tych PNG przez `tools/optimize-hero.py`:
-kadr hero jest elementem LCP, a PNG po ok. 2 MB kasował cały zysk z wczesnego wykrycia obrazu.
-PNG zostają w repozytorium jako master do ponownego przekodowania. Operacyjny opis ról plików,
+`attached_assets/photos/hero/` trafiają **wyłącznie pliki WebP** wygenerowane z tych PNG
+przez `tools/optimize-hero.py`: kadr hero jest elementem LCP, a PNG po ok. 2 MB kasował cały
+zysk z wczesnego wykrycia obrazu. Mastery PNG zostają poza repozytorium, w katalogu źródłowym
+— tak samo jak materiał dla `tools/optimize-photos.py`. Świeży klon nie odtworzy kadrów
+bez oryginałów od Właściciela; to świadoma decyzja, repozytorium nie magazynuje źródeł. Operacyjny opis ról plików,
 decyzji o przechowywaniu masterów i podmiany kadru znajduje się obok grafik w
 `attached_assets/photos/hero/README.md`.
 
@@ -153,8 +154,8 @@ Granice są domknięte od początku i otwarte od końca. Przykładowo dokładnie
   przedziale. Po zmianie pory nowy URL może zostać pobrany normalnie. Błąd samej panoramy
   awaryjnej nie powoduje kolejnej podmiany, więc nie powstaje pętla.
 - Obrazy: wszystkie cztery kadry mają 1534×1025, co zapobiega zmianie kadru i layout shift.
-  Do przeglądarki idzie WebP q80 z `tools/optimize-hero.py` (2,0–2,3 MB PNG → 94–174 kB);
-  PNG zostają jako master. Przeglądarki bez obsługi WebP obsługuje istniejąca ścieżka
+  Do przeglądarki idzie WebP q80 z `tools/optimize-hero.py` (2,0–2,3 MB PNG → 94–174 kB),
+  generowany z masterów w `docs/materialy-do-wykorzystania/hero/` (poza repozytorium). Przeglądarki bez obsługi WebP obsługuje istniejąca ścieżka
   `data-fallback-src` — handler `error` podstawia `winnica-panorama-01.jpg`.
 
 ## Data Models
@@ -221,7 +222,8 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 ## Implementation Checklist
 
 - [x] Wstrzyknąć standardy `frontend/js-conventions` i `content/html-editing`.
-- [x] Skopiować cztery źródłowe PNG do `attached_assets/photos/hero/`.
+- [x] ~~Skopiować cztery źródłowe PNG do `attached_assets/photos/hero/`.~~ Zastąpione:
+  do repozytorium trafiają tylko WebP, mastery zostają w katalogu źródłowym.
 - [x] Dodać konfigurację wariantów i fallback do obrazu hero w `index.html`.
 - [x] Dodać `heroPeriodForHour()` i `initHeroImage()` w `assets/js/main.js`.
 - [x] Podłączyć ten sam mechanizm do obrazu tła w `404.html`.
@@ -236,6 +238,7 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
   `index.html` oraz `404.html`.
 - [x] Przenieść wybór kadru dla `/` na serwer wraz z `preload` (`wsgi.py`).
 - [x] Dopisać testy pory dnia, podmiany hero i kotwic do `tools/test-routing.py`.
+- [x] Usunąć mastery PNG z repozytorium i przepiąć `tools/optimize-hero.py` na katalog źródłowy.
 
 ## Implementation Review
 
@@ -289,6 +292,9 @@ Po przeglądzie kodu (Flask z venv, Chrome):
   wyglądający na poprawny, ale zrobiony na niewłaściwym obrazie.
 - `tools/test-routing.py`: siatka godzin, podmiana `src` i `preload` na `/`, warianty
   `?hero=` (w tym wartość spoza listy) oraz zachowanie przy niepasującej kotwicy.
+- Mastery PNG (8,2 MB) usunięte z repozytorium — jechały na wdrożenie, choć żadna strona
+  ich nie wczytywała. `tools/optimize-hero.py` czyta je teraz z katalogu źródłowego poza
+  repozytorium. Sprawdzone: WebP odtworzone z masterów są bitowo identyczne z tymi w repo.
 
 ### 2026-09-03
 
