@@ -123,9 +123,9 @@ Sam formularz jest już w repozytorium i **jest serwowany publicznie** pod
 brzmi `/docs/` — z ukośnikiem z przodu; bez niego łapała katalog o tej nazwie na każdym
 poziomie i po cichu pomijała `attached_assets/docs/` przy commitowaniu.
 
-**Do rozważenia:** `robots.txt` ma `Allow: /`, więc formularz będzie indeksowany, mimo że
-nie ma jeszcze uzupełnionych danych winnicy i nie czytał go prawnik. Jeśli to przeszkadza —
-`Disallow: /attached_assets/docs/`.
+`robots.txt` ma `Allow: /`, więc formularz jest indeksowany. **Decyzja Właściciela
+(2026-09-03): zostaje tak — nie dodajemy `Disallow`.** To pusty szablon bez danych osobowych,
+a repozytorium i tak jest publiczne. Nie wracaj do tego bez jego słowa.
 
 **Czego potrzebuję, żeby użyć tych zdjęć:** wyłącznie numery z przeglądu.
 **Nie przysyłaj nazwisk ani podpisanych formularzy** — to dane osobowe, a repozytorium jest
