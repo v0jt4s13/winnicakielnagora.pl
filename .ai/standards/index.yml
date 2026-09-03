@@ -15,4 +15,4 @@ frontend:
   styling:
     description: Bundle Tailwinda tylko do odczytu vs. ręczny custom.css, kolory przez zmienne motywu
   theming:
-    description: Trzy motywy w themeStyles, parytet 29 zmiennych CSS, colorScheme i trwałość preferencji
+    description: Trzy motywy w themeStyles, parytet 29 zmiennych CSS, colorScheme, preferencje i niezależny initTimeTheme

@@ -35,8 +35,11 @@ done   # trzy razy ta sama liczba
   wartość do `document.documentElement.style.colorScheme`.
 - Wybrany motyw ląduje w `localStorage["winery-style"]`; domyślny (brak wpisu) to `classic`.
 - Automatyczne, chwilowe przełączenie wyglądu wywołuje `setTheme(style, false)`, żeby nie
-  nadpisać ręcznie zapisanej preferencji. Nocny kadr hero jest takim przełączeniem na
-  `modern`; po wyjściu z okresu nocnego wraca `preferredTheme()`.
+  nadpisać ręcznie zapisanej preferencji. Nocna pora jest takim przełączeniem na `modern`;
+  po wyjściu z niej wraca `preferredTheme()`.
+- Reguła czasowa motywu należy do osobnego `initTimeTheme()`, niezależnego od
+  `initHeroImage()`. Podstrony odmian ładują `main.js`, ale nie mają `#hero-image`, więc
+  inicjalizator obrazu nie może odpowiadać za wygląd całej witryny.
 - Każda zmiana kolorów lub CSS wymaga obejrzenia strony we **wszystkich trzech** motywach.
 
 ## Why

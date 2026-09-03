@@ -16,7 +16,9 @@ z `KATALOGI_PUBLICZNE`, gdzie znajduje się `attached_assets`, ale nie `docs`. D
 `attached_assets/photos/hero/` trafią kopie dostarczonych PNG bez konwersji i utraty jakości.
 Do przeglądarki idzie jednak **WebP** wygenerowany z tych PNG przez `tools/optimize-hero.py`:
 kadr hero jest elementem LCP, a PNG po ok. 2 MB kasował cały zysk z wczesnego wykrycia obrazu.
-PNG zostają w repozytorium jako master do ponownego przekodowania.
+PNG zostają w repozytorium jako master do ponownego przekodowania. Operacyjny opis ról plików,
+decyzji o przechowywaniu masterów i podmiany kadru znajduje się obok grafik w
+`attached_assets/photos/hero/README.md`.
 
 ## User Stories
 
@@ -40,7 +42,7 @@ obiadowej. Oczekuje aktualnego, jasnego pierwszego wrażenia bez wykonywania dod
    `poranek` dla 06:00–11:59 albo `dzien` dla 12:00–17:59 i ustawia `src` elementu
    `#hero-image` na ścieżkę zapisaną w jego `dataset`.
 
-   > **Zmiana vs. stan obecny:** obecnie hero zawsze pokazuje
+   > **Zmiana vs. stan przed wdrożeniem:** hero zawsze pokazywało
    > `winnica-panorama-01.jpg`. Po zmianie obraz odpowiada porze dnia w Kielnarowej;
    > układ i tekst pozostają identyczne.
 
@@ -52,8 +54,8 @@ dłuższy czas i wraca do początku strony po 22:00.
 1. O 21:59 hero pokazuje zachód słońca.
 
    ```text
-   21:59  ──►  zachod.png
-   22:00  ──►  noc.png
+   21:59  ──►  zachod.webp
+   22:00  ──►  noc.webp
    ```
 
 2. Po przekroczeniu granicy przedziału obraz aktualizuje się bez przeładowania strony.
@@ -61,7 +63,7 @@ dłuższy czas i wraca do początku strony po 22:00.
    **Za kulisami:** ta sama funkcja wyboru uruchamia się przy starcie i co 60 sekund.
    Jeżeli wybrany URL jest już ustawiony, DOM nie jest modyfikowany ponownie.
 
-   > **Zmiana vs. stan obecny:** obecnie obraz nie reaguje na upływ czasu. Po zmianie
+   > **Zmiana vs. stan przed wdrożeniem:** obraz nie reagował na upływ czasu. Po zmianie
    > otwarta karta przechodzi do kolejnego kadru najpóźniej minutę po granicy przedziału.
 
 ### 3. Nocny kadr przełącza witrynę na ciemny motyw
@@ -75,7 +77,7 @@ widoku, który pasuje do nocnej fotografii, bez ręcznego zmieniania ustawień.
    zapisany motyw: classic     pora: noc
               └──────────────┬──────────────┘
                              ▼
-                 noc.png + Modern Minimal Dark
+                 noc.webp + Modern Minimal Dark
    ```
 
 2. Automatyczny wybór `modern` nie zapisuje się do `localStorage`. Ręczny wybór stylu
@@ -88,7 +90,7 @@ widoku, który pasuje do nocnej fotografii, bez ręcznego zmieniania ustawień.
    preferencji. `initHeroImage()` reaguje tylko na zmianę przedziału, dzięki czemu ręczny
    wybór dokonany już w nocy nie jest cofany przy każdej aktualizacji minutowej.
 
-   > **Zmiana vs. stan obecny:** obecnie `modern` jest jasny, a wybór `noc.png` nie wpływa
+   > **Zmiana vs. stan przed wdrożeniem:** `modern` był jasny, a wybór pory `noc` nie wpływał
    > na resztę interfejsu. Po zmianie noc uruchamia ciemną paletę, a poranek przywraca
    > zapisaną preferencję.
 
@@ -173,8 +175,10 @@ sieciowe to pobranie wybranego pliku obrazu.
 - Zachowane zostają klasy sekcji `.relative h-[600px] md:h-[700px] w-full overflow-hidden`.
 - `object-cover`, gradient, treść i CTA pozostają bez zmian.
 - Obraz nadal jest dekoracyjny (`alt=""`).
-- Przed wyborem nie jest pobierany żaden sieciowy obraz hero, dlatego start nie pokazuje
-  niewłaściwej pory i nie wykonuje podwójnego pobrania. Po wyborze zmienia się tylko `src`.
+- Dla zwykłego `/` serwer wybiera obraz przed wysłaniem HTML i wstawia ten sam URL do
+  `preload` oraz `src`, dlatego preload scanner odkrywa właściwy kadr i przeglądarka pobiera
+  tylko jeden obraz hero. JavaScript zmienia `src` dopiero po przekroczeniu granicy przedziału
+  albo przy uruchomieniu kontrolowanego fallbacku.
 - Funkcja ma działać jednakowo na desktopie, telefonie i we wszystkich trzech motywach.
 - Ciemny `modern` musi zachować czytelność tekstu, kart, filtrów, formularza, menu i koszyka;
   wszystkie kolory nadal pochodzą wyłącznie ze zmiennych motywu.
@@ -202,7 +206,8 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 - Strona 404 wybiera ten sam wariant czasowy co strona główna i zachowuje kod HTTP 404.
 - Widok zachowuje czytelność na desktopie i telefonie we wszystkich motywach.
 - `modern` ma pełną ciemną paletę i `color-scheme: dark`; dwa pozostałe motywy pozostają jasne.
-- `noc.png` automatycznie aktywuje `modern` na stronie głównej i 404 bez zmiany zapisanej preferencji.
+- Pora `noc` automatycznie aktywuje `modern` na stronie głównej, 404 i podstronach odmian
+  bez zmiany zapisanej preferencji.
 - Przejście z nocy do poranka przywraca ręcznie zapisaną preferencję.
 - Ręczna zmiana stylu po automatycznym wyborze nocnym nie jest cofana co minutę.
 - Nocny motyw działa też na podstronach odmian (`wina/*.html`), które nie mają hero.
@@ -237,7 +242,7 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 - Sprawdzono mapowanie wszystkich 24 godzin oraz wartości spoza zakresu.
 - Sprawdzono fallback uszkodzonego obrazu i przejście do kolejnego przedziału.
 - Cztery PNG są bitowo identyczne z materiałami źródłowymi i zwracają HTTP 200.
-- Chrome wybrał `noc.png` zgodnie z aktualną godziną `Europe/Warsaw`.
+- Chrome wybrał `noc.webp` zgodnie z aktualną godziną `Europe/Warsaw`.
 - Strona 404 pod nieistniejącym adresem zachowuje kod 404 i wybiera ten sam obraz czasowy.
 - Widok hero sprawdzono w Chrome na desktopie 1440×900, telefonie 390×844 oraz we
   wszystkich trzech motywach: `classic`, `modern` i `rustic`.

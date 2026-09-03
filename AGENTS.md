@@ -240,6 +240,7 @@ assets/
   js/main.js              # cały front-end: motywy, nawigacja, filtry, koszyk, formularz
 attached_assets/
   generated_images/       # grafiki witryny (hero, butelki, wnętrza) — PNG + jeden JPG
+  photos/hero/             # czasowe kadry hero: WebP dla przeglądarki, PNG master + lokalny README
 .ai/                      # GUARDRAILS.md, specs/, standards/ — workspace workflow t-shirt size
 .claude/agents/           # subagenci — UWAGA: katalog jest w .gitignore, po klonie go nie ma
 .claude/skills/           # komendy /inject-standards, /verify-standards… — też w .gitignore
@@ -431,6 +432,13 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
   po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich trzech obiektach
   `themeStyles`. Szczegóły: `.ai/standards/frontend/theming.md`.
+- **Motyw zależny od pory dnia nie może żyć w inicjalizatorze hero.** Podstrony `wina/*.html`
+  nie mają `#hero-image`, ale nadal muszą dostać nocny `modern`. Logikę ogólnowitrynową trzymaj
+  w osobnym `initTimeTheme()`, a `initHeroImage()` niech odpowiada wyłącznie za obraz.
+- **Pomiar `?hero=` nie dowodzi zachowania zwykłego `/`.** Dla obrazu LCP sprawdź produkcyjną
+  ścieżkę routingu: preload scanner musi dostać ten sam plik co `src`, bez wcześniejszego
+  pobrania fallbacku. W przeglądarce używane są WebP; PNG to nieużywane mastery. Role plików,
+  decyzja o masterach i procedura podmiany: `attached_assets/photos/hero/README.md`.
 - **`alert()` blokuje automatyzację przeglądarki.** „Przejdź do płatności" (`initCart`)
   i wysyłka formularza (`initContactForm`) wołają `alert()` — kliknięcie ich przez Chrome MCP
   zawiesza sesję. Te dwa przyciski testuj ręcznie.
@@ -469,5 +477,5 @@ treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa 
 | Motywy | `assets/js/main.js` — obiekt `themeStyles` na górze pliku + `setTheme` / `initStyleSwitcher` |
 | Filtry sklepu | `assets/js/main.js` — `function initFilters` (kategoria, zakres cen 0–100, „tylko promocje") |
 | Style własne | `assets/css/custom.css` — `grep -n '^\.' assets/css/custom.css`; bundle `assets/css/style.css` tylko do odczytu |
-| Grafiki | `attached_assets/generated_images/`, ścieżki względne `./attached_assets/…` |
+| Grafiki | `attached_assets/generated_images/`; kadry czasowego hero i procedura ich podmiany: `attached_assets/photos/hero/README.md` |
 | Znane braki i rozjazdy | `TODO.md` |
