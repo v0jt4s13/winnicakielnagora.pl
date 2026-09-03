@@ -36,37 +36,37 @@ const themeStyles = {
   },
   modern: {
     name: "Modern Minimal",
-    colorScheme: "dark",
+    colorScheme: "light",
     vars: {
-      "--background": "225 12% 8%",
-      "--foreground": "40 20% 94%",
-      "--border": "220 10% 24%",
-      "--card": "225 11% 11%",
-      "--card-foreground": "40 20% 94%",
-      "--card-border": "220 10% 19%",
-      "--sidebar": "225 12% 10%",
-      "--sidebar-foreground": "40 20% 94%",
-      "--sidebar-border": "220 10% 20%",
-      "--sidebar-primary": "38 60% 54%",
-      "--sidebar-primary-foreground": "225 14% 8%",
-      "--sidebar-accent": "220 10% 18%",
-      "--sidebar-accent-foreground": "40 20% 94%",
-      "--sidebar-ring": "38 70% 58%",
-      "--popover": "225 12% 12%",
-      "--popover-foreground": "40 20% 94%",
-      "--popover-border": "220 10% 22%",
-      "--primary": "220 11% 16%",
-      "--primary-foreground": "40 20% 96%",
-      "--secondary": "220 10% 17%",
-      "--secondary-foreground": "40 15% 92%",
-      "--muted": "220 9% 14%",
-      "--muted-foreground": "215 12% 68%",
-      "--accent": "220 10% 20%",
-      "--accent-foreground": "40 20% 96%",
-      "--destructive": "0 68% 46%",
+      "--background": "0 0% 98%",
+      "--foreground": "0 0% 10%",
+      "--border": "0 0% 88%",
+      "--card": "0 0% 100%",
+      "--card-foreground": "0 0% 10%",
+      "--card-border": "0 0% 92%",
+      "--sidebar": "0 0% 96%",
+      "--sidebar-foreground": "0 0% 10%",
+      "--sidebar-border": "0 0% 90%",
+      "--sidebar-primary": "0 0% 15%",
+      "--sidebar-primary-foreground": "0 0% 98%",
+      "--sidebar-accent": "0 0% 92%",
+      "--sidebar-accent-foreground": "0 0% 10%",
+      "--sidebar-ring": "0 0% 30%",
+      "--popover": "0 0% 98%",
+      "--popover-foreground": "0 0% 10%",
+      "--popover-border": "0 0% 88%",
+      "--primary": "0 0% 15%",
+      "--primary-foreground": "0 0% 98%",
+      "--secondary": "0 0% 92%",
+      "--secondary-foreground": "0 0% 10%",
+      "--muted": "0 0% 94%",
+      "--muted-foreground": "0 0% 40%",
+      "--accent": "0 0% 90%",
+      "--accent-foreground": "0 0% 10%",
+      "--destructive": "0 84% 45%",
       "--destructive-foreground": "0 0% 98%",
-      "--input": "220 10% 35%",
-      "--ring": "38 70% 58%"
+      "--input": "0 0% 65%",
+      "--ring": "0 0% 30%"
     }
   },
   rustic: {
@@ -102,6 +102,41 @@ const themeStyles = {
       "--destructive-foreground": "0 0% 98%",
       "--input": "0 0% 65%",
       "--ring": "35 60% 45%"
+    }
+  },
+  dark: {
+    name: "Dark",
+    colorScheme: "dark",
+    vars: {
+      "--background": "225 12% 8%",
+      "--foreground": "40 20% 94%",
+      "--border": "220 10% 24%",
+      "--card": "225 11% 11%",
+      "--card-foreground": "40 20% 94%",
+      "--card-border": "220 10% 19%",
+      "--sidebar": "225 12% 10%",
+      "--sidebar-foreground": "40 20% 94%",
+      "--sidebar-border": "220 10% 20%",
+      "--sidebar-primary": "38 60% 54%",
+      "--sidebar-primary-foreground": "225 14% 8%",
+      "--sidebar-accent": "220 10% 18%",
+      "--sidebar-accent-foreground": "40 20% 94%",
+      "--sidebar-ring": "38 70% 58%",
+      "--popover": "225 12% 12%",
+      "--popover-foreground": "40 20% 94%",
+      "--popover-border": "220 10% 22%",
+      "--primary": "220 11% 16%",
+      "--primary-foreground": "40 20% 96%",
+      "--secondary": "220 10% 17%",
+      "--secondary-foreground": "40 15% 92%",
+      "--muted": "220 9% 14%",
+      "--muted-foreground": "215 12% 68%",
+      "--accent": "220 10% 20%",
+      "--accent-foreground": "40 20% 96%",
+      "--destructive": "0 68% 46%",
+      "--destructive-foreground": "0 0% 98%",
+      "--input": "220 10% 35%",
+      "--ring": "38 70% 58%"
     }
   }
 };
@@ -222,7 +257,7 @@ function initTimeTheme() {
     if (!pora || pora === poprzedniaPora) return;
     const bylaNoc = poprzedniaPora === "noc";
     poprzedniaPora = pora;
-    if (pora === "noc") setTheme("modern", false);
+    if (pora === "noc") setTheme("dark", false);
     else if (bylaNoc) setTheme(preferredTheme(), false);
   }
 
