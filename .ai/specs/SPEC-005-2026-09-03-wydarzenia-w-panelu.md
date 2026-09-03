@@ -13,12 +13,12 @@ akcje — nie doklejamy ich do cennika, bo to inny byt, o innym cyklu życia i i
 
 ### Czego ta zmiana świadomie nie robi
 
-- **Nie ma zapowiedzi wydarzeń.** Przy czterech polach z zadania `data_od` pełni jednocześnie
-  rolę początku wydarzenia i początku publikacji, więc wpis pojawia się dopiero w dniu
-  rozpoczęcia. Zapowiedź „za dwa tygodnie u nas…" wymagałaby piątego pola (`data_publikacji_od`).
-  Zgłoszone Właścicielowi 2026-09-03, decyzja: zostajemy przy czterech polach.
 - **Nie ma godzin.** Granice są dzienne, w strefie `Europe/Warsaw`.
-- **Nie ma zdjęć w wpisie.** Sekcja ma już swoją grafikę.
+- **Nie ma powtarzalności ani kalendarza.** Wpis to jeden przedział dat, nie cykl.
+
+> Dwa wcześniejsze ograniczenia zostały zniesione na wniosek Właściciela (2026-09-03):
+> wpis ma własną **datę publikacji** (można zapowiedzieć wydarzenie z wyprzedzeniem)
+> oraz **zdjęcie**. Szczegóły niżej; poprzedni zapis mówił, że jednego i drugiego nie ma.
 
 ## User Stories
 
@@ -135,15 +135,25 @@ szumem dla odwiedzającego.
 
 ## Warianty widoczności
 
-Niech `dzis` to data w `Europe/Warsaw` w formacie `YYYY-MM-DD`.
+Niech `dzis` to data w `Europe/Warsaw` w formacie `YYYY-MM-DD`, a `poczatek` to
+`data_publikacji_od`, jeśli pole jest wypełnione, albo `data_od`, jeśli puste.
 
 | Warunek | Wpis na stronie |
 |---|---|
-| `data_od <= dzis <= data_do` | **widoczny** |
-| `dzis < data_od` | ukryty (wydarzenie jeszcze się nie zaczęło) |
+| `poczatek <= dzis <= data_do` | **widoczny** |
+| `dzis < poczatek` | ukryty (jeszcze nie zapowiadamy) |
 | `dzis > data_do` | ukryty (wydarzenie się skończyło) |
 
-Granice są domknięte z obu stron: w dniu `data_od` i w dniu `data_do` wpis jest widoczny.
+Granice są domknięte z obu stron: w dniu `poczatek` i w dniu `data_do` wpis jest widoczny.
+
+**Rozdzielenie zapowiedzi od terminu.** `data_od` i `data_do` opisują, **kiedy wydarzenie
+się odbywa** — i to one trafiają do zakresu dat pokazywanego odwiedzającemu.
+`data_publikacji_od` mówi wyłącznie, **od kiedy wpis ma być widoczny**. Puste pole zachowuje
+poprzednie zachowanie (wpis pojawia się w dniu rozpoczęcia), więc wpisy sprzed tej zmiany
+działają bez migracji.
+
+Koniec publikacji celowo nie ma osobnego pola: wpis znika po `data_do`, bo zakończone
+wydarzenie nie ma czego ogłaszać.
 Daty w ISO `YYYY-MM-DD` porównujemy jako napisy — dla tego formatu porządek leksykograficzny
 jest tożsamy z chronologicznym, więc nie ma potrzeby parsowania.
 
@@ -297,7 +307,22 @@ rósłby w nieskończoność. **Do wycięcia, jeśli Właściciel uzna to za nad
 | `data_od` | `^\d{4}-\d{2}-\d{2}$` **i** poprawna data kalendarzowa (`datetime.date.fromisoformat`) |
 | `data_do` | jak wyżej, dodatkowo `data_do >= data_od` |
 
-Pól opcjonalnych nie ma. Nieznane pola w pliku → błąd walidacji, jak w cenniku.
+Pola opcjonalne:
+
+| Pole | Reguła |
+|---|---|
+| `data_publikacji_od` | data jak wyżej, dodatkowo `<= data_do`. Puste albo brak = `data_od` |
+| `zdjecie` | slug z `attached_assets/photos/` **bez** rozszerzenia i bez `-sm`, dokładnie jak `zdjecie` pozycji cennika. Puste albo brak = wpis bez zdjęcia |
+
+Nieznane pola w pliku → błąd walidacji, jak w cenniku.
+
+**`data_publikacji_od > data_do` jest błędem, nie dziwnym ustawieniem** — taki wpis nigdy
+by się nie pokazał, a cisza wyglądałaby jak usterka strony.
+
+**Skąd lista zdjęć w panelu.** `wydarzenia.py` **nie** buduje własnej listy slugów i nie
+importuje `cennik.py`: sprawdza po prostu, czy `attached_assets/photos/<slug>.jpg` istnieje.
+Panel ma już listę `zdjecia` z `cennik.stan_poczatkowy()` i to jej używa do zbudowania
+`<select>` — jedna lista, dwa formularze, zero duplikatu.
 
 **Treść jest zwykłym tekstem i trafia do DOM przez `textContent`, nigdy `innerHTML`.**
 Wpis pochodzi z panelu za hasłem, ale to jedyne miejsce w projekcie, gdzie tekst wpisany
@@ -320,14 +345,41 @@ Format błędu identyczny z cennikiem: `{"pozycja": <int|null>, "pole": <str|nul
 
 Wpis na stronie głównej, wewnątrz `#lista-wydarzen`:
 
+Wpis **bez zdjęcia** — zwykła karta z paddingiem, dokładnie jak dotąd:
+
 ```text
 ┌────────────────────────────────────────────────┐
 │  10–12 września 2026                           │
 │  Dzień otwarty                                 │
-│  Zapraszamy na zwiedzanie winnicy i degustację │
-│  młodych roczników.                            │
+│  Zapraszamy na zwiedzanie winnicy…             │
 └────────────────────────────────────────────────┘
 ```
+
+Wpis **ze zdjęciem** — ten sam układ dwukolumnowy, co istniejąca karta degustacji w tej
+sekcji (`grid md:grid-cols-2`); na telefonie kolumny składają się do pionu:
+
+```text
+┌────────────────────────┬───────────────────────┐
+│                        │  1–5 października 2026│
+│      [ zdjęcie ]       │  Winobranie 2026      │
+│                        │  Zbiory z udziałem…   │
+└────────────────────────┴───────────────────────┘
+```
+
+- Zdjęcie renderujemy **tylko wtedy, gdy pole `zdjecie` jest wypełnione**.
+  Ścieżka: `./attached_assets/photos/<slug>.jpg` — wariant pełny, nie `-sm`.
+- **Dlaczego dwie kolumny, a nie pasek nad tekstem.** Biblioteka zdjęć zawiera także kadry
+  **pionowe** (np. `dornfelder-kieliszek-01` to 1063×1600). Pasek 16:9 z `object-cover`
+  przycinałby je do wąskiego wycinka i ucinał kieliszek w pół. W kolumnie obraz dostaje
+  `md:aspect-auto` i wypełnia wysokość tekstu, więc kadr pionowy jest użyteczny.
+  Poniżej 768 px zostaje `aspect-video` — na telefonie kolumna i tak jest szeroka.
+- Klasy: karta `rounded-md border border-card-border overflow-hidden`, ramka
+  `aspect-video md:aspect-auto`, obraz `w-full h-full object-cover`, kolumna tekstu
+  `p-8 flex flex-col justify-center`. Wszystkie są w bundlu Tailwinda (sprawdzone).
+- `loading="lazy"` i `decoding="async"` — sekcja jest daleko pod zgięciem strony.
+- `alt` to tytuł wydarzenia. Zdjęcie niesie treść (co się dzieje), więc puste `alt` byłoby błędem.
+- Zakres dat nad tytułem pokazuje **`data_od`–`data_do`**, czyli termin wydarzenia.
+  `data_publikacji_od` nie jest nigdzie pokazywana odwiedzającemu — to ustawienie redakcyjne.
 
 - Ramka wpisu: `rounded-md border border-card-border bg-card p-8`.
   **Uwaga na opis:** to nie są „te same klasy co karta degustacji" — tamta ma
@@ -367,6 +419,14 @@ Panel działa tylko przy ustawionych `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` —
 - Wpis z `dzis < data_od` oraz wpis z `dzis > data_do` **nie trafiają do przeglądarki** —
   nie ma ich w odpowiedzi `/data/wydarzenia.json`, nie tylko w renderze.
 - Wydarzenie jednodniowe (`data_od == data_do`) jest widoczne w swoim dniu.
+- Wpis z `data_publikacji_od` wcześniejszą niż `data_od` pokazuje się **przed** rozpoczęciem
+  wydarzenia, a zakres dat na karcie dalej opisuje sam termin, nie datę publikacji.
+- Wpis bez `data_publikacji_od` zachowuje się dokładnie jak przed tą zmianą — pliki sprzed
+  niej nie wymagają migracji ani nie powodują błędu walidacji.
+- `data_publikacji_od > data_do` → `400`; taki wpis nigdy nie byłby widoczny.
+- Wpis ze `zdjecie` pokazuje je nad tytułem; wpis bez tego pola wygląda dokładnie jak dotąd.
+- `zdjecie` wskazujące nieistniejący plik → `400`, plik nietknięty.
+- Lista zdjęć w formularzu wydarzenia jest ta sama co w formularzu pozycji cennika.
 - `aktywne()` przyjmuje `dzis` jako argument, więc granice da się sprawdzić testem bez
   czekania na kalendarz.
 - Pusta lista albo same nieaktywne wpisy → sekcja `#wydarzenia` wygląda dokładnie jak dziś.
@@ -411,6 +471,15 @@ Panel działa tylko przy ustawionych `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` —
 - [ ] `TODO.md` — dopisać `WYDARZENIA_SCIEZKA` do opisu wdrożenia obok `CENNIK_SCIEZKA`
   (dokument uzgadniany z Właścicielem — zmiana dopiero po jego zgodzie).
 - [x] Przegląd w przeglądarce: cztery motywy, telefon, stany pusty / aktywny / błędny.
+
+Rozszerzenie z 2026-09-03 (data publikacji + zdjęcie):
+
+- [x] `wydarzenia.py` — pola opcjonalne, `aktywne()` liczy od daty publikacji, walidacja zdjęcia.
+- [x] `tools/panel/panel.html` — pola „Widoczne od" i „Zdjęcie".
+- [x] `tools/panel/panel.js` — obsługa obu pól, `<select>` z listy `zdjecia`, sekwencyjne wczytanie.
+- [x] `assets/js/main.js` — render zdjęcia w karcie wydarzenia (układ dwukolumnowy).
+- [x] `tools/test-wydarzenia.py` i `tools/test-routing.py` — granice publikacji, zgodność wstecz.
+- [x] Przegląd w przeglądarce: wpis zapowiedziany, wpis ze zdjęciem, wpis bez zdjęcia.
 
 ## Implementation Review
 
@@ -485,5 +554,14 @@ jest narzędziem desktopowym.
   w bundlu Tailwinda to `whitespace-nowrap`.
 - Na wniosek Właściciela dodane zwijanie sekcji treściowych panelu (Pozycje, Wydarzenia,
   Kategorie) klikalnym nagłówkiem; sekcje formularzy zostają bez przełącznika.
+- Na wniosek Właściciela zniesione dwa ograniczenia zapisane w pierwszej wersji: wpis dostaje
+  opcjonalną `data_publikacji_od` (zapowiedź przed terminem; puste pole = zachowanie sprzed
+  zmiany, bez migracji danych) oraz opcjonalne `zdjecie` — slug z tej samej biblioteki co
+  pozycje cennika. Walidacja zdjęcia sprawdza istnienie pliku, więc `wydarzenia.py` nie
+  importuje `cennik.py` ani nie powiela listy slugów.
+- Walidacja odrzuca też slug z końcówką `-sm`: plik miniatury **istnieje**, więc sama kontrola
+  obecności go przepuszczała, a karta dostałaby obraz 600 px. Wychwycił to test, nie przegląd.
+- Wpis ze zdjęciem renderuje się w układzie dwukolumnowym zamiast paska nad tekstem —
+  biblioteka zawiera kadry pionowe, które w proporcji 16:9 były przycinane do wąskiego wycinka.
 - Wdrożone. Odstępstwo od specyfikacji: identyfikator wpisu nadaje `slugWydarzenia()`,
   a nie `proponujId()` — ta druga funkcja jest cennikowa i zależy od stanu cennika.

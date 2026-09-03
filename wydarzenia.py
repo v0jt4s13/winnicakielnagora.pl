@@ -36,9 +36,17 @@ SZKIELET: dict = {"wydarzenia": []}
 # Wlasciciel i grupa moga czytac, reszta nie. Grupa to zwykle www-data.
 PRAWA_PLIKU = 0o640
 
+PROJEKT_ZDJEC = PROJEKT / "attached_assets" / "photos"
+
 POLA_WYMAGANE = ("id", "tytul", "tresc", "data_od", "data_do")
+# `data_publikacji_od` puste = wpis pokazuje sie od `data_od`, czyli tak jak przed
+# dodaniem tego pola. Dzieki temu pliki sprzed zmiany nie wymagaja migracji.
+POLA_OPCJONALNE = ("data_publikacji_od", "zdjecie")
 WZOR_ID = re.compile(r"^[a-z0-9-]+$")
 WZOR_DATY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# Ten sam ksztalt slugu co `zdjecie` pozycji cennika. Wzorzec odcina takze wyjscie
+# poza katalog zdjec (kropki, ukosniki) zanim dotkniemy systemu plikow.
+WZOR_ZDJECIA = re.compile(r"^[a-z0-9-]+$")
 
 MAX_TYTUL = 120
 MAX_TRESC = 2000
@@ -74,8 +82,21 @@ def dzis_w_winnicy() -> str:
         return date.today().isoformat()
 
 
+def poczatek_publikacji(wpis: dict) -> str | None:
+    """Od kiedy wpis ma byc widoczny: data_publikacji_od albo — gdy puste — data_od.
+
+    Rozdzielenie terminu od zapowiedzi: data_od/data_do mowia, KIEDY wydarzenie sie odbywa
+    (to one ida na karte), a data_publikacji_od tylko, OD KIEDY o nim pisemy.
+    """
+    zapowiedz = wpis.get("data_publikacji_od")
+    if isinstance(zapowiedz, str) and zapowiedz.strip():
+        return zapowiedz
+    poczatek = wpis.get("data_od")
+    return poczatek if isinstance(poczatek, str) else None
+
+
 def aktywne(dane: dict, dzis: str | None = None) -> dict:
-    """Zawezenie do wpisow widocznych danego dnia: data_od <= dzis <= data_do.
+    """Zawezenie do wpisow widocznych danego dnia: poczatek <= dzis <= data_do.
 
     Granice sa domkniete z obu stron. Daty ISO porownujemy jako napisy — dla formatu
     YYYY-MM-DD porzadek leksykograficzny jest tozsamy z chronologicznym.
@@ -88,13 +109,18 @@ def aktywne(dane: dict, dzis: str | None = None) -> dict:
     wpisy = dane.get("wydarzenia")
     if not isinstance(wpisy, list):
         return {"wydarzenia": []}
-    return {"wydarzenia": [
-        wpis for wpis in wpisy
-        if isinstance(wpis, dict)
-        and isinstance(wpis.get("data_od"), str)
-        and isinstance(wpis.get("data_do"), str)
-        and wpis["data_od"] <= dzis <= wpis["data_do"]
-    ]}
+
+    widoczne = []
+    for wpis in wpisy:
+        if not isinstance(wpis, dict):
+            continue
+        poczatek = poczatek_publikacji(wpis)
+        koniec = wpis.get("data_do")
+        if not isinstance(poczatek, str) or not isinstance(koniec, str):
+            continue
+        if poczatek <= dzis <= koniec:
+            widoczne.append(wpis)
+    return {"wydarzenia": widoczne}
 
 
 def _blad(pozycja, pole, komunikat) -> dict:
@@ -136,7 +162,7 @@ def waliduj(dane) -> list[dict]:
             if pole not in wpis:
                 bledy.append(_blad(i, pole, "Pole wymagane"))
         for pole in wpis:
-            if pole not in POLA_WYMAGANE:
+            if pole not in POLA_WYMAGANE + POLA_OPCJONALNE:
                 bledy.append(_blad(i, pole, f"Nieznane pole: {pole}"))
 
         ident = wpis.get("id", "")
@@ -167,6 +193,31 @@ def waliduj(dane) -> list[dict]:
             if wpis["data_do"] < wpis["data_od"]:
                 bledy.append(_blad(
                     i, "data_do", "„data do” nie może być wcześniejsza niż „data od”"))
+
+        zapowiedz = wpis.get("data_publikacji_od")
+        if zapowiedz not in (None, ""):
+            if not _data_ok(zapowiedz):
+                bledy.append(_blad(i, "data_publikacji_od",
+                                   "Wymagana poprawna data w formacie RRRR-MM-DD"))
+            elif _data_ok(wpis.get("data_do")) and zapowiedz > wpis["data_do"]:
+                # Taki wpis nigdy by sie nie pokazal, a cisza wygladalaby jak usterka strony.
+                bledy.append(_blad(i, "data_publikacji_od",
+                                   "Wpis nigdy się nie pokaże — data publikacji jest "
+                                   "późniejsza niż „data do”"))
+
+        zdjecie = wpis.get("zdjecie")
+        if zdjecie not in (None, ""):
+            if not isinstance(zdjecie, str) or not WZOR_ZDJECIA.match(zdjecie):
+                bledy.append(_blad(i, "zdjecie",
+                                   "Dozwolone małe litery, cyfry i myślnik"))
+            elif zdjecie.endswith("-sm"):
+                # `-sm` to wariant miniatury (600 px), a nie osobne zdjecie. Plik istnieje,
+                # wiec sama kontrola obecnosci by go przepuscila — i karta wydarzenia
+                # dostalaby rozmyty obrazek. Slug ma byc taki jak w pozycjach cennika.
+                bledy.append(_blad(i, "zdjecie",
+                                   "Podaj slug bez końcówki „-sm” — to wariant miniatury"))
+            elif not (PROJEKT_ZDJEC / f"{zdjecie}.jpg").is_file():
+                bledy.append(_blad(i, "zdjecie", "Nie ma takiego zdjęcia"))
 
     return bledy
 

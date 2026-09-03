@@ -63,6 +63,31 @@ def main() -> int:
     sprawdz("dzis_w_winnicy ma format RRRR-MM-DD",
             len(wydarzenia.dzis_w_winnicy()) == 10 and wydarzenia.dzis_w_winnicy()[4] == "-")
 
+    # 2b) data publikacji — zapowiedz przed terminem -------------------------
+    zapowiedziane = {"wydarzenia": [
+        dict(wpis("zapowiedz", "2026-10-01", "2026-10-05"), data_publikacji_od="2026-09-01"),
+        wpis("bez-pola", "2026-10-01", "2026-10-05"),
+    ]}
+    widoczne2 = lambda dzis: [w["id"] for w in wydarzenia.aktywne(zapowiedziane, dzis)["wydarzenia"]]
+
+    sprawdz("dzien przed publikacja: nic", widoczne2("2026-08-31") == [])
+    sprawdz("dzien publikacji wliczony", widoczne2("2026-09-01") == ["zapowiedz"])
+    sprawdz("miedzy publikacja a terminem widac tylko zapowiedziane",
+            widoczne2("2026-09-15") == ["zapowiedz"])
+    sprawdz("w terminie widac oba", widoczne2("2026-10-01") == ["zapowiedz", "bez-pola"])
+    sprawdz("po data_do znika takze zapowiedziane", widoczne2("2026-10-06") == [])
+    sprawdz("brak pola = zachowanie sprzed zmiany (start od data_od)",
+            widoczne2("2026-09-15") == ["zapowiedz"] and widoczne2("2026-10-01") == ["zapowiedz", "bez-pola"])
+    sprawdz("puste pole traktowane jak brak",
+            [w["id"] for w in wydarzenia.aktywne(
+                {"wydarzenia": [dict(wpis("x", "2026-10-01", "2026-10-05"), data_publikacji_od="")]},
+                "2026-09-15")["wydarzenia"]] == [])
+    sprawdz("poczatek_publikacji zwraca date publikacji, gdy jest",
+            wydarzenia.poczatek_publikacji(
+                dict(wpis("x", "2026-10-01", "2026-10-05"), data_publikacji_od="2026-09-01")) == "2026-09-01")
+    sprawdz("poczatek_publikacji spada na data_od, gdy pola brak",
+            wydarzenia.poczatek_publikacji(wpis("x", "2026-10-01", "2026-10-05")) == "2026-10-01")
+
     # 3) walidacja ------------------------------------------------------------
     sprawdz("poprawne dane bez bledow", wydarzenia.waliduj(dane) == [])
     sprawdz("wydarzenie jednodniowe jest poprawne",
@@ -92,6 +117,42 @@ def main() -> int:
             (0, "id") in pola_bledow({"wydarzenia": [wpis("Zle-ID", "2026-09-10", "2026-09-11")]}))
     nadmiarowe = {"wydarzenia": [dict(wpis("a", "2026-09-10", "2026-09-11"), cena=10)]}
     sprawdz("nieznane pole odrzucone", (0, "cena") in pola_bledow(nadmiarowe))
+
+    # pola opcjonalne: data publikacji
+    sprawdz("data publikacji przed terminem jest poprawna",
+            wydarzenia.waliduj({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), data_publikacji_od="2026-09-01")]}) == [])
+    sprawdz("data publikacji pozniejsza niz data_do odrzucona",
+            (0, "data_publikacji_od") in pola_bledow({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), data_publikacji_od="2026-11-01")]}))
+    sprawdz("zly format daty publikacji odrzucony",
+            (0, "data_publikacji_od") in pola_bledow({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), data_publikacji_od="01.09.2026")]}))
+    sprawdz("pusta data publikacji nie jest bledem",
+            wydarzenia.waliduj({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), data_publikacji_od="")]}) == [])
+
+    # pola opcjonalne: zdjecie
+    dostepne = sorted(p.stem for p in wydarzenia.PROJEKT_ZDJEC.glob("*.jpg")
+                      if not p.stem.endswith("-sm"))
+    sprawdz("biblioteka zdjec nie jest pusta", len(dostepne) > 0)
+    if dostepne:
+        sprawdz("istniejace zdjecie przechodzi",
+                wydarzenia.waliduj({"wydarzenia": [
+                    dict(wpis("a", "2026-10-01", "2026-10-05"), zdjecie=dostepne[0])]}) == [])
+    sprawdz("nieistniejace zdjecie odrzucone",
+            (0, "zdjecie") in pola_bledow({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), zdjecie="nie-ma-takiego-pliku")]}))
+    sprawdz("proba wyjscia poza katalog zdjec odrzucona",
+            (0, "zdjecie") in pola_bledow({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), zdjecie="../wsgi")]}))
+    sprawdz("wariant -sm nie jest dozwolony jako slug",
+            (0, "zdjecie") in pola_bledow({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"),
+                     zdjecie=(dostepne[0] + "-sm") if dostepne else "cokolwiek-sm")]}))
+    sprawdz("puste zdjecie nie jest bledem",
+            wydarzenia.waliduj({"wydarzenia": [
+                dict(wpis("a", "2026-10-01", "2026-10-05"), zdjecie="")]}) == [])
     sprawdz("brak listy wydarzen", pola_bledow({}) == {(None, "wydarzenia")})
     sprawdz("nie-obiekt odrzucony", wydarzenia.waliduj([]) == [
         {"pozycja": None, "pole": None, "komunikat": "Oczekiwano obiektu JSON"}])

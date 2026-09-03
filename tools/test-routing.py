@@ -156,12 +156,18 @@ def sprawdz_wydarzenia() -> int:
         wpis("trwajace", "2000-01-01", "2100-01-01"),
         wpis("przyszle", "2099-01-01", "2099-01-02"),
         wpis("zakonczone", "2000-01-01", "2000-01-02"),
+        # Zapowiedz: wydarzenie dopiero bedzie, ale publikacja juz ruszyla.
+        dict(wpis("zapowiedziane", "2099-01-01", "2099-01-02"),
+             data_publikacji_od="2000-01-01"),
     ]}
     try:
         odpowiedz = wsgi.zywe_wydarzenia()
         dane = json.loads(odpowiedz.tresc)
         widoczne = [w["id"] for w in dane["wydarzenia"]]
-        sprawdz("trasa oddaje wpis aktywny", widoczne == ["trwajace"])
+        sprawdz("trasa oddaje wpis aktywny i zapowiedziany",
+                widoczne == ["trwajace", "zapowiedziane"])
+        sprawdz("zapowiedz wychodzi na strone przed terminem wydarzenia",
+                "zapowiedziane" in odpowiedz.tresc)
         sprawdz("wpis przyszly nie opuszcza serwera", "przyszle" not in odpowiedz.tresc)
         sprawdz("wpis zakonczony nie opuszcza serwera", "zakonczone" not in odpowiedz.tresc)
         sprawdz("odpowiedz ma no-store",

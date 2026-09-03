@@ -483,6 +483,9 @@ qs("#odrzuc").addEventListener("click", async () => {
 
 
 // --- wydarzenia -----------------------------------------------------------
+const POLA_WYDARZENIA = ["tytul", "tresc", "data_od", "data_do", "data_publikacji_od", "zdjecie"];
+const POLA_OPCJONALNE_WYDARZENIA = ["data_publikacji_od", "zdjecie"];
+
 // Drugi plik danych, wlasna walidacja po stronie serwera, wlasny zapis. Panel widzi
 // WSZYSTKIE wpisy — take nieaktywne; o tym, co zobaczy odwiedzajacy, decyduje serwer
 // (wydarzenia.aktywne w Pythonie). Znacznik stanu ponizej jest tylko informacja.
@@ -492,11 +495,16 @@ function dzisWWinnicy() {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date());
 }
 
+/** Cztery stany, bo od kiedy wpis jest WIDOCZNY, a od kiedy wydarzenie TRWA, to dwie
+ *  rozne daty. Szary = nie ma go na stronie, bursztyn = widoczny jako zapowiedz,
+ *  zielony = trwa wlasnie teraz. */
 function stanWydarzenia(wpis) {
   const dzis = dzisWWinnicy();
   if (!wpis.data_od || !wpis.data_do) return { klasa: "stan-zakonczone", opis: "brak dat" };
-  if (dzis < wpis.data_od) return { klasa: "stan-przyszle", opis: "przyszłe" };
+  const poczatek = wpis.data_publikacji_od || wpis.data_od;
   if (dzis > wpis.data_do) return { klasa: "stan-zakonczone", opis: "zakończone" };
+  if (dzis < poczatek) return { klasa: "stan-zakonczone", opis: "ukryte" };
+  if (dzis < wpis.data_od) return { klasa: "stan-przyszle", opis: "zapowiedź" };
   return { klasa: "stan-aktywne", opis: "aktywne" };
 }
 
@@ -544,7 +552,10 @@ function renderFormularzWydarzenia() {
   sekcja.hidden = false;
   qs("#tytul-formularza-wydarzenia").textContent = wpis.tytul || "Wydarzenie";
   const formularz = qs("#formularz-wydarzenia");
-  ["tytul", "tresc", "data_od", "data_do"].forEach((pole) => {
+  // Lista zdjec przychodzi z cennika (cennik.stan_poczatkowy) — jedna biblioteka
+  // obsluguje oba formularze, wiec nie budujemy drugiej.
+  formularz.elements.zdjecie.innerHTML = opcje(zdjecia, wpis.zdjecie);
+  POLA_WYDARZENIA.forEach((pole) => {
     formularz.elements[pole].value = wpis[pole] || "";
   });
 }
@@ -559,8 +570,13 @@ function zbierzFormularzWydarzenia() {
   if (wybraneWydarzenie === null) return;
   const formularz = qs("#formularz-wydarzenia");
   const wpis = wydarzenia[wybraneWydarzenie];
-  ["tytul", "tresc", "data_od", "data_do"].forEach((pole) => {
+  POLA_WYDARZENIA.forEach((pole) => {
     wpis[pole] = formularz.elements[pole].value;
+  });
+  // Puste pola opcjonalne usuwamy zamiast zapisywac "" — walidator traktuje brak klucza
+  // i pusty napis tak samo, ale plik danych zostaje bez smieci.
+  POLA_OPCJONALNE_WYDARZENIA.forEach((pole) => {
+    if (!wpis[pole]) delete wpis[pole];
   });
   // Identyfikator nie jest polem formularza — wynika z tytulu i musi zostac unikalny,
   // bo to on rozroznia wpisy przy zapisie.
@@ -692,5 +708,6 @@ window.addEventListener("beforeunload", (e) => {
   e.returnValue = "";
 });
 
-wczytaj();
-wczytajWydarzenia();
+// Sekwencyjnie, nie rownolegle: formularz wydarzenia buduje <select> ze zdjeciami
+// z listy, ktora przychodzi razem z cennikiem.
+wczytaj().then(wczytajWydarzenia);

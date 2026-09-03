@@ -854,10 +854,11 @@ async function initWydarzenia() {
 
   wpisy.forEach((wpis) => {
     const karta = document.createElement("article");
-    karta.className = "rounded-md border border-card-border bg-card p-8";
 
     const daty = document.createElement("div");
     daty.className = "text-sm text-muted-foreground mb-2";
+    // Zakres opisuje TERMIN wydarzenia (data_od–data_do). data_publikacji_od jest
+    // ustawieniem redakcyjnym i nie pokazujemy jej odwiedzającemu.
     daty.textContent = zakresDatWydarzenia(wpis.data_od, wpis.data_do);
 
     const tytul = document.createElement("h3");
@@ -870,7 +871,35 @@ async function initWydarzenia() {
     // w panelu trafia do markupu strony publicznej.
     tresc.textContent = wpis.tresc;
 
-    karta.append(daty, tytul, tresc);
+    // Bez zdjęcia: zwykła karta z paddingiem. Ze zdjęciem: ten sam układ dwukolumnowy,
+    // co istniejąca karta degustacji w tej sekcji — biblioteka zdjęć ma też kadry
+    // pionowe, a te w pasku 16:9 zostałyby przycięte do wąskiego wycinka.
+    if (wpis.zdjecie) {
+      karta.className = "rounded-md border border-card-border overflow-hidden";
+      const siatka = document.createElement("div");
+      siatka.className = "grid md:grid-cols-2";
+
+      const ramka = document.createElement("div");
+      ramka.className = "aspect-video md:aspect-auto";
+      const obraz = document.createElement("img");
+      obraz.src = `./attached_assets/photos/${wpis.zdjecie}.jpg`;
+      obraz.alt = wpis.tytul || "";
+      obraz.loading = "lazy";
+      obraz.decoding = "async";
+      obraz.className = "w-full h-full object-cover";
+      ramka.appendChild(obraz);
+
+      const opis = document.createElement("div");
+      opis.className = "p-8 flex flex-col justify-center";
+      opis.append(daty, tytul, tresc);
+
+      siatka.append(ramka, opis);
+      karta.appendChild(siatka);
+    } else {
+      karta.className = "rounded-md border border-card-border bg-card p-8";
+      karta.append(daty, tytul, tresc);
+    }
+
     lista.appendChild(karta);
   });
 
