@@ -30,7 +30,11 @@
   <meta name="twitter:description" content="Jednohektarowa winnica na południowym stoku pod Rzeszowem. Odmiany odporne, wina i soki 100% z winogron.">
   <meta name="twitter:image" content="https://winnicakielnagora.pl/attached_assets/photos/winnica-panorama-01.jpg">
   <meta name="keywords" content="winnica Kielnarowa, wina podkarpackie, Souvignier Gris, Monarch, Dornfelder, sok winogronowy, winnica pod Rzeszowem">
-  <link rel="preload" as="image" href="./attached_assets/photos/winnica-panorama-01.jpg" fetchpriority="high">
+  <!-- hero-preload -->
+  <!-- Wlasciwy <link rel="preload"> na klatke hero wstawia serwer (wsgi.py) wedlug pory
+       dnia. Preload scanner nie zaglada do atrybutow data-*-src, wiec bez tego obraz
+       LCP odkrywalby dopiero odroczony main.js. Bez serwera znacznik zostaje pusty:
+       strona dziala, tylko bez wczesnego pobrania. -->
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="icon" href="./favicon.ico" sizes="32x32">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/lato-400-latin.woff2">
@@ -193,8 +197,8 @@
     <main class="flex-1">
       <section class="relative h-[600px] md:h-[700px] w-full overflow-hidden">
         <!-- JS wybiera jeden kadr dla aktualnej pory w Europe/Warsaw; bez JS zostaje dzien. -->
-        <img id="hero-image" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" data-poranek-src="./attached_assets/photos/hero/poranek.png" data-dzien-src="./attached_assets/photos/hero/dzien.png" data-zachod-src="./attached_assets/photos/hero/zachod.png" data-noc-src="./attached_assets/photos/hero/noc.png" data-fallback-src="./attached_assets/photos/winnica-panorama-01.jpg" class="absolute inset-0 w-full h-full object-cover">
-        <noscript><img src="./attached_assets/photos/hero/dzien.png" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover"></noscript>
+        <img id="hero-image" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" data-poranek-src="./attached_assets/photos/hero/poranek.webp" data-dzien-src="./attached_assets/photos/hero/dzien.webp" data-zachod-src="./attached_assets/photos/hero/zachod.webp" data-noc-src="./attached_assets/photos/hero/noc.webp" data-fallback-src="./attached_assets/photos/winnica-panorama-01.jpg" class="absolute inset-0 w-full h-full object-cover">
+        <noscript><img src="./attached_assets/photos/hero/dzien.webp" alt="" width="1534" height="1025" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover"></noscript>
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
         <div class="relative h-full flex flex-col items-center justify-center text-center px-5 max-w-4xl mx-auto">
           <div class="flex items-center gap-3 mb-5">

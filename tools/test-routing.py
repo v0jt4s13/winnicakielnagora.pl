@@ -30,6 +30,14 @@ class _Resp:
     def __init__(self, tresc, kod=200, naglowki=None):
         self.tresc, self.kod, self.headers = tresc, kod, dict(naglowki or {})
 
+    # Strona glowna wysyla ETag i odpowiada warunkowo. Werkzeug robi to sam, atrapa
+    # musi tylko nie wywrocic sie na wywolaniu.
+    def add_etag(self):
+        self.headers["ETag"] = "atrapa"
+
+    def make_conditional(self, _zadanie):
+        return self
+
 
 class _Zadanie:
     authorization = None
@@ -76,7 +84,7 @@ def wynik(sciezka: str) -> tuple[str, int]:
 
 PRZYPADKI = [
     # adres,                          oczekiwany plik,               kod
-    ("",                              "index.html",                  200),
+    # "/" nie idzie przez send_from_directory (podmiana hero) — patrz sprawdz_hero()
     ("index.html",                    "index.html",                  200),
     ("wina/monarch.html",             "wina/monarch.html",           200),
     ("wina/soki.html",                "wina/soki.html",              200),
@@ -125,6 +133,66 @@ PRZYPADKI = [
 ]
 
 
+def sprawdz_hero() -> int:
+    """Strona glowna musi wskazac klatke hero juz w HTML-u, a ?hero nie moze klamac."""
+    bledy = 0
+
+    def sprawdz(opis, warunek):
+        nonlocal bledy
+        print(f"{'OK  ' if warunek else 'BLAD'}  {opis}")
+        if not warunek:
+            bledy += 1
+
+    # --- siatka godzin: musi zgadzac sie z heroPeriodForHour() w assets/js/main.js ---
+    for godzina, oczekiwana in ((0, "noc"), (5, "noc"), (6, "poranek"), (11, "poranek"),
+                                (12, "dzien"), (17, "dzien"), (18, "zachod"),
+                                (21, "zachod"), (22, "noc"), (23, "noc")):
+        sprawdz(f"godzina {godzina:02d} → {oczekiwana}",
+                wsgi._pora_hero(godzina) == oczekiwana)
+
+    # --- zwykle wejscie na "/" ---
+    wsgi.request.args = {}
+    odpowiedz = wsgi.serve("")
+    tresc = odpowiedz.tresc
+    pora = wsgi._pora_hero_teraz()
+    zdjecie = f"./attached_assets/photos/hero/{pora}.webp"
+    sprawdz(f'"/" ma src na <img> ({pora})',
+            f'<img id="hero-image" src="{zdjecie}"' in tresc)
+    sprawdz('"/" ma preload na te sama klatke',
+            f'<link rel="preload" as="image" href="{zdjecie}" fetchpriority="high">' in tresc)
+    sprawdz('"/" nie zostawia nieuzytego znacznika',
+            wsgi.HERO_KOTWICA_PRELOAD not in tresc)
+    sprawdz('"/" nie preloaduje zdjecia zapasowego',
+            'as="image" href="./attached_assets/photos/winnica-panorama-01.jpg"' not in tresc)
+    sprawdz('"/" wymusza rewalidacje', odpowiedz.headers.get("Cache-Control") == "no-cache")
+    sprawdz('"/" bez paska wyboru pory', "data-hero-kandydaci" not in tresc)
+
+    # --- narzedzie pomiarowe ?hero= ---
+    wsgi.request.args = {"hero": "noc"}
+    tresc = wsgi.serve("").tresc
+    sprawdz('?hero=noc podmienia klatke',
+            '<img id="hero-image" src="./attached_assets/photos/hero/noc.webp"' in tresc)
+    sprawdz('?hero=noc pokazuje pasek wyboru', "data-hero-kandydaci" in tresc)
+
+    wsgi.request.args = {"hero": "../../etc/passwd"}
+    tresc = wsgi.serve("").tresc
+    # Uwaga na skrot: sam 'src="./attached_assets/photos/hero/' wystepuje takze w
+    # data-poranek-src=... — kotwiczymy sie wiec na calym poczatku znacznika <img>.
+    sprawdz("?hero z niedozwolona wartoscia nie podmienia niczego",
+            f'{wsgi.HERO_KOTWICA_IMG} src=' not in tresc)
+    sprawdz("?hero z niedozwolona wartoscia daje sam pasek",
+            "data-hero-kandydaci" in tresc)
+    wsgi.request.args = {}
+
+    # --- kotwica przestala pasowac ---
+    sprawdz("brak kotwicy → None, a nie po cichu ta sama tresc",
+            wsgi._wstrzyknij_hero("<html>bez hero</html>", "noc") is None)
+    sprawdz("podwojna kotwica tez → None",
+            wsgi._wstrzyknij_hero(wsgi.HERO_KOTWICA_IMG * 2 + wsgi.HERO_KOTWICA_PRELOAD,
+                                  "noc") is None)
+    return bledy
+
+
 def main() -> int:
     bledy = 0
     for sciezka, oczekiwany_plik, oczekiwany_kod in PRZYPADKI:
@@ -152,6 +220,8 @@ def main() -> int:
             print("BLAD  404 ma sciezki bezwzgledne od korzenia hosta")
             bledy += 1
     wsgi.request.script_root = ""
+
+    bledy += sprawdz_hero()
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")
     return 0 if bledy == 0 else 1

@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import json
 import os
+from datetime import datetime
 from hashlib import pbkdf2_hmac
 from pathlib import Path
 
@@ -78,6 +79,7 @@ _kompresja_cache: dict[tuple[str, float], bytes] = {}
 CACHE_WG_ROZSZERZENIA = {
     ".jpg": "public, max-age=2592000",
     ".png": "public, max-age=2592000",
+    ".webp": "public, max-age=2592000",
     ".svg": "public, max-age=2592000",
     ".ico": "public, max-age=2592000",
     ".woff2": "public, max-age=2592000",
@@ -299,30 +301,88 @@ def panel_pliki(plik: str):
     return odpowiedz
 
 
-# --- przelacznik zdjecia wejsciowego (narzedzie testowe) ----------------------
-# Podmiana idzie po stronie serwera, a nie w JS, bo tylko wtedy pomiar w PageSpeed
-# jest uczciwy — przy podmianie w przegladarce pobralaby sie najpierw wersja domyslna.
-# Bez parametru ?hero strona jest bajt w bajt taka jak zawsze.
+# --- zdjecie wejsciowe (hero) zalezne od pory dnia ----------------------------
+# Klatke wybiera serwer, a nie JS. Preload scanner nie zaglada do atrybutow data-*-src,
+# wiec przy podmianie w przegladarce obraz LCP odkrywa dopiero odroczony main.js — a
+# preload wskazujacy cokolwiek innego to jeszcze jedno, niepotrzebne pobranie.
 HERO_PORY = ("poranek", "dzien", "zachod", "noc")
-HERO_KOTWICA_IMG = "<img id=\"hero-image\""
-HERO_KOTWICA_PRELOAD = '<link rel="preload" as="image" href="./attached_assets/photos/winnica-panorama-01.jpg"'
+HERO_KOTWICA_IMG = '<img id="hero-image"'
+HERO_KOTWICA_PRELOAD = "<!-- hero-preload -->"
 
 
-def _index_z_hero(pora: str | None):
-    """index.html z wymuszona pora dnia i paskiem wyboru.
+def _pora_hero(godzina: int) -> str:
+    """Ta sama siatka godzin co heroPeriodForHour() w assets/js/main.js.
 
-    Kotwiczymy sie na id="hero-image", a nie na sciezce do zdjecia: ta sama sciezka
-    wystepuje takze w og:image, twitter:image i w sekcji kontaktu.
+    Duplikat jest swiadomy: nie ma kroku budowania, ktory podalby jedna definicje obu
+    stronom. Granice pilnuje tools/test-routing.py — zmiana tutaj wymaga zmiany tam i w JS.
     """
-    tresc = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
+    if 6 <= godzina < 12:
+        return "poranek"
+    if 12 <= godzina < 18:
+        return "dzien"
+    if 18 <= godzina < 22:
+        return "zachod"
+    return "noc"
+
+
+def _pora_hero_teraz() -> str:
+    """Pora dnia w strefie winnicy. Serwer moze stac w UTC, przegladarka gdziekolwiek."""
+    try:
+        from zoneinfo import ZoneInfo
+        return _pora_hero(datetime.now(ZoneInfo("Europe/Warsaw")).hour)
+    except Exception:
+        # Brak bazy stref (tzdata) nie moze wywalic strony glownej.
+        return _pora_hero(datetime.now().hour)
+
+
+def _wstrzyknij_hero(tresc: str, pora: str) -> str | None:
+    """Wstawia src na <img> i preload na te sama klatke.
+
+    Zwraca None, gdy ktoras kotwica nie pasuje dokladnie raz. Wolajacy ma wtedy zdecydowac,
+    co zrobic — cicha podmiana, ktora nic nie podmienila, byla juz zrodlem bledu.
+    """
+    if tresc.count(HERO_KOTWICA_IMG) != 1 or tresc.count(HERO_KOTWICA_PRELOAD) != 1:
+        return None
+    zdjecie = f"./attached_assets/photos/hero/{pora}.webp"
+    tresc = tresc.replace(HERO_KOTWICA_IMG, f'{HERO_KOTWICA_IMG} src="{zdjecie}"', 1)
+    return tresc.replace(
+        HERO_KOTWICA_PRELOAD,
+        f'<link rel="preload" as="image" href="{zdjecie}" fetchpriority="high">', 1)
+
+
+def _index() -> str:
+    return (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
+
+
+def _strona_glowna():
+    """index.html z klatka hero wybrana wedlug biezacej pory dnia."""
+    z_hero = _wstrzyknij_hero(_index(), _pora_hero_teraz())
+    if z_hero is None:
+        # Kotwica przestala pasowac (ktos ruszyl znacznik w index.html). Strona ma dzialac:
+        # oddajemy plik bez zmian, hero ustawi JS. Gorszy czas ladowania, ale nie awaria.
+        return _oddaj("index.html")
+    # Odtwarzamy to, co dawal tu send_from_directory: no-cache + ETag. Werkzeug ustawia
+    # oba sam, my skladamy odpowiedz recznie, wiec musimy o nie zadbac. Przy tresci
+    # zaleznej od pory dnia rewalidacja nie jest opcja — bez niej rano wisi nocne zdjecie.
+    odpowiedz = Response(z_hero, 200, {"Content-Type": "text/html; charset=utf-8",
+                                       "Cache-Control": "no-cache"})
+    odpowiedz.add_etag()
+    return odpowiedz.make_conditional(request)
+
+
+def _strona_glowna_z_paskiem(pora: str | None):
+    """Wariant z paskiem wyboru pory (?hero=...) — narzedzie do pomiarow w PageSpeed."""
+    tresc = _index()
     if pora:
-        zdjecie = f"./attached_assets/photos/hero/{pora}.png"
-        # 1) src na samym <img> — inaczej obraz LCP odkrywa dopiero JS.
-        tresc = tresc.replace(HERO_KOTWICA_IMG, f'{HERO_KOTWICA_IMG} src="{zdjecie}"', 1)
-        # 2) preload musi wskazywac to, co naprawde zostanie wyswietlone.
-        tresc = tresc.replace(
-            HERO_KOTWICA_PRELOAD,
-            f'<link rel="preload" as="image" href="{zdjecie}"', 1)
+        z_hero = _wstrzyknij_hero(tresc, pora)
+        if z_hero is None:
+            # Tu cisza jest gorsza niz blad: pomiar zrobiony na niepodmienionej stronie
+            # wyglada na poprawny i prowadzi do falszywych wnioskow.
+            return Response(
+                "Nie znalazlem kotwicy hero w index.html — przelacznik ?hero nie moze "
+                "podmienic zdjecia. Sprawdz HERO_KOTWICA_IMG i HERO_KOTWICA_PRELOAD.",
+                500, {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"})
+        tresc = z_hero
     tresc = tresc.replace(
         "<body ", f'<body data-hero-kandydaci="{",".join(HERO_PORY)}" ', 1)
     return Response(tresc, 200, {"Content-Type": "text/html; charset=utf-8",
@@ -346,8 +406,8 @@ def serve(path: str):
             pora = request.args.get("hero")
             # Nieznana wartosc = sam pasek wyboru, bez podmiany. Lista dozwolonych
             # zamyka droge sciezkom z zewnatrz (../, adresy http).
-            return _index_z_hero(pora if pora in HERO_PORY else None)
-        return _oddaj("index.html")
+            return _strona_glowna_z_paskiem(pora if pora in HERO_PORY else None)
+        return _strona_glowna()
 
     istniejacy = _plik(path)
     if istniejacy:

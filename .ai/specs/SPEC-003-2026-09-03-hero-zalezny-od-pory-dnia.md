@@ -7,12 +7,16 @@ zależnie od aktualnej godziny w strefie `Europe/Warsaw`. Zmiana dotyczy wyłąc
 treść, CTA, gradient i wysokość obu widoków pozostają bez zmian.
 
 Wariant `modern` jest pełnym ciemnym motywem. Przy automatycznym albo testowym wyborze
-`noc.png` witryna aktywuje go bez nadpisywania stylu zapisanego przez użytkownika.
+pory `noc` witryna aktywuje go bez nadpisywania stylu zapisanego przez użytkownika —
+na stronie głównej, na stronie 404 **i na podstronach odmian**, które nie mają hero.
 
 Źródła dostarczone przez Właściciela znajdują się w
 `docs/materialy-do-wykorzystania/hero/`. `wsgi.py` dopuszcza publicznie tylko katalogi
 z `KATALOGI_PUBLICZNE`, gdzie znajduje się `attached_assets`, ale nie `docs`. Dlatego do
 `attached_assets/photos/hero/` trafią kopie dostarczonych PNG bez konwersji i utraty jakości.
+Do przeglądarki idzie jednak **WebP** wygenerowany z tych PNG przez `tools/optimize-hero.py`:
+kadr hero jest elementem LCP, a PNG po ok. 2 MB kasował cały zysk z wczesnego wykrycia obrazu.
+PNG zostają w repozytorium jako master do ponownego przekodowania.
 
 ## User Stories
 
@@ -92,26 +96,40 @@ widoku, który pasuje do nocnej fotografii, bez ręcznego zmieniania ustawień.
 
 | Czas w `Europe/Warsaw` | Klucz | Plik publiczny |
 |---|---|---|
-| 06:00–11:59 | `poranek` | `attached_assets/photos/hero/poranek.png` |
-| 12:00–17:59 | `dzien` | `attached_assets/photos/hero/dzien.png` |
-| 18:00–21:59 | `zachod` | `attached_assets/photos/hero/zachod.png` |
-| 22:00–05:59 | `noc` | `attached_assets/photos/hero/noc.png` |
+| 06:00–11:59 | `poranek` | `attached_assets/photos/hero/poranek.webp` |
+| 12:00–17:59 | `dzien` | `attached_assets/photos/hero/dzien.webp` |
+| 18:00–21:59 | `zachod` | `attached_assets/photos/hero/zachod.webp` |
+| 22:00–05:59 | `noc` | `attached_assets/photos/hero/noc.webp` |
 
 Granice są domknięte od początku i otwarte od końca. Przykładowo dokładnie 12:00 oznacza
 `dzien`, a dokładnie 22:00 — `noc`.
 
 ## Architecture
 
-- `index.html`: istniejący obraz hero otrzyma `id="hero-image"`, cztery atrybuty `data-*`
-  ze ścieżkami oraz `data-fallback-src` wskazujący dotychczasową panoramę. Element nie ma
-  początkowego `src`, więc przeglądarka nie pobiera błędnego kadru przed wykonaniem JS.
-  W `<noscript>` pozostaje dzienny obraz awaryjny dla przeglądarek bez JavaScriptu.
+- `index.html`: obraz hero ma `id="hero-image"`, cztery atrybuty `data-*` ze ścieżkami
+  oraz `data-fallback-src` wskazujący dotychczasową panoramę. W statycznym pliku nie ma
+  `src` ani gotowego `<link rel="preload">` — jest tylko znacznik `<!-- hero-preload -->`,
+  w który serwer wstawia preload właściwego kadru. W `<noscript>` pozostaje dzienny obraz
+  awaryjny dla przeglądarek bez JavaScriptu.
+- `wsgi.py`: dla adresu `/` **serwer** wybiera kadr według pory dnia w `Europe/Warsaw`
+  (`_pora_hero_teraz()`) i wstawia jednocześnie `src` na `<img>` oraz `<link rel="preload">`
+  na ten sam plik (`_wstrzyknij_hero`). Bez tego preload scanner nie ma czego znaleźć:
+  nie zagląda do atrybutów `data-*-src`, więc obraz LCP odkrywałby dopiero odroczony
+  `main.js` — a każdy preload wskazujący inny plik to dodatkowe, bezużyteczne pobranie.
+  Gdy kotwica przestanie pasować, `_wstrzyknij_hero` zwraca `None`: strona główna oddaje
+  wtedy plik bez zmian (działa, tylko wolniej), a narzędzie `?hero=` kończy się błędem 500,
+  bo cichy pomiar na niepodmienionej stronie prowadzi do fałszywych wniosków.
+  `_pora_hero()` powiela siatkę godzin z `heroPeriodForHour()` — nie ma kroku budowania,
+  który podałby jedną definicję obu stronom, więc granic pilnuje `tools/test-routing.py`.
 - `404.html`: obraz tła otrzyma tę samą konfigurację `#hero-image` i `<noscript>`, dzięki
   czemu korzysta z jednej implementacji w `main.js`, również pod głęboko zagnieżdżonym
   nieistniejącym adresem.
 - `assets/js/main.js`: czysta funkcja `heroPeriodForHour(hour)` mapuje liczbę 0–23 na klucz
-  obrazu. Nowa funkcja `initHeroImage()` zgodna ze wzorcem `initX()` ustawia obraz i jest
-  rejestrowana w istniejącym `DOMContentLoaded`.
+  obrazu. `initHeroImage()` odpowiada wyłącznie za obraz i kończy się od razu, gdy na stronie
+  nie ma `#hero-image`. Motyw przełącza osobne `initTimeTheme()` — **celowo niezależne od
+  obrazu**, bo podstrony odmian (`wina/*.html`) ładują ten sam skrypt, ale hero nie mają;
+  logika wpięta w inicjalizator obrazu nigdy się tam nie wykonywała i po zmroku strona główna
+  była ciemna, a każda podstrona jasna. Obie funkcje są rejestrowane w `DOMContentLoaded`.
 - `themeStyles.modern`: zachowuje ten sam komplet 29 zmiennych co pozostałe motywy, ale
   otrzymuje ciemną paletę grafitową z ciepłym akcentem. Każdy motyw deklaruje także
   `colorScheme` (`dark` dla `modern`, `light` dla `classic` i `rustic`) dla natywnych kontrolek.
@@ -119,8 +137,8 @@ Granice są domknięte od początku i otwarte od końca. Przykładowo dokładnie
   a ręczny wybór zachowuje domyślny zapis do `localStorage["winery-style"]`. Poza pętlą
   29 zmiennych funkcja ustawia `document.documentElement.style.colorScheme` z konfiguracji
   motywu i wywołuje `updateStyleMenu(style)`, więc menu zawsze wskazuje styl faktycznie widoczny.
-- Kolejność startowa: `initStyleSwitcher()` przed `initHeroImage()`. Najpierw ładowana jest
-  preferencja, potem noc może tymczasowo zastosować `modern`.
+- Kolejność startowa: `initStyleSwitcher()` → `initTimeTheme()` → `initHeroImage()`.
+  Najpierw ładowana jest preferencja, potem noc może tymczasowo zastosować `modern`.
 - Czas: `Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Warsaw", hour: "numeric",
   hourCycle: "h23" })` i `formatToParts()` zapewniają zakres 00–23, również o północy.
   Wynik spoza zakresu albo błąd `Intl` powoduje użycie lokalnej godziny urządzenia.
@@ -132,8 +150,10 @@ Granice są domknięte od początku i otwarte od końca. Przykładowo dokładnie
   wariantu czasowego. Aktualizacje minutowe nie ponawiają uszkodzonego URL-a w tym samym
   przedziale. Po zmianie pory nowy URL może zostać pobrany normalnie. Błąd samej panoramy
   awaryjnej nie powoduje kolejnej podmiany, więc nie powstaje pętla.
-- Obrazy: źródłowe PNG są kopiowane bez zmian (1534×1025). Identyczne proporcje zapobiegają
-  zmianie kadru i layout shift.
+- Obrazy: wszystkie cztery kadry mają 1534×1025, co zapobiega zmianie kadru i layout shift.
+  Do przeglądarki idzie WebP q80 z `tools/optimize-hero.py` (2,0–2,3 MB PNG → 94–174 kB);
+  PNG zostają jako master. Przeglądarki bez obsługi WebP obsługuje istniejąca ścieżka
+  `data-fallback-src` — handler `error` podstawia `winnica-panorama-01.jpg`.
 
 ## Data Models
 
@@ -142,7 +162,11 @@ a bieżący wybór żyje wyłącznie w DOM.
 
 ## API Contracts
 
-Brak nowych endpointów i żądań sieciowych poza pobraniem wybranego pliku obrazu.
+Brak nowych endpointów. Adres `/` przestał być jednak zwykłym plikiem statycznym: jego
+treść zależy od pory dnia, więc `wsgi.py` składa odpowiedź sam i dokłada `ETag`
+oraz `Cache-Control: no-cache` — dokładnie to, co wcześniej ustawiał `send_from_directory`.
+Powrót na stronę to zwykle warunkowe żądanie i `304` bez ciała. Poza tym jedyne żądanie
+sieciowe to pobranie wybranego pliku obrazu.
 
 ## UI/UX
 
@@ -181,6 +205,13 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 - `noc.png` automatycznie aktywuje `modern` na stronie głównej i 404 bez zmiany zapisanej preferencji.
 - Przejście z nocy do poranka przywraca ręcznie zapisaną preferencję.
 - Ręczna zmiana stylu po automatycznym wyborze nocnym nie jest cofana co minutę.
+- Nocny motyw działa też na podstronach odmian (`wina/*.html`), które nie mają hero.
+- Zwykłe wejście na `/` pobiera dokładnie jeden plik hero: ten, który zostanie wyświetlony.
+  Żaden kadr ani obraz zapasowy nie jest pobierany „na zapas".
+- `<link rel="preload">` na stronie głównej wskazuje ten sam plik co `src` elementu hero,
+  więc preload scanner znajduje obraz LCP bez czekania na `main.js`.
+- Wynik pomiaru z `?hero=` odpowiada temu, co dostaje zwykły odwiedzający na `/`.
+- Kadr hero waży poniżej 200 kB.
 
 ## Implementation Checklist
 
@@ -195,6 +226,11 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 - [x] Zmienić `themeStyles.modern` na pełną ciemną paletę z `colorScheme: "dark"`.
 - [x] Powiązać wejście i wyjście z okresu `noc` z tymczasowym motywem `modern`.
 - [x] Zweryfikować nocny motyw na stronie głównej i 404 oraz przywracanie preferencji.
+- [x] Wydzielić `initTimeTheme()` z `initHeroImage()`, żeby noc obejmowała podstrony odmian.
+- [x] Przekodować kadry na WebP (`tools/optimize-hero.py`) i przepiąć ścieżki w
+  `index.html` oraz `404.html`.
+- [x] Przenieść wybór kadru dla `/` na serwer wraz z `preload` (`wsgi.py`).
+- [x] Dopisać testy pory dnia, podmiany hero i kotwic do `tools/test-routing.py`.
 
 ## Implementation Review
 
@@ -213,7 +249,41 @@ pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo warto
 - Nakładka strony 404 korzysta z koloru `--primary`, dzięki czemu nie rozjaśnia nocnego
   zdjęcia i zachowuje kontrast we wszystkich trzech motywach.
 
+Po przeglądzie kodu (Flask z venv, Chrome):
+
+- Zwykłe `/` o 12:02 CEST: `preload` i `src` wskazują `dzien.webp`; jedyne pobranie hero to
+  ten plik, 175 kB w 27 ms, inicjator `link`. `winnica-panorama-01.jpg` nie jest pobierany.
+- `/wina/monarch.html?hero=noc`: strona ciemna mimo braku `#hero-image` — to właśnie
+  przypadek, który wcześniej nie działał.
+- Ręczny wybór `rustic` w trakcie nocy przetrwał tyknięcie zegara (102 s od załadowania)
+  i został zapisany w `localStorage`.
+- Trzy motywy sprawdzone na `/`: `classic` i `rustic` jasne, `modern` ciemny z
+  `color-scheme: dark`; hero czytelne w każdym.
+- Strona 404 pod nieistniejącym adresem: kod 404, kadr `dzien.webp`.
+- `?hero=noc` podmienia kadr i pokazuje pasek; wartość spoza listy nie podmienia niczego.
+- `304` na warunkowe żądanie `/`, gzip i `Vary: Accept-Encoding` bez zmian.
+- Konsola bez błędów. Sklep renderuje 8 kart z cenami, filtry na miejscu (nietknięte).
+- Cztery zestawy testów przechodzą: `test-routing`, `test-cennik-sciezka`,
+  `test-panel-auth` (atrapa Flaska) oraz `test-serwowanie` (prawdziwy Flask).
+
 ## Changelog
+
+### 2026-09-03 (poprawki po przeglądzie kodu)
+
+- `initTimeTheme()` wydzielone z `initHeroImage()`. Wcześniej nocny ciemny motyw nigdy nie
+  włączał się na ośmiu podstronach odmian, bo inicjalizator kończył się na braku
+  `#hero-image`; odwiedzający po zmroku widział ciemną stronę główną i jasną podstronę.
+- Wybór kadru hero dla `/` przeniesiony na serwer razem z `<link rel="preload">`.
+  Wcześniej `/` preloadowało `winnica-panorama-01.jpg` (247 563 B), którego nigdy nie
+  pokazywano, a właściwy kadr odkrywał dopiero odroczony `main.js`. Zapis o braku
+  podwójnego pobierania dotyczył wyłącznie adresów `?hero=` i nie odpowiadał produkcji.
+- Kadry przekodowane na WebP q80 (`tools/optimize-hero.py`): 2,0–2,3 MB PNG → 94–174 kB.
+  PNG zostają w repozytorium jako master.
+- `_wstrzyknij_hero` sprawdza, czy kotwica pasuje dokładnie raz. Wcześniej `str.replace`
+  bez trafienia po cichu oddawał stronę bez podmiany — przy `?hero=` dawało to pomiar
+  wyglądający na poprawny, ale zrobiony na niewłaściwym obrazie.
+- `tools/test-routing.py`: siatka godzin, podmiana `src` i `preload` na `/`, warianty
+  `?hero=` (w tym wartość spoza listy) oraz zachowanie przy niepasującej kotwicy.
 
 ### 2026-09-03
 
