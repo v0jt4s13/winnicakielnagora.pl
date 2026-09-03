@@ -108,13 +108,24 @@ Osiemnaście zdjęć w `attached_assets/photos/` z członem **`-osoby-`** pokazu
 osoby. Do czasu potwierdzenia zgód strona używa wyłącznie kadrów bez tego członu.
 
 Właściciel zebrał zgody **ustnie przy robieniu zdjęć** (2026-09-03). Formularz do potwierdzenia
-ich na piśmie: `docs/zgoda-wizerunek-formularz.html` — jedna strona A4, osiem wierszy na
-podpisy, z klauzulą informacyjną RODO. Przed pierwszym użyciem trzeba w nim uzupełnić adres,
+ich na piśmie: `attached_assets/docs/form-zgody-rodo/zgoda-wizerunek-formularz.html` — jedna
+strona A4, osiem wierszy na podpisy, z klauzulą informacyjną RODO. Przed pierwszym użyciem
+trzeba w nim uzupełnić adres,
 e-mail i telefon winnicy (te same dane, których brakuje w pozycji #9) i warto dać go
 do przejrzenia prawnikowi — nie był przez takiego pisany.
 
 Ponumerowany przegląd zdjęć: `docs/zgody-wizerunek.jpg` + lista `docs/zgody-wizerunek.txt`.
-Katalog `docs/` jest w `.gitignore`.
+Katalog `docs/` **w korzeniu repozytorium** jest w `.gitignore`, więc te dwa pliki zostają
+lokalnie.
+
+Sam formularz jest już w repozytorium i **jest serwowany publicznie** pod
+`/attached_assets/docs/form-zgody-rodo/zgoda-wizerunek-formularz.html`. Reguła w `.gitignore`
+brzmi `/docs/` — z ukośnikiem z przodu; bez niego łapała katalog o tej nazwie na każdym
+poziomie i po cichu pomijała `attached_assets/docs/` przy commitowaniu.
+
+**Do rozważenia:** `robots.txt` ma `Allow: /`, więc formularz będzie indeksowany, mimo że
+nie ma jeszcze uzupełnionych danych winnicy i nie czytał go prawnik. Jeśli to przeszkadza —
+`Disallow: /attached_assets/docs/`.
 
 **Czego potrzebuję, żeby użyć tych zdjęć:** wyłącznie numery z przeglądu.
 **Nie przysyłaj nazwisk ani podpisanych formularzy** — to dane osobowe, a repozytorium jest
@@ -249,7 +260,12 @@ Do ustawienia w konfiguracji wdrożeniowej:
 
 ```
 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json
+WYDARZENIA_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wydarzenia.json
 ```
+
+`WYDARZENIA_SCIEZKA` działa dokładnie tak samo i z tego samego powodu (SPEC-005). **Bez niej
+wpisy wydarzeń zrobione panelem znikną przy najbliższym wdrożeniu**, bo aplikacja czytałaby
+i zapisywała `data/wydarzenia.json` z katalogu nadpisywanego deployem.
 
 Plus dwie rzeczy po stronie serwera:
 

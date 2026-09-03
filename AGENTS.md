@@ -216,7 +216,7 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
    - [x] Inject standards
    - [x] Markup sekcji w index.html
    - [ ] Obsługa w main.js (funkcja initX + rejestracja w DOMContentLoaded)    ← in progress
-   - [ ] Style w custom.css sprawdzone we wszystkich trzech motywach
+   - [ ] Style w custom.css sprawdzone we wszystkich czterech motywach
    ```
 
 ### After Completing Implementation
@@ -232,15 +232,23 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 ## Project Layout
 
 ```
-index.html                # CAŁA witryna — jeden plik, wszystkie sekcje (~790 linii)
-wsgi.py                   # Flask (16 linii): serwuje statyki + fallback na index.html
+index.html                # CAŁA witryna — jeden plik, wszystkie sekcje
+404.html                  # projektowa strona błędu; <base> podmienia wsgi.py wg przedrostka wdrożenia
+wsgi.py                   # Flask: statyki, /data/*.json, API panelu, kadr hero wybierany serwerowo
+cennik.py                 # dane cennika — odczyt, walidacja, zapis atomowy (CENNIK_SCIEZKA)
+wydarzenia.py             # dane wydarzeń — jw. + filtr widoczności (WYDARZENIA_SCIEZKA)
+data/                     # wersje STARTOWE wina.json i wydarzenia.json; żywe pliki leżą poza repo
+wina/                     # strony odmian, po jednym pliku HTML na odmianę
 assets/
   css/style.css           # prebudowany bundle Tailwind (zminifikowany, 1 linia) — NIE edytować ręcznie
   css/custom.css          # ręcznie pisane style projektu (.btn-primary, .hover-elevate, .cart-panel…)
-  js/main.js              # cały front-end: motywy, nawigacja, filtry, koszyk, formularz
+  js/produkty.js          # biblioteka: wyliczenia cen i render karty; NIC nie uruchamia przy wczytaniu
+  js/main.js              # cały front-end: motywy, nawigacja, filtry, koszyk, wydarzenia, formularz
+tools/                    # skrypty uruchamiane ręcznie: dev-server, panel, testy, optymalizacja zdjęć
 attached_assets/
   generated_images/       # grafiki witryny (hero, butelki, wnętrza) — PNG + jeden JPG
-  photos/hero/             # czasowe kadry hero: WebP dla przeglądarki, PNG master + lokalny README
+  photos/hero/            # czasowe kadry hero — WebP; mastery PNG poza repo, patrz lokalny README
+  docs/                   # formularz zgody na wizerunek — serwowany publicznie
 .ai/                      # GUARDRAILS.md, specs/, standards/ — workspace workflow t-shirt size
 .claude/agents/           # subagenci — UWAGA: katalog jest w .gitignore, po klonie go nie ma
 .claude/skills/           # komendy /inject-standards, /verify-standards… — też w .gitignore
@@ -264,10 +272,16 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
 - **Serwer**: Python 3.11 + Flask (`wsgi.py`) wyłącznie do serwowania plików statycznych.
   Produkcja: gunicorn `wsgi:app` na `127.0.0.1:8004`, domena `ops02.jdblayer.com`,
   katalog `/opt/apps/app_winnicakielnagora.pl`, wdrożenie przez `projects_manager`.
-- **Baza danych**: brak. Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw
-  w `localStorage` pod kluczem `winery-style`.
-- **Motywy**: trzy zestawy (`classic`, `modern`, `rustic`), po 29 zmiennych CSS każdy,
-  w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
+- **Baza danych**: brak silnika bazodanowego. Dane redagowane panelem żyją w dwóch plikach
+  JSON — `data/wina.json` i `data/wydarzenia.json` — obsługiwanych przez `cennik.py`
+  i `wydarzenia.py`. Na produkcji ich żywe wersje leżą **poza katalogiem wdrożenia**
+  (`CENNIK_SCIEZKA`, `WYDARZENIA_SCIEZKA`), a kopie w repo są wersjami startowymi.
+  Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw w `localStorage`
+  pod kluczem `winery-style`.
+- **Motywy**: cztery zestawy (`classic`, `modern`, `rustic`, `dark`), po 29 zmiennych CSS
+  każdy, w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
+  `dark` jest jedynym ciemnym i jedynym, który witryna włącza sama — po zmroku,
+  przez `initTimeTheme()`.
 - **Ceny**: `data-price` na karcie produktu to **brutto**; netto i VAT 23% liczy
   `renderCart` (`subtotal / 1.23`). Nie ma nigdzie osobnego źródła cen.
 - **Testy**: brak. **Linter / formatter**: brak. **Krok budowania**: brak.
@@ -339,8 +353,8 @@ builda, zanim zgłosisz zmianę jako gotową:
 
 1. `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000
 2. Obejrzyj sekcję, której dotyczyła zmiana (kotwice w tabeli **Where to Look**)
-3. **Przełącz wszystkie trzy motywy** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
-   musi wyglądać poprawnie w `classic`, `modern` i `rustic`
+3. **Przełącz wszystkie cztery motywy** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
+   musi wyglądać poprawnie w `classic`, `modern`, `rustic` i `dark`
 4. Przy zmianach w sklepie: sprawdź filtry (kategoria, zakres cen, „tylko promocje") oraz
    koszyk (dodanie, +/−, podsumowanie netto / VAT / razem)
 5. Konsola przeglądarki bez błędów
@@ -428,17 +442,25 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   komunikatu.
 - **VAT 23% jest zaszyty w dwóch miejscach**: `renderCart` w `main.js` (`subtotal / 1.23`)
   i etykieta „VAT (23%)" w panelu koszyka w `index.html`.
-- **Trzy motywy po 29 zmiennych CSS.** `setTheme` ustawia je jako style inline na
+- **Cztery motywy po 29 zmiennych CSS.** `setTheme` ustawia je jako style inline na
   `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
-  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich trzech obiektach
+  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich czterech obiektach
   `themeStyles`. Szczegóły: `.ai/standards/frontend/theming.md`.
 - **Motyw zależny od pory dnia nie może żyć w inicjalizatorze hero.** Podstrony `wina/*.html`
-  nie mają `#hero-image`, ale nadal muszą dostać nocny `modern`. Logikę ogólnowitrynową trzymaj
+  nie mają `#hero-image`, ale nadal muszą dostać nocny `dark`. Logikę ogólnowitrynową trzymaj
   w osobnym `initTimeTheme()`, a `initHeroImage()` niech odpowiada wyłącznie za obraz.
+  Motyw włączany automatycznie ma być **osobną pozycją**, a nie przemalowaniem istniejącej:
+  `modern` był przez chwilę ciemny i rozjeżdżał się z własnym opisem w menu.
 - **Pomiar `?hero=` nie dowodzi zachowania zwykłego `/`.** Dla obrazu LCP sprawdź produkcyjną
   ścieżkę routingu: preload scanner musi dostać ten sam plik co `src`, bez wcześniejszego
-  pobrania fallbacku. W przeglądarce używane są WebP; PNG to nieużywane mastery. Role plików,
-  decyzja o masterach i procedura podmiany: `attached_assets/photos/hero/README.md`.
+  pobrania fallbacku. Do repozytorium trafiają wyłącznie WebP; mastery PNG leżą **poza repo**,
+  w katalogu źródłowym, więc świeży klon nie przekoduje kadrów bez oryginałów od Właściciela.
+  Role plików i procedura podmiany: `attached_assets/photos/hero/README.md`.
+- **Filtr dat wydarzeń nie może wylądować w `wsgi.py`.** `.ai/GUARDRAILS.md` #3 zabrania
+  logiki biznesowej w `wsgi.py` poza panelem redakcyjnym, a `/data/wydarzenia.json` jest trasą
+  publiczną. Widoczność liczy `wydarzenia.aktywne()`; handler ma tylko wczytać, zawęzić i oddać.
+  Pilnuje tego `tools/test-routing.py`. Wpisy przyszłe i zakończone **nie opuszczają serwera**,
+  więc `main.js` nie ma żadnej logiki dat.
 - **`alert()` blokuje automatyzację przeglądarki.** „Przejdź do płatności" (`initCart`)
   i wysyłka formularza (`initContactForm`) wołają `alert()` — kliknięcie ich przez Chrome MCP
   zawiesza sesję. Te dwa przyciski testuj ręcznie.
@@ -469,9 +491,13 @@ treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa 
 
 | What | Where |
 |------|-------|
-| Serwowanie plików | `wsgi.py` — jedyny handler `serve()`, fallback na `index.html`. Brak API i endpointów biznesowych |
+| Serwowanie plików | `wsgi.py` — catch-all `serve()` z białą listą `PLIKI_PUBLICZNE` / `KATALOGI_PUBLICZNE`; nieznany adres to **404**, nie strona główna |
+| Endpointy | `wsgi.py` — `/zdrowie`, `/data/wina.json`, `/data/wydarzenia.json` (tylko wpisy aktywne dziś), `/tools/panel/api/<akcja>` za hasłem |
 | Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `kontakt` |
-| Dane produktów (zamiast bazy) | sekcja `#sklep` w `index.html` — `grep -n 'class="product-card' index.html` (6 kart, atrybuty `data-*`) |
+| Dane produktów (zamiast bazy) | `data/wina.json` — jedyne źródło asortymentu i cen; `index.html` NIE zawiera kart, renderuje je `renderSklep()` w `main.js`. Reguły: `.ai/standards/content/wina-json.md` |
+| Wydarzenia | `data/wydarzenia.json` + `wydarzenia.py` (walidacja, `aktywne()`); render `initWydarzenia()` w `main.js`, kontener `#lista-wydarzen` w sekcji `#wydarzenia` |
+| Panel redakcyjny | `tools/panel/` — lokalnie `serwer.py` na `127.0.0.1` bez hasła, na produkcji `wsgi.py` za Basic Auth (`PANEL_UZYTKOWNIK`, `PANEL_HASLO_HASH`) |
+| Testy | `tools/test-*.py` — routing, wydarzenia, ścieżka cennika, uwierzytelnianie panelu, serwowanie na prawdziwym Flasku |
 | Ikony | `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`, użycie `<use href="#icon-…">` — `grep -n '<symbol' index.html` |
 | Koszyk | `assets/js/main.js` — stan w `const cart = new Map()`, render w `renderCart`, zdarzenia w `initCart` (`grep -n 'function initCart' assets/js/main.js`) |
 | Motywy | `assets/js/main.js` — obiekt `themeStyles` na górze pliku + `setTheme` / `initStyleSwitcher` |
