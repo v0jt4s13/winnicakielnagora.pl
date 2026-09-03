@@ -1,6 +1,7 @@
 const themeStyles = {
   classic: {
     name: "Classic Burgundy",
+    colorScheme: "light",
     vars: {
       "--background": "50 5% 98%",
       "--foreground": "0 0% 18%",
@@ -35,40 +36,42 @@ const themeStyles = {
   },
   modern: {
     name: "Modern Minimal",
+    colorScheme: "dark",
     vars: {
-      "--background": "0 0% 98%",
-      "--foreground": "0 0% 10%",
-      "--border": "0 0% 88%",
-      "--card": "0 0% 100%",
-      "--card-foreground": "0 0% 10%",
-      "--card-border": "0 0% 92%",
-      "--sidebar": "0 0% 96%",
-      "--sidebar-foreground": "0 0% 10%",
-      "--sidebar-border": "0 0% 90%",
-      "--sidebar-primary": "0 0% 15%",
-      "--sidebar-primary-foreground": "0 0% 98%",
-      "--sidebar-accent": "0 0% 92%",
-      "--sidebar-accent-foreground": "0 0% 10%",
-      "--sidebar-ring": "0 0% 30%",
-      "--popover": "0 0% 98%",
-      "--popover-foreground": "0 0% 10%",
-      "--popover-border": "0 0% 88%",
-      "--primary": "0 0% 15%",
-      "--primary-foreground": "0 0% 98%",
-      "--secondary": "0 0% 92%",
-      "--secondary-foreground": "0 0% 10%",
-      "--muted": "0 0% 94%",
-      "--muted-foreground": "0 0% 40%",
-      "--accent": "0 0% 90%",
-      "--accent-foreground": "0 0% 10%",
-      "--destructive": "0 84% 45%",
+      "--background": "225 12% 8%",
+      "--foreground": "40 20% 94%",
+      "--border": "220 10% 24%",
+      "--card": "225 11% 11%",
+      "--card-foreground": "40 20% 94%",
+      "--card-border": "220 10% 19%",
+      "--sidebar": "225 12% 10%",
+      "--sidebar-foreground": "40 20% 94%",
+      "--sidebar-border": "220 10% 20%",
+      "--sidebar-primary": "38 60% 54%",
+      "--sidebar-primary-foreground": "225 14% 8%",
+      "--sidebar-accent": "220 10% 18%",
+      "--sidebar-accent-foreground": "40 20% 94%",
+      "--sidebar-ring": "38 70% 58%",
+      "--popover": "225 12% 12%",
+      "--popover-foreground": "40 20% 94%",
+      "--popover-border": "220 10% 22%",
+      "--primary": "220 11% 16%",
+      "--primary-foreground": "40 20% 96%",
+      "--secondary": "220 10% 17%",
+      "--secondary-foreground": "40 15% 92%",
+      "--muted": "220 9% 14%",
+      "--muted-foreground": "215 12% 68%",
+      "--accent": "220 10% 20%",
+      "--accent-foreground": "40 20% 96%",
+      "--destructive": "0 68% 46%",
       "--destructive-foreground": "0 0% 98%",
-      "--input": "0 0% 65%",
-      "--ring": "0 0% 30%"
+      "--input": "220 10% 35%",
+      "--ring": "38 70% 58%"
     }
   },
   rustic: {
     name: "Rustic Natural",
+    colorScheme: "light",
     vars: {
       "--background": "32 25% 96%",
       "--foreground": "25 20% 15%",
@@ -125,12 +128,13 @@ function stawkaVat() {
 const qs = (sel) => document.querySelector(sel);
 const qsa = (sel) => Array.from(document.querySelectorAll(sel));
 
-function setTheme(style) {
-  const vars = themeStyles[style]?.vars;
-  if (!vars) return;
+function setTheme(style, persist = true) {
+  const theme = themeStyles[style];
+  if (!theme) return;
   const root = document.documentElement;
-  Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value));
-  localStorage.setItem("winery-style", style);
+  Object.entries(theme.vars).forEach(([key, value]) => root.style.setProperty(key, value));
+  root.style.colorScheme = theme.colorScheme;
+  if (persist) localStorage.setItem("winery-style", style);
   updateStyleMenu(style);
 }
 
@@ -141,11 +145,15 @@ function updateStyleMenu(style) {
   });
 }
 
+function preferredTheme() {
+  const saved = localStorage.getItem("winery-style");
+  return themeStyles[saved] ? saved : "classic";
+}
+
 function initStyleSwitcher() {
   const trigger = qs("#style-trigger");
   const menu = qs("#style-menu");
-  const saved = localStorage.getItem("winery-style") || "classic";
-  setTheme(saved);
+  setTheme(preferredTheme(), false);
 
   trigger?.addEventListener("click", () => {
     menu?.classList.toggle("hidden");
@@ -191,11 +199,20 @@ function wineryHour() {
   return new Date().getHours();
 }
 
+/** Pora wymuszona adresem (?hero=noc) — narzedzie testowe, patrz initPrzelacznikHero. */
+function wymuszonaPoraHero() {
+  const zadana = new URLSearchParams(location.search).get("hero");
+  return ["poranek", "dzien", "zachod", "noc"].includes(zadana) ? zadana : null;
+}
+
 function initHeroImage() {
   const image = qs("#hero-image");
   if (!image) return;
 
+  const wymuszona = wymuszonaPoraHero();
+
   const fallbackSrc = image.dataset.fallbackSrc;
+  let selectedPeriod = null;
   let selectedSrc = null;
   let failedSrc = null;
 
@@ -207,9 +224,16 @@ function initHeroImage() {
   });
 
   function updateImage() {
-    const period = heroPeriodForHour(wineryHour());
+    const period = wymuszona || heroPeriodForHour(wineryHour());
     const nextSrc = period ? image.dataset[`${period}Src`] : null;
     if (!nextSrc) return;
+
+    if (period !== selectedPeriod) {
+      const wasNight = selectedPeriod === "noc";
+      selectedPeriod = period;
+      if (period === "noc") setTheme("modern", false);
+      else if (wasNight) setTheme(preferredTheme(), false);
+    }
 
     if (nextSrc !== selectedSrc) {
       selectedSrc = nextSrc;
@@ -221,7 +245,8 @@ function initHeroImage() {
   }
 
   updateImage();
-  window.setInterval(updateImage, 60_000);
+  // Przy wymuszonej porze zegar jest zbedny — inaczej po minucie nadpisalby wybor.
+  if (!wymuszona) window.setInterval(updateImage, 60_000);
 }
 
 function initNavigation() {
@@ -644,6 +669,42 @@ function initWineOffer() {
     .join("");
 }
 
+/**
+ * Pasek wyboru zdjęcia wejściowego — narzędzie testowe, nie funkcja witryny.
+ *
+ * Pokazuje się WYŁĄCZNIE gdy serwer doda body[data-hero-kandydaci], czyli gdy adres
+ * zawiera ?hero. Zwykły odwiedzający nigdy go nie zobaczy i nic go nie kosztuje.
+ *
+ * Sama podmiana zdjęcia dzieje się po stronie serwera (wsgi.py), więc wynik pomiaru
+ * w PageSpeed dotyczy naprawdę wybranego zdjęcia, a nie domyślnego z podmianą w locie.
+ *
+ * Celowo bez miniatur: podgląd czterech kadrów oznaczałby pobranie ~8,4 MB grafiki
+ * i zafałszowanie pomiaru, dla którego ten pasek w ogóle powstał.
+ */
+function initPrzelacznikHero() {
+  const kandydaci = document.body.dataset.heroKandydaci;
+  if (!kandydaci) return;
+
+  const wybrana = wymuszonaPoraHero();
+  const opisy = { poranek: "Poranek", dzien: "Dzień", zachod: "Zachód", noc: "Noc" };
+
+  const pasek = document.createElement("div");
+  pasek.className = "przelacznik-hero";
+  pasek.innerHTML =
+    '<span class="przelacznik-hero__tytul">Zdjęcie wejściowe</span>' +
+    kandydaci
+      .split(",")
+      .map((pora) => {
+        const aktywna = pora === wybrana ? " przelacznik-hero__opcja--aktywna" : "";
+        return `<a class="przelacznik-hero__opcja${aktywna}" href="?hero=${pora}">${
+          opisy[pora] || pora
+        }</a>`;
+      })
+      .join("") +
+    `<a class="przelacznik-hero__opcja" href="./">${wybrana ? "Wróć do pory dnia" : "Zamknij"}</a>`;
+  document.body.appendChild(pasek);
+}
+
 function initContactForm() {
   const form = qs("#contact-form");
   form?.addEventListener("submit", (e) => {
@@ -654,10 +715,11 @@ function initContactForm() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  initHeroImage();
   initStyleSwitcher();
+  initHeroImage();
   initNavigation();
   initContactForm();
+  initPrzelacznikHero();
 
   cennik = await wczytajCennik();
   renderKategorie();

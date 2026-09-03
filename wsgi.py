@@ -299,6 +299,36 @@ def panel_pliki(plik: str):
     return odpowiedz
 
 
+# --- przelacznik zdjecia wejsciowego (narzedzie testowe) ----------------------
+# Podmiana idzie po stronie serwera, a nie w JS, bo tylko wtedy pomiar w PageSpeed
+# jest uczciwy — przy podmianie w przegladarce pobralaby sie najpierw wersja domyslna.
+# Bez parametru ?hero strona jest bajt w bajt taka jak zawsze.
+HERO_PORY = ("poranek", "dzien", "zachod", "noc")
+HERO_KOTWICA_IMG = "<img id=\"hero-image\""
+HERO_KOTWICA_PRELOAD = '<link rel="preload" as="image" href="./attached_assets/photos/winnica-panorama-01.jpg"'
+
+
+def _index_z_hero(pora: str | None):
+    """index.html z wymuszona pora dnia i paskiem wyboru.
+
+    Kotwiczymy sie na id="hero-image", a nie na sciezce do zdjecia: ta sama sciezka
+    wystepuje takze w og:image, twitter:image i w sekcji kontaktu.
+    """
+    tresc = (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
+    if pora:
+        zdjecie = f"./attached_assets/photos/hero/{pora}.png"
+        # 1) src na samym <img> — inaczej obraz LCP odkrywa dopiero JS.
+        tresc = tresc.replace(HERO_KOTWICA_IMG, f'{HERO_KOTWICA_IMG} src="{zdjecie}"', 1)
+        # 2) preload musi wskazywac to, co naprawde zostanie wyswietlone.
+        tresc = tresc.replace(
+            HERO_KOTWICA_PRELOAD,
+            f'<link rel="preload" as="image" href="{zdjecie}"', 1)
+    tresc = tresc.replace(
+        "<body ", f'<body data-hero-kandydaci="{",".join(HERO_PORY)}" ', 1)
+    return Response(tresc, 200, {"Content-Type": "text/html; charset=utf-8",
+                                 "Cache-Control": "no-store"})
+
+
 def _oddaj(wzgledna: str):
     """send_from_directory + Cache-Control zalezny od rozszerzenia."""
     odpowiedz = send_from_directory(STATIC_ROOT, wzgledna)
@@ -312,6 +342,11 @@ def _oddaj(wzgledna: str):
 @app.route("/<path:path>")
 def serve(path: str):
     if not path:
+        if "hero" in request.args:
+            pora = request.args.get("hero")
+            # Nieznana wartosc = sam pasek wyboru, bez podmiany. Lista dozwolonych
+            # zamyka droge sciezkom z zewnatrz (../, adresy http).
+            return _index_z_hero(pora if pora in HERO_PORY else None)
         return _oddaj("index.html")
 
     istniejacy = _plik(path)

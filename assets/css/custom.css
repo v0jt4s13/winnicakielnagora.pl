@@ -302,10 +302,10 @@ body.cart-open #cart-panel {
   z-index: -1;
   background: linear-gradient(
     90deg,
-    hsl(var(--foreground) / 0.96) 0%,
-    hsl(var(--foreground) / 0.86) 36%,
-    hsl(var(--foreground) / 0.48) 70%,
-    hsl(var(--foreground) / 0.24) 100%
+    hsl(var(--primary) / 0.96) 0%,
+    hsl(var(--primary) / 0.86) 36%,
+    hsl(var(--primary) / 0.48) 70%,
+    hsl(var(--primary) / 0.24) 100%
   );
 }
 
@@ -450,6 +450,73 @@ body.cart-open #cart-panel {
   margin-top: 1.5rem;
 }
 
+@media (min-width: 641px) and (max-height: 899px) {
+  .error-page {
+    align-items: flex-start;
+    padding-top: clamp(4.5rem, 12vh, 6rem);
+    padding-bottom: 1rem;
+  }
+
+  .error-page__header-inner {
+    height: clamp(3.75rem, 10vh, 5rem);
+  }
+
+  .error-page__copy {
+    max-width: 43rem;
+  }
+
+  .error-page__code {
+    margin-bottom: -0.2rem;
+    font-size: clamp(5rem, 18vh, 8rem);
+  }
+
+  .error-page__eyebrow {
+    margin-bottom: clamp(0.35rem, 1vh, 0.75rem);
+    font-size: 0.75rem;
+  }
+
+  .error-page__title {
+    max-width: 38rem;
+    margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
+    font-size: clamp(2.15rem, 8vh, 3.75rem);
+    line-height: 0.95;
+  }
+
+  .error-page__description {
+    max-width: 36rem;
+    font-size: clamp(0.9375rem, 2.2vh, 1.0625rem);
+    line-height: 1.45;
+  }
+
+  .error-page__actions {
+    gap: 0.75rem;
+    margin-top: clamp(0.75rem, 2vh, 1.5rem);
+  }
+
+  .error-page__actions .btn-primary,
+  .error-page__actions .btn-ghost {
+    padding: 0.625rem 1rem;
+  }
+
+  .error-page__shortcuts {
+    margin-top: clamp(0.75rem, 2vh, 1.5rem);
+  }
+
+  .error-page__shortcut {
+    gap: 0.1rem;
+    padding: clamp(0.5rem, 1.4vh, 0.75rem) 1rem;
+  }
+
+  .error-page__shortcut-note,
+  .error-page__location {
+    font-size: 0.75rem;
+  }
+
+  .error-page__location {
+    margin-top: clamp(0.5rem, 1.5vh, 1rem);
+  }
+}
+
 @media (max-width: 640px) {
   .error-page {
     align-items: flex-start;
@@ -466,9 +533,9 @@ body.cart-open #cart-panel {
   .error-page__veil {
     background: linear-gradient(
       180deg,
-      hsl(var(--foreground) / 0.9) 0%,
-      hsl(var(--foreground) / 0.72) 55%,
-      hsl(var(--foreground) / 0.94) 100%
+      hsl(var(--primary) / 0.9) 0%,
+      hsl(var(--primary) / 0.72) 55%,
+      hsl(var(--primary) / 0.94) 100%
     );
   }
 
@@ -544,3 +611,44 @@ body.cart-open #cart-panel {
 #lista-produktow:empty { min-height: 520px; }
 @media (min-width: 640px) { #lista-produktow:empty { min-height: 620px; } }
 @media (min-width: 1280px) { #lista-produktow:empty { min-height: 700px; } }
+
+/* Pasek wyboru zdjęcia wejściowego — narzędzie testowe (?hero w adresie).
+   Kolory celowo poza systemem motywów: to nakładka deweloperska, która ma być
+   widoczna niezależnie od tego, jaki motyw akurat testujemy. */
+.przelacznik-hero {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: calc(100vw - 2rem);
+  overflow-x: auto;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(20, 18, 16, 0.92);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  font: 12px/1.3 system-ui, sans-serif;
+  color: #f2ece4;
+}
+.przelacznik-hero__tytul {
+  flex: 0 0 auto;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.przelacznik-hero__opcja {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.przelacznik-hero__opcja:hover { background: rgba(255, 255, 255, 0.14); }
+.przelacznik-hero__opcja--aktywna { border-color: #d8a24a; color: #d8a24a; }

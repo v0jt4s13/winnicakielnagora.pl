@@ -6,6 +6,9 @@ Hero strony głównej oraz tło strony 404 mają pokazywać jeden z czterech kad
 zależnie od aktualnej godziny w strefie `Europe/Warsaw`. Zmiana dotyczy wyłącznie obrazu;
 treść, CTA, gradient i wysokość obu widoków pozostają bez zmian.
 
+Wariant `modern` jest pełnym ciemnym motywem. Przy automatycznym albo testowym wyborze
+`noc.png` witryna aktywuje go bez nadpisywania stylu zapisanego przez użytkownika.
+
 Źródła dostarczone przez Właściciela znajdują się w
 `docs/materialy-do-wykorzystania/hero/`. `wsgi.py` dopuszcza publicznie tylko katalogi
 z `KATALOGI_PUBLICZNE`, gdzie znajduje się `attached_assets`, ale nie `docs`. Dlatego do
@@ -57,6 +60,34 @@ dłuższy czas i wraca do początku strony po 22:00.
    > **Zmiana vs. stan obecny:** obecnie obraz nie reaguje na upływ czasu. Po zmianie
    > otwarta karta przechodzi do kolejnego kadru najpóźniej minutę po granicy przedziału.
 
+### 3. Nocny kadr przełącza witrynę na ciemny motyw
+
+**Persona:** odwiedzający otwierający stronę po 22:00. Chce czytelnego, spokojnego wizualnie
+widoku, który pasuje do nocnej fotografii, bez ręcznego zmieniania ustawień.
+
+1. Strona najpierw odczytuje zapisaną preferencję motywu, a następnie wybiera porę dnia.
+
+   ```text
+   zapisany motyw: classic     pora: noc
+              └──────────────┬──────────────┘
+                             ▼
+                 noc.png + Modern Minimal Dark
+   ```
+
+2. Automatyczny wybór `modern` nie zapisuje się do `localStorage`. Ręczny wybór stylu
+   pozostaje możliwy i jest zapisywany jak dotychczas.
+
+3. Gdy otwarta karta przejdzie z nocy do poranka, przywracany jest ostatni styl wybrany
+   przez użytkownika.
+
+   **Za kulisami:** `setTheme(style, persist)` rozdziela zastosowanie palety od zapisu
+   preferencji. `initHeroImage()` reaguje tylko na zmianę przedziału, dzięki czemu ręczny
+   wybór dokonany już w nocy nie jest cofany przy każdej aktualizacji minutowej.
+
+   > **Zmiana vs. stan obecny:** obecnie `modern` jest jasny, a wybór `noc.png` nie wpływa
+   > na resztę interfejsu. Po zmianie noc uruchamia ciemną paletę, a poranek przywraca
+   > zapisaną preferencję.
+
 ## Warianty czasowe
 
 | Czas w `Europe/Warsaw` | Klucz | Plik publiczny |
@@ -81,10 +112,21 @@ Granice są domknięte od początku i otwarte od końca. Przykładowo dokładnie
 - `assets/js/main.js`: czysta funkcja `heroPeriodForHour(hour)` mapuje liczbę 0–23 na klucz
   obrazu. Nowa funkcja `initHeroImage()` zgodna ze wzorcem `initX()` ustawia obraz i jest
   rejestrowana w istniejącym `DOMContentLoaded`.
+- `themeStyles.modern`: zachowuje ten sam komplet 29 zmiennych co pozostałe motywy, ale
+  otrzymuje ciemną paletę grafitową z ciepłym akcentem. Każdy motyw deklaruje także
+  `colorScheme` (`dark` dla `modern`, `light` dla `classic` i `rustic`) dla natywnych kontrolek.
+- `setTheme(style, persist = true)`: automatyczne przełączenie wywołuje funkcję z `false`,
+  a ręczny wybór zachowuje domyślny zapis do `localStorage["winery-style"]`. Poza pętlą
+  29 zmiennych funkcja ustawia `document.documentElement.style.colorScheme` z konfiguracji
+  motywu i wywołuje `updateStyleMenu(style)`, więc menu zawsze wskazuje styl faktycznie widoczny.
+- Kolejność startowa: `initStyleSwitcher()` przed `initHeroImage()`. Najpierw ładowana jest
+  preferencja, potem noc może tymczasowo zastosować `modern`.
 - Czas: `Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Warsaw", hour: "numeric",
   hourCycle: "h23" })` i `formatToParts()` zapewniają zakres 00–23, również o północy.
   Wynik spoza zakresu albo błąd `Intl` powoduje użycie lokalnej godziny urządzenia.
-- Aktualizacja: interwał 60 sekund; bez `localStorage`, żądań API ani stanu trwałego.
+- Aktualizacja obrazu: interwał 60 sekund, bez żądań API i bez nowego stanu trwałego. Mechanizm
+  może odczytać istniejący `localStorage["winery-style"]`, ale zapisuje go wyłącznie ręczny
+  wybór użytkownika; automatyczne wejście w noc nigdy go nie zmienia.
 - Błąd obrazu: `initHeroImage()` przechowuje w swoim domknięciu URL, którego pobranie nie
   powiodło się. Handler `error` ustawia dotychczasową panoramę, ale nie oznacza jej jako
   wariantu czasowego. Aktualizacje minutowe nie ponawiają uszkodzonego URL-a w tym samym
@@ -110,12 +152,18 @@ Brak nowych endpointów i żądań sieciowych poza pobraniem wybranego pliku obr
 - Przed wyborem nie jest pobierany żaden sieciowy obraz hero, dlatego start nie pokazuje
   niewłaściwej pory i nie wykonuje podwójnego pobrania. Po wyborze zmienia się tylko `src`.
 - Funkcja ma działać jednakowo na desktopie, telefonie i we wszystkich trzech motywach.
+- Ciemny `modern` musi zachować czytelność tekstu, kart, filtrów, formularza, menu i koszyka;
+  wszystkie kolory nadal pochodzą wyłącznie ze zmiennych motywu.
 
 ## Configuration
 
 Stała strefa czasowa: `Europe/Warsaw`. To świadoma decyzja produktu: obraz przedstawia
 aktualną porę w winnicy, więc wszyscy odwiedzający widzą ten sam kadr niezależnie od swojej
 lokalizacji. Brak zmiennych środowiskowych i flag funkcji.
+
+Automatyczny `modern` jest stanem prezentacji, nie preferencją. Jedynym trwałym ustawieniem
+pozostaje ręczny wybór w `localStorage["winery-style"]`. Brak wpisu albo wartość spoza
+`classic`, `modern`, `rustic` oznacza domyślny `classic`.
 
 ## Kryteria akceptacji
 
@@ -129,6 +177,10 @@ lokalizacji. Brak zmiennych środowiskowych i flag funkcji.
 - Publiczne obrazy są dostępne przez routing produkcyjny.
 - Strona 404 wybiera ten sam wariant czasowy co strona główna i zachowuje kod HTTP 404.
 - Widok zachowuje czytelność na desktopie i telefonie we wszystkich motywach.
+- `modern` ma pełną ciemną paletę i `color-scheme: dark`; dwa pozostałe motywy pozostają jasne.
+- `noc.png` automatycznie aktywuje `modern` na stronie głównej i 404 bez zmiany zapisanej preferencji.
+- Przejście z nocy do poranka przywraca ręcznie zapisaną preferencję.
+- Ręczna zmiana stylu po automatycznym wyborze nocnym nie jest cofana co minutę.
 
 ## Implementation Checklist
 
@@ -138,6 +190,11 @@ lokalizacji. Brak zmiennych środowiskowych i flag funkcji.
 - [x] Dodać `heroPeriodForHour()` i `initHeroImage()` w `assets/js/main.js`.
 - [x] Podłączyć ten sam mechanizm do obrazu tła w `404.html`.
 - [x] Sprawdzić granice czasowe, routing obrazów, standardy i widok w przeglądarce.
+- [x] Wstrzyknąć standardy dla rozszerzenia: `frontend/theming`, `frontend/js-conventions`
+  i `frontend/styling`.
+- [x] Zmienić `themeStyles.modern` na pełną ciemną paletę z `colorScheme: "dark"`.
+- [x] Powiązać wejście i wyjście z okresu `noc` z tymczasowym motywem `modern`.
+- [x] Zweryfikować nocny motyw na stronie głównej i 404 oraz przywracanie preferencji.
 
 ## Implementation Review
 
@@ -149,6 +206,12 @@ lokalizacji. Brak zmiennych środowiskowych i flag funkcji.
 - Widok hero sprawdzono w Chrome na desktopie 1440×900, telefonie 390×844 oraz we
   wszystkich trzech motywach: `classic`, `modern` i `rustic`.
 - Kod jest zgodny z `frontend/js-conventions` i zaktualizowanym `content/html-editing`.
+- Ciemny `modern` sprawdzono w Chrome na stronie głównej, w sklepie i na stronie 404,
+  również w widoku telefonu 390×844; karty, filtry, menu i formularz pozostają czytelne.
+- Potwierdzono, że noc automatycznie wybiera `modern` bez zapisu do `localStorage`, ręczny
+  wybór pozostaje trwały, a poranek przywraca zapisaną preferencję.
+- Nakładka strony 404 korzysta z koloru `--primary`, dzięki czemu nie rozjaśnia nocnego
+  zdjęcia i zachowuje kontrast we wszystkich trzech motywach.
 
 ## Changelog
 
@@ -157,3 +220,5 @@ lokalizacji. Brak zmiennych środowiskowych i flag funkcji.
 - Pierwsza wersja specyfikacji czasowego obrazu hero.
 - Wdrożono cztery warianty czasowe, obsługę fallbacku i automatyczną aktualizację.
 - Rozszerzono wybór czasowy na stronę 404 bez duplikowania logiki JavaScript.
+- Doprecyzowano wymagania dla ciemnego wariantu `modern` aktywowanego przez nocny kadr.
+- Wdrożono ciemną paletę `modern`, automatyczne przełączanie nocne i przywracanie preferencji.

@@ -35,6 +35,7 @@ class _Zadanie:
     authorization = None
     method = "GET"
     script_root = ""
+    args = {}          # ?hero=... — ten zestaw testuje adresy bez parametrow
 
     def get_json(self, silent=False):
         return None
