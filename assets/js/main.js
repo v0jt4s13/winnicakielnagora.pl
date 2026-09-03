@@ -249,6 +249,65 @@ function initHeroImage() {
   if (!wymuszona) window.setInterval(updateImage, 60_000);
 }
 
+function initScrollReveal() {
+  const root = document.documentElement;
+  const blocks = qsa("[data-reveal]");
+
+  function revealAll() {
+    blocks.forEach((block) => block.classList.add("is-visible"));
+    root.classList.remove("reveal-pending", "reveal-ready");
+  }
+
+  if (blocks.length === 0) {
+    root.classList.remove("reveal-pending");
+    return;
+  }
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+    revealAll();
+    return;
+  }
+
+  const hashTarget = location.hash ? qs(location.hash) : null;
+  if (hashTarget) {
+    blocks
+      .filter((block) => hashTarget.contains(block) || block.contains(hashTarget))
+      .forEach((block) => block.classList.add("is-visible"));
+  }
+
+  let observer;
+  try {
+    observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.08 }
+    );
+
+    blocks
+      .filter((block) => !block.classList.contains("is-visible"))
+      .forEach((block) => observer.observe(block));
+    root.classList.add("reveal-ready");
+    root.classList.remove("reveal-pending");
+
+    const handleMotionChange = (event) => {
+      if (!event.matches) return;
+      observer.disconnect();
+      revealAll();
+      reducedMotion.removeEventListener?.("change", handleMotionChange);
+    };
+    reducedMotion.addEventListener?.("change", handleMotionChange);
+  } catch (_error) {
+    observer?.disconnect();
+    revealAll();
+  }
+}
+
 function initNavigation() {
   const mobileToggle = qs("#mobile-menu-toggle");
   const mobileMenu = qs("#mobile-menu");
@@ -717,6 +776,7 @@ function initContactForm() {
 document.addEventListener("DOMContentLoaded", async () => {
   initStyleSwitcher();
   initHeroImage();
+  initScrollReveal();
   initNavigation();
   initContactForm();
   initPrzelacznikHero();

@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    document.documentElement.classList.add("reveal-pending");
+    window.addEventListener("DOMContentLoaded", () => {
+      window.requestAnimationFrame(() => {
+        const root = document.documentElement;
+        if (!root.classList.contains("reveal-ready")) root.classList.remove("reveal-pending");
+      });
+    }, { once: true });
+  </script>
   <title>Winnica Kielna Góra — wina z Kielnarowej pod Rzeszowem</title>
   <meta name="description" content="Rodzinna winnica na południowym stoku w Kielnarowej, 10 km od Rzeszowa. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron.">
   <link rel="canonical" href="https://winnicakielnagora.pl/">
@@ -203,7 +212,7 @@
 
       <section id="o-nas" class="py-20 bg-secondary/20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="grid md:grid-cols-2 gap-12 items-center">
+          <div class="grid md:grid-cols-2 gap-12 items-center" data-reveal>
             <div>
               <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">O Naszej Winnicy</h2>
               <div class="space-y-5 text-muted-foreground">
@@ -237,12 +246,12 @@
 
       <section id="nasze-wina" class="py-20 bg-secondary/20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nasze Odmiany Winogron</h2>
             <p class="text-muted-foreground max-w-2xl mx-auto">Uprawiamy starannie wyselekcjonowane odmiany winorośli, które idealnie odnajdują się w klimacie Podkarpacia</p>
           </div>
           <div class="space-y-12">
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8">
                 <div>
                   <div class="aspect-[4/3] overflow-hidden">
@@ -264,7 +273,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8 md:flex-row-reverse">
                 <div class="md:order-2">
                   <div class="aspect-[4/3] overflow-hidden">
@@ -286,7 +295,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8">
                 <div>
                   <div class="aspect-[4/3] overflow-hidden">
@@ -308,7 +317,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8 md:flex-row-reverse">
                 <div class="md:order-2">
                   <div class="aspect-[4/3] overflow-hidden">
@@ -330,7 +339,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8">
                 <div>
                   <div class="aspect-[4/3] overflow-hidden">
@@ -352,7 +361,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8 md:flex-row-reverse">
                 <div class="md:order-2">
                   <div class="aspect-[4/3] overflow-hidden">
@@ -374,7 +383,7 @@
                 </div>
               </div>
             </article>
-            <article class="rounded-md border border-card-border overflow-hidden">
+            <article class="rounded-md border border-card-border overflow-hidden" data-reveal>
               <div class="grid md:grid-cols-2 gap-8">
                 <div>
                   <div class="aspect-[4/3] overflow-hidden">
@@ -402,12 +411,12 @@
 
       <section id="sklep" class="py-20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Sklep z Winami</h2>
             <p class="text-muted-foreground max-w-2xl mx-auto">Odkryj naszą kolekcję wyjątkowych win. Wszystkie produkty dostępne z dostawą do domu</p>
           </div>
           <div class="grid lg:grid-cols-4 gap-8">
-            <aside class="lg:col-span-1 bg-card border border-card-border rounded-md p-5">
+            <aside class="lg:col-span-1 bg-card border border-card-border rounded-md p-5" data-reveal>
               <div class="flex items-center justify-between mb-5">
                 <h3 class="font-semibold text-lg">Filtry</h3>
                 <button id="clear-filters" class="hidden text-sm text-primary hover:underline gap-2 items-center">
@@ -453,7 +462,7 @@
                 </div>
               </div>
             </aside>
-            <div class="lg:col-span-3">
+            <div class="lg:col-span-3" data-reveal>
               <div id="no-products" class="hidden text-center py-12">
                 <p class="text-muted-foreground">Nie znaleziono produktów spełniających kryteria filtrowania</p>
               </div>
@@ -466,11 +475,11 @@
 
       <section id="wydarzenia" class="py-20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Wydarzenia i Degustacje</h2>
             <p class="text-muted-foreground max-w-2xl mx-auto">Degustacje i zwiedzanie winnicy organizujemy po wcześniejszym umówieniu — dla par, grup znajomych i firm</p>
           </div>
-          <div class="rounded-md border border-card-border overflow-hidden">
+          <div class="rounded-md border border-card-border overflow-hidden" data-reveal>
             <div class="grid md:grid-cols-2">
               <div class="aspect-video md:aspect-auto">
                 <!-- TODO (TODO.md #15): grafika AI - brak zdjecia wnetrza do degustacji -->
@@ -495,12 +504,12 @@
 
       <section id="kontakt" class="py-20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="text-center mb-12">
+          <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Kontakt</h2>
             <p class="text-muted-foreground max-w-2xl mx-auto">Zapraszamy do kontaktu. Chętnie odpowiemy na wszystkie pytania</p>
           </div>
           <div class="grid md:grid-cols-2 gap-12">
-            <div class="space-y-8">
+            <div class="space-y-8" data-reveal>
               <div class="rounded-md border border-card-border bg-card">
                 <div class="p-8">
                   <h3 class="font-semibold text-lg mb-8">Dane kontaktowe</h3>
@@ -544,7 +553,7 @@
                 </div>
               </div>
             </div>
-            <div class="rounded-md border border-card-border bg-card">
+            <div class="rounded-md border border-card-border bg-card" data-reveal>
               <div class="p-8">
                 <h3 class="font-semibold text-lg mb-8">Wyślij wiadomość</h3>
                 <form id="contact-form" class="space-y-5">
@@ -575,7 +584,7 @@
 
     <footer class="bg-primary text-primary-foreground">
       <div class="max-w-7xl mx-auto px-5 py-12">
-        <div class="grid md:grid-cols-4 gap-12 mb-12">
+        <div class="grid md:grid-cols-4 gap-12 mb-12" data-reveal>
           <div>
             <div class="flex items-center gap-2 mb-5">
               <svg class="w-6 h-6"><use href="#icon-wine"></use></svg>
