@@ -16,3 +16,7 @@ frontend:
     description: Bundle Tailwinda tylko do odczytu vs. ręczny custom.css, kolory przez zmienne motywu
   theming:
     description: Cztery motywy w themeStyles (w tym ciemny dark), parytet 29 zmiennych CSS, colorScheme, preferencje i niezależny initTimeTheme
+
+process:
+  model-selection:
+    description: Dobór modelu do zadania — agent proponuje i czeka na akceptację, nigdy nie zmienia bez zgody
