@@ -5,7 +5,7 @@
 Hero strony głównej oraz tło strony 404 mają pokazywać jeden z czterech kadrów winnicy
 zależnie od aktualnej godziny w strefie `Europe/Warsaw`. Zmiana dotyczy wyłącznie obrazu;
 treść, CTA, gradient i wysokość obu widoków pozostają bez zmian.
-
+W14sc1c1312026
 Wariant `modern` jest pełnym ciemnym motywem. Przy automatycznym albo testowym wyborze
 pory `noc` witryna aktywuje go bez nadpisywania stylu zapisanego przez użytkownika —
 na stronie głównej, na stronie 404 **i na podstronach odmian**, które nie mają hero.
