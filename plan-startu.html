@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan Startu Winnicy</title>
+<!--
+  Wewnętrzna strona planu startu witryny winnicakielnagora.pl.
+  NIE jest serwowana publicznie (root spoza PLIKI_PUBLICZNE w wsgi.py) — otwiera się
+  lokalnie w przeglądarce. Odpowiednik nieudanej publikacji artefaktu z 2026-09-07.
+  Źródła: TODO.md, .ai/GUARDRAILS.md, audit/2026-09-02-homepage, SPEC-001…006.
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+  [hidden]{display:none!important;}
+
+  :root{
+    --ground:#f3ece6;
+    --surface:#ffffff;
+    --surface-2:#ede2da;
+    --ink:#2e1f1b;
+    --ink-muted:#6b5750;
+    --border:#dcccc2;
+    --accent:#7a1f2b;
+    --accent-strong:#5e1620;
+    --accent-soft:#f1dcdf;
+    --crit:#b5432a;
+    --crit-soft:#f4ded6;
+    --important:#8a6216;
+    --important-soft:#f1e6cd;
+    --decision:#3f5468;
+    --decision-soft:#e1e9ee;
+    --waiting:#5e5f45;
+    --waiting-soft:#e9e9d9;
+    --done:#3f6034;
+    --done-soft:#e2ead9;
+    --shadow: 0 1px 2px rgba(46,31,27,.06), 0 6px 20px -8px rgba(46,31,27,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#1a1210;
+      --surface:#241a16;
+      --surface-2:#2d211c;
+      --ink:#f0e6dd;
+      --ink-muted:#c4ada2;
+      --border:#3e2c26;
+      --accent:#e39299;
+      --accent-strong:#f0aeb5;
+      --accent-soft:#3a2226;
+      --crit:#e2795c;
+      --crit-soft:#3a241c;
+      --important:#dcb35f;
+      --important-soft:#372c1a;
+      --decision:#93b3ca;
+      --decision-soft:#212f39;
+      --waiting:#abaf84;
+      --waiting-soft:#2a2c1d;
+      --done:#8fc17c;
+      --done-soft:#20301c;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 26px -10px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1a1210;
+    --surface:#241a16;
+    --surface-2:#2d211c;
+    --ink:#f0e6dd;
+    --ink-muted:#c4ada2;
+    --border:#3e2c26;
+    --accent:#e39299;
+    --accent-strong:#f0aeb5;
+    --accent-soft:#3a2226;
+    --crit:#e2795c;
+    --crit-soft:#3a241c;
+    --important:#dcb35f;
+    --important-soft:#372c1a;
+    --decision:#93b3ca;
+    --decision-soft:#212f39;
+    --waiting:#abaf84;
+    --waiting-soft:#2a2c1d;
+    --done:#8fc17c;
+    --done-soft:#20301c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 26px -10px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height:1.55;
+  }
+  img{max-width:100%;}
+  .wrap{max-width:860px; margin:0 auto; padding:56px 22px 100px;}
+
+  h1,h2,h3{font-family:'Playfair Display', Georgia, serif; text-wrap:balance; margin:0;}
+  a{color:var(--accent);}
+
+  .eyebrow{
+    font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 10px;
+  }
+  header.masthead h1{font-size:clamp(2rem,5vw,2.9rem); font-weight:700; color:var(--ink);}
+  header.masthead .sub{
+    margin-top:14px; font-size:1.05rem; color:var(--ink-muted); max-width:62ch;
+  }
+  .meta-row{
+    margin-top:20px; display:flex; flex-wrap:wrap; gap:8px 18px;
+    font-size:.82rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;
+  }
+  .meta-row code{
+    font-family:ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    background:var(--surface-2); padding:1px 6px; border-radius:4px; font-size:.78rem;
+  }
+
+  .stats{
+    margin-top:36px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .stat{background:var(--surface); padding:18px 16px;}
+  .stat .n{font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:.78rem; color:var(--ink-muted); margin-top:2px;}
+
+  section{margin-top:64px;}
+  section > h2{font-size:1.5rem; font-weight:700; color:var(--ink);}
+  section > .lede{color:var(--ink-muted); margin-top:8px; max-width:64ch; font-size:.96rem;}
+
+  /* --- accomplishments --- */
+  .done-groups{margin-top:28px; display:flex; flex-direction:column; gap:26px;}
+  .done-group h3{
+    font-family:'Work Sans',sans-serif; font-size:.78rem; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--done); margin-bottom:10px;
+  }
+  .done-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  .done-list li{
+    display:flex; gap:11px; align-items:flex-start; font-size:.93rem; color:var(--ink);
+  }
+  .done-list .tick{
+    flex:none; width:18px; height:18px; margin-top:2px; border-radius:50%;
+    background:var(--done-soft); color:var(--done); display:flex; align-items:center; justify-content:center;
+    font-size:.7rem; font-weight:700;
+  }
+  .done-list .txt b{font-weight:600;}
+  .done-list .txt span{color:var(--ink-muted);}
+
+  /* --- plan --- */
+  .progress-bar{
+    margin-top:24px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .progress-track{
+    flex:1 1 220px; height:8px; border-radius:5px; background:var(--surface-2);
+    border:1px solid var(--border); overflow:hidden;
+  }
+  .progress-fill{height:100%; background:var(--accent); width:0%; transition:width .25s ease;}
+  .progress-label{font-size:.82rem; color:var(--ink-muted); font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+  .chips{margin-top:18px; display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:inherit; font-size:.8rem; font-weight:600; padding:7px 14px; border-radius:999px;
+    border:1px solid var(--border); background:var(--surface); color:var(--ink-muted); cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .chip[data-active="true"]{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .chip .dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; vertical-align:middle;}
+
+  .plan-group{margin-top:30px;}
+  .plan-group-head{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .plan-group-head .bar{width:4px; height:20px; border-radius:2px;}
+  .plan-group-head h3{font-family:'Work Sans',sans-serif; font-size:1.02rem; font-weight:700;}
+  .plan-group-head .count{font-size:.8rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
+
+  .row{
+    display:flex; gap:14px; align-items:flex-start; padding:14px 16px;
+    background:var(--surface); border:1px solid var(--border); border-radius:9px;
+    box-shadow:var(--shadow);
+  }
+  .row + .row{margin-top:8px;}
+  .row input[type="checkbox"]{
+    flex:none; width:19px; height:19px; margin-top:2px; accent-color:var(--accent); cursor:pointer;
+  }
+  .row .body{flex:1; min-width:0;}
+  .row .title{font-weight:600; font-size:.97rem;}
+  .row .why{font-size:.87rem; color:var(--ink-muted); margin-top:3px;}
+  .row .badge{
+    flex:none; align-self:flex-start; font-size:.7rem; font-weight:700; letter-spacing:.03em;
+    padding:4px 9px; border-radius:6px; white-space:nowrap; font-variant-numeric:tabular-nums;
+  }
+  .row[data-checked="true"] .title{text-decoration:line-through; color:var(--ink-muted);}
+  .row[data-checked="true"]{opacity:.62;}
+  .row[hidden]{display:none;}
+
+  .cat-crit .badge{background:var(--crit-soft); color:var(--crit);}
+  .cat-important .badge{background:var(--important-soft); color:var(--important);}
+  .cat-decision .badge{background:var(--decision-soft); color:var(--decision);}
+  .cat-waiting .badge{background:var(--waiting-soft); color:var(--waiting);}
+
+  /* --- tests --- */
+  .test-list{display:flex; flex-direction:column; gap:8px; margin-top:22px;}
+  .test-row{
+    display:flex; align-items:center; gap:12px; padding:11px 14px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:8px;
+  }
+  .test-row input{accent-color:var(--accent); width:18px; height:18px; cursor:pointer; flex:none;}
+  .test-row code{
+    font-family:ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size:.85rem;
+    color:var(--ink);
+  }
+  .test-row[data-checked="true"] code{text-decoration:line-through; color:var(--ink-muted);}
+  .test-row .note{font-size:.78rem; color:var(--ink-muted); margin-left:auto; padding-left:10px;}
+
+  footer{
+    margin-top:70px; padding-top:26px; border-top:1px solid var(--border);
+    font-size:.82rem; color:var(--ink-muted); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  footer .sources{max-width:60ch;}
+
+  @media (max-width:520px){
+    .wrap{padding:40px 16px 80px;}
+    .row{flex-wrap:wrap;}
+    .row .badge{margin-left:33px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Winnica Kielna Góra · plan startu</p>
+    <h1>Ostatnie kroki przed publikacją</h1>
+    <p class="sub">Stan wdrożenia witryny winnicakielnagora.pl i lista tego, co zostało do domknięcia zanim strona pójdzie w świat na dobre — pogrupowana wg tego, co blokuje start, co czeka na Właściciela, a co po prostu czeka na materiały.</p>
+    <div class="meta-row">
+      <span>Stan na <strong>7 września 2026</strong></span>
+      <span>gałąź <code>master</code></span>
+      <span>ostatni commit <code>98f3704</code> (merge: SPEC-006 + dane kontaktowe)</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">1 ha</div><div class="l">powierzchnia winnicy</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">odmian (4 białe, 3 czerwone)</div></div>
+      <div class="stat"><div class="n">8</div><div class="l">pozycji w cenniku, 15–222 zł</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">motywy strony</div></div>
+    </div>
+  </header>
+
+  <section id="o-projekcie">
+    <h2>O co chodzi w tym projekcie</h2>
+    <p class="lede">
+      Winnica Kielna Góra to rodzinne, jednohektarowe gospodarstwo w Kielnarowej, 10 km od Rzeszowa,
+      na stoku o południowym nachyleniu. Pierwsze krzewy poszły w ziemię w 2020 roku, formalnie winnica
+      powstała w 2024. Siedem odmian odpornych daje wina białe, czerwone, różowe i sok winogronowy.
+      Strona jest w całości statyczna — jeden <code style="font-family:ui-monospace,monospace;background:var(--surface-2);padding:1px 6px;border-radius:4px;">index.html</code>
+      i garść assetów, serwowane przez 16-liniowy Flask. Asortyment i wydarzenia Właściciel redaguje
+      sam, w panelu za hasłem, bez dotykania kodu. Sprzedaż online i degustacje są świadomie odłożone
+      na później — na start liczą się informacja o winnicy, wydarzenia i noclegi.
+    </p>
+  </section>
+
+  <section id="dziala">
+    <h2>Co już działa</h2>
+    <p class="lede">Rzeczy dowiezione i sprawdzone w przeglądarce — punkt wyjścia, nie lista do przejrzenia.</p>
+
+    <div class="done-groups">
+      <div class="done-group">
+        <h3>Zakres oferty na start (SPEC-006)</h3>
+        <ul class="done-list">
+          <li><span class="tick">✓</span><span class="txt"><b>Sprzedaż online ukryta na start</b> <span>— sekcja sklepu i koszyk za flagą <code style="font-family:ui-monospace,monospace">SKLEP_WLACZONY</code>; kod koszyka i <code style="font-family:ui-monospace,monospace">data/wina.json</code> nietknięte, gotowe do przywrócenia.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Degustacje zdjęte z treści</b> <span>— karta „Co się u nas dzieje" (wyprzedaże roczników, pikniki, spotkania przy zbiorach) zamiast „Degustacje po umówieniu".</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>— trzy pokoje w budynku winiarni; przycisk do Booking.com nieaktywny do czasu podania linku.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nawigacja odchudzona</b> <span>— bez „Sklep" i „Degustacje", z „Noclegi"; hero z jednym przyciskiem; podstrony odmian kierują do kontaktu.</span></span></li>
+        </ul>
+      </div>
+
+      <div class="done-group">
+        <h3>Treść i dane</h3>
+        <ul class="done-list">
+          <li><span class="tick">✓</span><span class="txt"><b>Adres, telefon i e-mail na stronie</b> <span>— Kielnarowa 303, 36-020 Tyczyn; klikalne linki <code style="font-family:ui-monospace,monospace">tel:</code> i <code style="font-family:ui-monospace,monospace">mailto:</code> w sekcji kontaktu i stopce.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Cennik i wydarzenia redagowane w panelu</b> <span>— Właściciel zmienia wina, ceny i terminy bez gita (SPEC-002, SPEC-005).</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Zmyślone produkty i wydarzenia usunięte</b> <span>— sklep i sekcja wydarzeń pokazują wyłącznie prawdziwe dane właściciela.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Jedno źródło ceny</b> <span>— <code style="font-family:ui-monospace,monospace">cena_brutto</code> w JSON, netto i VAT liczone, nie przepisywane ręcznie.</span></span></li>
+        </ul>
+      </div>
+
+      <div class="done-group">
+        <h3>Wydajność i SEO</h3>
+        <ul class="done-list">
+          <li><span class="tick">✓</span><span class="txt"><b>Hero: 1,9 MB → 167 kB</b> <span>WebP, kompresja, nagłówki cache dla obrazów i fontów.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Kadr hero dobierany serwerowo wg pory dnia</b> <span>— poranek/dzień/zachód/noc, preload bez zgadywania po stronie klienta (SPEC-003).</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Osiem stron odmian + sitemap</b> <span>— treść sklepu widoczna dla wyszukiwarek mimo renderu przez JS.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Własna strona 404</b> <span>zamiast serwowania strony głównej pod każdym adresem.</span></span></li>
+        </ul>
+      </div>
+
+      <div class="done-group">
+        <h3>Design i UX</h3>
+        <ul class="done-list">
+          <li><span class="tick">✓</span><span class="txt"><b>Cztery motywy w pełnym parytecie</b> <span>classic, modern, rustic, dark — 29 zmiennych CSS każdy.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Motyw dark włącza się sam po zmroku</b> <span>— jedyny motyw, który strona wybiera bez udziału gościa.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Animacje przy przewijaniu</b> <span>i zwijane sekcje panelu redakcyjnego (SPEC-004).</span></span></li>
+        </ul>
+      </div>
+
+      <div class="done-group">
+        <h3>Infrastruktura i bezpieczeństwo</h3>
+        <ul class="done-list">
+          <li><span class="tick">✓</span><span class="txt"><b>Osierocony proces na porcie 8004 usunięty</b> <span>— duplikat unitu systemd blokował wdrożenia nowego kodu.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Panel na produkcji za HTTP Basic Auth</b> <span>— bez ustawionych zmiennych środowiskowych zwraca 404, nie 401.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Cennik i wydarzenia poza katalogiem wdrożenia</b> <span>— zmiany z panelu przeżywają kolejny deploy.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b><code style="font-family:ui-monospace,monospace">.git</code> i pliki źródłowe niedostępne z zewnątrz</b> <span>— potwierdzone na żywo: 404 dla <code style="font-family:ui-monospace,monospace">.git/config</code>, <code style="font-family:ui-monospace,monospace">wsgi.py</code>.</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="plan">
+    <h2>Co zostało przed publikacją</h2>
+    <p class="lede">19 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu — stan zapisuje się w tej przeglądarce.</p>
+
+    <div class="progress-bar">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">0 / 25 przejrzanych</div>
+    </div>
+
+    <div class="chips" id="chips">
+      <button class="chip" data-filter="all" data-active="true">Wszystko</button>
+      <button class="chip" data-filter="crit"><span class="dot" style="background:var(--crit)"></span>Krytyczne</button>
+      <button class="chip" data-filter="important"><span class="dot" style="background:var(--important)"></span>Ważne</button>
+      <button class="chip" data-filter="decision"><span class="dot" style="background:var(--decision)"></span>Decyzja Właściciela</button>
+      <button class="chip" data-filter="waiting"><span class="dot" style="background:var(--waiting)"></span>Czeka na materiały</button>
+    </div>
+
+    <!-- KRYTYCZNE -->
+    <div class="plan-group" data-group="crit">
+      <div class="plan-group-head"><span class="bar" style="background:var(--crit)"></span><h3>Krytyczne blokery</h3><span class="count">4 pozycje</span></div>
+
+      <label class="row cat-crit" data-cat="crit" data-id="crit-1">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Nagłówek H1 wychodzi poza ekran na 390&nbsp;px</span>
+          <span class="why">Telefon to zapewne większość ruchu na stronie winnicy — pierwsze wrażenie wygląda dziś na uciętą stronę.</span>
+        </span>
+        <span class="badge">Audyt 2026-09-02</span>
+      </label>
+
+      <label class="row cat-crit" data-cat="crit" data-id="crit-3">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">„Bieszczadzkie stoki" w haśle głównym vs. Kielnarowa/Rzeszów</span>
+          <span class="why">Reszta strony i dane dla wyszukiwarek mówią konsekwentnie o Podkarpaciu pod Rzeszowem — hasło hero jest jedynym odstępstwem. Właściciel poprawia teksty.</span>
+        </span>
+        <span class="badge">TODO #24</span>
+      </label>
+
+      <label class="row cat-crit" data-cat="crit" data-id="crit-4">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Zgody na wizerunek zebrane tylko ustnie</span>
+          <span class="why">18 zdjęć z rozpoznawalnymi osobami czeka na podpis na piśmie — formularz RODO jest już gotowy w repo.</span>
+        </span>
+        <span class="badge">TODO #14</span>
+      </label>
+
+      <label class="row cat-crit" data-cat="crit" data-id="crit-5">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Panel na produkcji musi jechać po HTTPS</span>
+          <span class="why">Basic Auth wysyła login i hasło zakodowane, nie zaszyfrowane — po zwykłym HTTP każdy po drodze je przechwyci.</span>
+        </span>
+        <span class="badge">TODO #27</span>
+      </label>
+    </div>
+
+    <!-- WAŻNE -->
+    <div class="plan-group" data-group="important">
+      <div class="plan-group-head"><span class="bar" style="background:var(--important)"></span><h3>Ważne, nieblokujące</h3><span class="count">7 pozycji</span></div>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-1">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Nawigacja i CTA jako przyciski, nie linki</span>
+          <span class="why"><code style="font-family:ui-monospace,monospace">&lt;button data-scroll&gt;</code> zamiast <code style="font-family:ui-monospace,monospace">&lt;a href="#sekcja"&gt;</code> — brak indeksowalnej siatki linków wewnętrznych, gorsza obsługa klawiaturą.</span>
+        </span>
+        <span class="badge">Audyt 2026-09-02</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-slowo">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Przełącznik słowa „tradycyjne" (<code style="font-family:ui-monospace,monospace">?slowo=</code>) — jeszcze nie zrobiony</span>
+          <span class="why">Narzędzie redakcyjne na wzór <code style="font-family:ui-monospace,monospace">?hero=</code>, do porównania „tradycyjne / kraftowe / rzemieślnicze" na żywej stronie. Rozpisane w quick-spec 004.</span>
+        </span>
+        <span class="badge">SPEC-006</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-3">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Brak aria-label, linku „Przejdź do treści" i prefers-reduced-motion</span>
+          <span class="why">Przyciski stylu, koszyka i menu bez nazw dostępności; animacje przy przewijaniu nie respektują preferencji systemowej.</span>
+        </span>
+        <span class="badge">Audyt 2026-09-02</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-4">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Nagłówek stron odmian rozjeżdża się na telefonie</span>
+          <span class="why">Przyciski różnej wysokości, „Nasze odmiany" łamie się na dwa wiersze.</span>
+        </span>
+        <span class="badge">Audyt 2026-09-02</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-5">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Opisy ośmiu odmian nie zweryfikowane wobec źródeł</span>
+          <span class="why">Powstały z rozwinięcia treści strony głównej — źródła wskazane w materiałach jeszcze nie sprawdzone przez WebFetch.</span>
+        </span>
+        <span class="badge">TODO #19</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-6">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Dodać <code style="font-family:ui-monospace,monospace">Organization</code> w JSON-LD i przywrócić mapę</span>
+          <span class="why">Adres, telefon i e-mail są już na stronie — to co dotąd blokowało oba te elementy jest już domknięte.</span>
+        </span>
+        <span class="badge">TODO #9</span>
+      </label>
+
+      <label class="row cat-important" data-cat="important" data-id="imp-7">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Długi cache CSS/JS wymaga stemplowania wersji</span>
+          <span class="why">Zanim wydłużymy <code style="font-family:ui-monospace,monospace">max-age</code>, adres pliku musi się zmieniać z treścią — inaczej przeglądarki znów pokażą stary CSS.</span>
+        </span>
+        <span class="badge">TODO #35</span>
+      </label>
+    </div>
+
+    <!-- DECYZJE -->
+    <div class="plan-group" data-group="decision">
+      <div class="plan-group-head"><span class="bar" style="background:var(--decision)"></span><h3>Decyzja Właściciela</h3><span class="count">3 pozycje</span></div>
+
+      <label class="row cat-decision" data-cat="decision" data-id="dec-1">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Formularz kontaktowy kończy się <code style="font-family:ui-monospace,monospace">alert()</code>, nic nie wysyła</span>
+          <span class="why">Sklep jest już ukryty, ale formularz zostaje. Realna wysyłka to backend (zadanie rozmiaru L) — albo uczciwie napisać „napisz do nas mailem".</span>
+        </span>
+        <span class="badge">TODO #7</span>
+      </label>
+
+      <label class="row cat-decision" data-cat="decision" data-id="dec-2">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Martwa gałąź <code style="font-family:ui-monospace,monospace">dist/public</code> w <code style="font-family:ui-monospace,monospace">wsgi.py</code></span>
+          <span class="why">Wdrożenie nie ma kroku budowania, więc serwer nigdy tam nie zajrzy. Dodajemy build, czy usuwamy kod?</span>
+        </span>
+        <span class="badge">TODO #8</span>
+      </label>
+
+      <label class="row cat-decision" data-cat="decision" data-id="dec-4">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title"><code style="font-family:ui-monospace,monospace">.claude/skills</code> i <code style="font-family:ui-monospace,monospace">agents</code> w <code style="font-family:ui-monospace,monospace">.gitignore</code></span>
+          <span class="why">Po świeżym klonie nie ma komend ani subagentów. Commitować cały framework do repo, czy zostawić lokalnie?</span>
+        </span>
+        <span class="badge">TODO #17</span>
+      </label>
+    </div>
+
+    <!-- CZEKA NA MATERIAŁY -->
+    <div class="plan-group" data-group="waiting">
+      <div class="plan-group-head"><span class="bar" style="background:var(--waiting)"></span><h3>Czeka na materiały</h3><span class="count">5 pozycji</span></div>
+
+      <label class="row cat-waiting" data-cat="waiting" data-id="wait-5">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Noclegi — link do Booking i zdjęcia 3 pokoi</span>
+          <span class="why">Sekcja „Noclegi" jest już na stronie z nieaktywnym przyciskiem. Właściciel wystawia pokoje na Booking.com — po materiałach podmieniamy link i wgrywamy zdjęcia.</span>
+        </span>
+        <span class="badge">TODO #37</span>
+      </label>
+
+      <label class="row cat-waiting" data-cat="waiting" data-id="wait-1">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Brak zdjęć butelek z etykietami</span>
+          <span class="why">Sekcja wydarzeń pokazuje dziś grafikę AI zastępczą — potrzebna sesja zdjęciowa.</span>
+        </span>
+        <span class="badge">TODO #15</span>
+      </label>
+
+      <label class="row cat-waiting" data-cat="waiting" data-id="wait-2">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Linki do filmów na YouTube</span>
+          <span class="why">Sekcja z osadzonymi filmami czeka na materiał od Właściciela — decyzja o hostingu na YouTube już zapadła.</span>
+        </span>
+        <span class="badge">TODO #16</span>
+      </label>
+
+      <label class="row cat-waiting" data-cat="waiting" data-id="wait-3">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Panel AI-opisów nieprzetestowany z prawdziwym kluczem</span>
+          <span class="why">Sprawdzone są tylko ścieżki błędów; pierwsze użycie z realnym kluczem OpenAI warto obejrzeć.</span>
+        </span>
+        <span class="badge">TODO #20</span>
+      </label>
+
+      <label class="row cat-waiting" data-cat="waiting" data-id="wait-4">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Podpisane papierowo zgody na wizerunek</span>
+          <span class="why">Ustne zgody zebrane przy zdjęciach — formularz do podpisu gotowy, czeka na zebranie od osób na fotografiach.</span>
+        </span>
+        <span class="badge">TODO #14</span>
+      </label>
+    </div>
+  </section>
+
+  <section id="testy">
+    <h2>Checklist przed startem</h2>
+    <p class="lede">Definicja „gotowe" z <code style="font-family:ui-monospace,monospace;background:var(--surface-2);padding:1px 6px;border-radius:4px;">.ai/GUARDRAILS.md</code> — bez tego nic nie idzie na produkcję.</p>
+
+    <div class="test-list">
+      <label class="test-row" data-id="test-1"><input type="checkbox"><code>node tools/test-produkty.js</code><span class="note">ceny i render karty</span></label>
+      <label class="test-row" data-id="test-2"><input type="checkbox"><code>python3 tools/test-routing.py</code><span class="note">routing i pliki publiczne</span></label>
+      <label class="test-row" data-id="test-3"><input type="checkbox"><code>python3 tools/test-panel-auth.py</code><span class="note">dostęp do panelu na produkcji</span></label>
+      <label class="test-row" data-id="test-4"><input type="checkbox"><code>python3 tools/test-cennik-sciezka.py</code><span class="note">ścieżka żywego cennika</span></label>
+      <label class="test-row" data-id="test-5"><input type="checkbox"><code>python3 tools/test-wydarzenia.py</code><span class="note">filtr widoczności wydarzeń</span></label>
+      <label class="test-row" data-id="test-6"><input type="checkbox"><code>python3 tools/test-serwowanie.py</code><span class="note">serwowanie na prawdziwym Flasku</span></label>
+    </div>
+    <p class="lede" style="margin-top:16px;">Plus podgląd ręczny: wszystkie cztery motywy, layout na 390&nbsp;px i konsola bez błędów — nie ma tu innego dowodu poprawności.</p>
+  </section>
+
+  <footer>
+    <span class="sources">Źródła: <code style="font-family:ui-monospace,monospace">TODO.md</code>, <code style="font-family:ui-monospace,monospace">.ai/GUARDRAILS.md</code>, <code style="font-family:ui-monospace,monospace">audit/2026-09-02-homepage</code>, SPEC-001…006.</span>
+    <span>Zaznaczenia zapisują się lokalnie w tej przeglądarce.</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'wkg-plan-startu-v1';
+  var state = {};
+  try {
+    state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  } catch(e) { state = {}; }
+
+  function save(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+
+  var checkRows = Array.prototype.slice.call(document.querySelectorAll('.row[data-id], .test-row[data-id]'));
+
+  function updateProgress(){
+    var total = checkRows.length;
+    var done = checkRows.filter(function(r){ return state[r.getAttribute('data-id')]; }).length;
+    var fill = document.getElementById('progress-fill');
+    var label = document.getElementById('progress-label');
+    if (fill) fill.style.width = (total ? (done/total*100) : 0) + '%';
+    if (label) label.textContent = done + ' / ' + total + ' przejrzanych';
+  }
+
+  checkRows.forEach(function(row){
+    var id = row.getAttribute('data-id');
+    var box = row.querySelector('input[type="checkbox"]');
+    if (!box) return;
+    var checked = !!state[id];
+    box.checked = checked;
+    row.setAttribute('data-checked', checked ? 'true' : 'false');
+    box.addEventListener('change', function(){
+      state[id] = box.checked;
+      row.setAttribute('data-checked', box.checked ? 'true' : 'false');
+      save();
+      updateProgress();
+    });
+  });
+  updateProgress();
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll('#chips .chip'));
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.plan-group'));
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      chips.forEach(function(c){ c.setAttribute('data-active','false'); });
+      chip.setAttribute('data-active','true');
+      var f = chip.getAttribute('data-filter');
+      groups.forEach(function(g){
+        g.hidden = !(f === 'all' || g.getAttribute('data-group') === f);
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
