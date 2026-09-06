@@ -77,6 +77,12 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
    w `cennik.py` w katalogu głównym. Z `tools/` serwer produkcyjny oddaje wyłącznie trzy pliki
    interfejsu panelu, i to za hasłem.
 5. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
+6. **Sklep online jest wyłączony, nie usunięty** (SPEC-006, decyzja Właściciela z 2026-09-06):
+   sekcja `#sklep` i koszyk są `hidden`, a `const SKLEP_WLACZONY = false` w `assets/js/main.js`
+   wstrzymuje ich inicjalizację. Kod koszyka, filtrów, `renderSklep()` i `data/wina.json`
+   **zostają nietknięte** — sprzedaż ma wrócić. **NIGDY** nie usuwaj tego kodu ani nie
+   „porządkuj" go bez wyraźnej decyzji Właściciela; przywrócenie sprzedaży to odwrócenie
+   flagi i atrybutów `hidden` (patrz `TODO.md` #38).
 
 ## Consistency rules
 

@@ -137,9 +137,8 @@
           <div class="hidden md:flex items-center gap-1">
             <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#o-nas">O Nas</button>
             <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#nasze-wina">Nasze Wina</button>
-            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#sklep">Sklep</button>
-            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#degustacje">Degustacje</button>
             <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#wydarzenia">Wydarzenia</button>
+            <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#noclegi">Noclegi</button>
             <button class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md" data-scroll="#kontakt">Kontakt</button>
           </div>
           <div class="flex items-center gap-3">
@@ -179,7 +178,7 @@
                 </button>
               </div>
             </div>
-            <button id="cart-button" class="relative w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+            <button id="cart-button" hidden class="relative w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
               <svg class="w-5 h-5"><use href="#icon-cart"></use></svg>
               <span id="cart-count" class="hidden absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-ring text-primary text-xs font-semibold flex items-center justify-center"></span>
             </button>
@@ -193,9 +192,8 @@
         <div class="px-5 py-3 space-y-1">
           <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#o-nas">O Nas</button>
           <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#nasze-wina">Nasze Wina</button>
-          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#sklep">Sklep</button>
-          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#degustacje">Degustacje</button>
           <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#wydarzenia">Wydarzenia</button>
+          <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#noclegi">Noclegi</button>
           <button class="w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md" data-scroll="#kontakt">Kontakt</button>
         </div>
       </div>
@@ -215,8 +213,7 @@
           <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Tradycyjne wina z bieszczadzkich stoków</p>
           <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
           <div class="flex flex-wrap gap-5 justify-center">
-            <button class="btn-ghost" data-scroll="#sklep">Przejdź do sklepu</button>
-            <button class="btn-ghost" data-scroll="#degustacje">Degustacje</button>
+            <button class="btn-ghost" data-scroll="#nasze-wina">Poznaj nasze wina</button>
           </div>
         </div>
       </section>
@@ -420,7 +417,10 @@
         </div>
       </section>
 
-      <section id="sklep" class="py-20">
+      <!-- Sprzedaż online wyłączona na start — SPEC-006. Sekcja ukryta (nie usunięta),
+           koszyk niżej też. Włączenie: zdjąć `hidden` tutaj, z #cart-button, #cart-overlay,
+           #cart-panel i ustawić SKLEP_WLACZONY = true w assets/js/main.js. -->
+      <section id="sklep" class="py-20" hidden>
         <div class="max-w-7xl mx-auto px-5">
           <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Sklep z Winami</h2>
@@ -487,8 +487,8 @@
       <section id="wydarzenia" class="py-20">
         <div class="max-w-7xl mx-auto px-5">
           <div class="text-center mb-12" data-reveal>
-            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Wydarzenia i Degustacje</h2>
-            <p class="text-muted-foreground max-w-2xl mx-auto">Degustacje i zwiedzanie winnicy organizujemy po wcześniejszym umówieniu — dla par, grup znajomych i firm</p>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Wydarzenia</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Wyprzedaże, pikniki i spotkania sezonowe — ogłaszamy je z wyprzedzeniem na tej stronie</p>
           </div>
           <!-- Wypełnia initWydarzenia() z /data/wydarzenia.json. Serwer oddaje wyłącznie wpisy
                aktywne dziś, więc pusty kontener = brak wydarzeń, a nie błąd. Patrz SPEC-005. -->
@@ -496,22 +496,35 @@
           <div class="rounded-md border border-card-border overflow-hidden" data-reveal>
             <div class="grid md:grid-cols-2">
               <div class="aspect-video md:aspect-auto">
-                <!-- TODO (TODO.md #15): grafika AI - brak zdjecia wnetrza do degustacji -->
-                <img src="./attached_assets/generated_images/sala-degustacyjna-ai.jpg" alt="Sala degustacyjna" class="w-full h-full object-cover" width="1200" height="655" loading="lazy" decoding="async">
+                <img src="./attached_assets/generated_images/sala-degustacyjna-ai.jpg" alt="Wnętrze winiarni" class="w-full h-full object-cover" width="1200" height="655" loading="lazy" decoding="async">
               </div>
               <div class="p-8 flex flex-col justify-center">
-                <h3 class="font-serif text-2xl font-bold mb-5" id="degustacje">Degustacje po umówieniu</h3>
-                <p class="text-muted-foreground mb-8">Nie prowadzimy stałego kalendarza wydarzeń — termin ustalamy indywidualnie. Napisz, ilu Was będzie i kiedy chcielibyście przyjechać, a odpowiemy z propozycją.</p>
-                <!-- TODO (TODO.md #13): zakres oferty i ceny do potwierdzenia z Wlascicielem.
-                     Nie dopisuj tu uslug (sommelier, catering, wesela) bez jego potwierdzenia. -->
+                <h3 class="font-serif text-2xl font-bold mb-5">Co się u nas dzieje</h3>
+                <p class="text-muted-foreground mb-8">Nie prowadzimy stałego kalendarza. Kilka razy w roku organizujemy wyprzedaże roczników, pikniki na winnicy i spotkania przy zbiorach — terminy ogłaszamy tutaj i w mediach społecznościowych.</p>
                 <ul class="space-y-2 mb-8">
-                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Termin ustalany indywidualnie</span></li>
-                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Wina i soki z naszej winnicy</span></li>
-                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Winnica na stoku, 10 km od Rzeszowa</span></li>
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Wyprzedaże i przedsprzedaże roczników</span></li>
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Pikniki i dni otwarte na winnicy</span></li>
+                  <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">Spotkania przy zbiorach (winobranie)</span></li>
                 </ul>
-                <button class="btn-primary" data-scroll="#kontakt">Skontaktuj się z nami</button>
+                <button class="btn-primary" data-scroll="#kontakt">Napisz do nas</button>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="noclegi" class="py-20 bg-secondary/20">
+        <div class="max-w-7xl mx-auto px-5">
+          <div class="text-center mb-12" data-reveal>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nocleg w winnicy</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Trzy pokoje w budynku winiarni, z widokiem na winorośl. Rezerwacja przez Booking.com</p>
+          </div>
+          <div class="text-center" data-reveal>
+            <!-- TODO: podmienić href na URL oferty Booking od Właściciela, usunąć is-disabled /
+                 aria-disabled / tabindex i podpis „Rezerwacja wkrótce". Zdjęcia 3 pokoi — osobne
+                 zadanie: rząd grid md:grid-cols-3 nad przyciskiem. -->
+            <a class="btn-primary is-disabled" href="#noclegi" role="button" aria-disabled="true" tabindex="-1">Zarezerwuj na Booking</a>
+            <p class="text-sm text-muted-foreground mt-3">Rezerwacja wkrótce — link pojawi się niebawem</p>
           </div>
         </div>
       </section>
@@ -616,8 +629,8 @@
             <ul class="space-y-3 text-sm text-primary-foreground/80">
               <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#o-nas">O Nas</button></li>
               <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#nasze-wina">Nasze Wina</button></li>
-              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#sklep">Sklep</button></li>
               <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#wydarzenia">Wydarzenia</button></li>
+              <li><button class="hover:text-primary-foreground transition-colors" data-scroll="#noclegi">Noclegi</button></li>
             </ul>
           </div>
           <div>
@@ -649,8 +662,8 @@
     </footer>
   </div>
 
-  <div id="cart-overlay" class="cart-overlay"></div>
-  <aside id="cart-panel" class="cart-panel">
+  <div id="cart-overlay" hidden class="cart-overlay"></div>
+  <aside id="cart-panel" hidden class="cart-panel">
     <div class="p-6 border-b border-border flex items-center justify-between">
       <div class="flex items-center gap-2 font-semibold text-lg">
         <svg class="w-5 h-5"><use href="#icon-bag"></use></svg>

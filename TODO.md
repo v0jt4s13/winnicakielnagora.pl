@@ -4,7 +4,7 @@ Rejestr rzeczy, które w kodzie już są niespójne, świadomie niedokończone a
 od Właściciela. To nie jest backlog funkcji. Przeczytaj przed większą zmianą; po zamknięciu
 pozycji usuń ją i dopisz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`.
 
-Ostatnia aktualizacja: **2026-09-02**.
+Ostatnia aktualizacja: **2026-09-06**.
 
 ## Do naprawy
 
@@ -91,14 +91,12 @@ i tak wskazuje wariant z `.html`, więc nie ma duplikatu dla wyszukiwarek.
 Właściciel potwierdził, że wino z tej odmiany jest produkowane. Strona odmiany powstała.
 Do poprawienia przy okazji: pisany opis winnicy w materiałach jej nie wymienia.
 
-### 13. Wydarzenia i degustacje
+### ~~13. Wydarzenia i degustacje~~ — ZAMKNIĘTE 2026-09-06 (SPEC-006)
 
-Trzy zmyślone terminy z cenami **zostały usunięte 2026-09-02**. Sekcja mówi teraz, że degustacje
-odbywają się po wcześniejszym umówieniu, i kieruje do formularza kontaktowego. Usunąłem też
-niepotwierdzone obietnice („profesjonalny sommelier", „catering lokalnych produktów", „wesela").
-
-Do decyzji: czy te usługi faktycznie są w ofercie i czy mają wrócić na stronę, oraz czy
-chcecie prowadzić kalendarz konkretnych wydarzeń.
+**Decyzja Właściciela:** degustacji nie oferujemy (na razie). Wszystkie wzmianki zdjęte
+z treści — nagłówek sekcji to „Wydarzenia", statyczną kartę zastąpiła „Co się u nas dzieje"
+(wyprzedaże roczników, pikniki, spotkania przy zbiorach). Kalendarz konkretnych wydarzeń
+prowadzi panel redakcyjny (SPEC-005). Szczegóły: `.ai/specs/SPEC-006-2026-09-06-strona-bez-sklepu-noclegi.md`.
 
 ## Materiały
 
@@ -135,10 +133,10 @@ poza repozytorium i poza serwerem strony.
 
 ### 15. Brakujące ujęcia
 
-W materiałach nie ma zdjęć **butelek z etykietami**, **wnętrza do degustacji** ani ujęcia
-budynku innego niż `winnica-budynek-01`. Strona pokazuje dziś w tych miejscach grafiki AI
-(`attached_assets/generated_images/`). Potrzebna sesja zdjęciowa albo zgoda na dalsze
-korzystanie z grafik zastępczych.
+W materiałach nie ma zdjęć **butelek z etykietami**, **3 pokoi gościnnych** (sekcja
+`#noclegi` startuje bez zdjęć — patrz #37) ani ujęcia budynku innego niż `winnica-budynek-01`.
+Strona pokazuje dziś w niektórych miejscach grafiki AI (`attached_assets/generated_images/`).
+Potrzebna sesja zdjęciowa albo zgoda na dalsze korzystanie z grafik zastępczych.
 
 ### 16. Filmy — czekamy na linki z YouTube
 
@@ -208,16 +206,13 @@ stanu w danych. Jeśli któreś wino ma się jeszcze przenieść — poprawka za
 w panelu.
 
 
-### 23. Sklep obiecuje dostawę, której nie ma
+### ~~23. Sklep obiecuje dostawę, której nie ma~~ — ZAMKNIĘTE 2026-09-06 (SPEC-006)
 
-Nagłówek sekcji sklepu mówi „Wszystkie produkty dostępne **z dostawą do domu**", a koszyk jest
-zaślepką — przycisk płatności kończy się `alert()`. To ten sam gatunek problemu, co usunięte
-wcześniej zmyślone wydarzenia: obietnica bez pokrycia.
-
-Do decyzji: usunąć wzmiankę o dostawie do czasu uruchomienia sprzedaży, czy opisać, jak
-zamówienie faktycznie działa (np. telefonicznie albo mailem po ustaleniu). Podobnie ogólnikowe
-są „Odkryj naszą kolekcję wyjątkowych win" i „Odkryj wyjątkowy smak win produkowanych z pasją"
-w hero — do przepisania przy okazji prac nad treścią.
+**Decyzja Właściciela:** sprzedaż online nie rusza na start (brak logistyki). Sekcja `#sklep`
+i koszyk są ukryte (`hidden` + flaga `SKLEP_WLACZONY = false` w `assets/js/main.js`) — kod
+i `data/wina.json` zostają, gotowe do przywrócenia (patrz #38). Wzmianka o „dostawie do domu"
+zeszła z widoku razem z sekcją. Ogólnikowe „Odkryj naszą kolekcję…" i hero „Odkryj wyjątkowy
+smak…" — nadal do przepisania przy pracach nad treścią (Właściciel).
 
 ### 24. „Bieszczadzkie stoki" a lokalizacja winnicy
 
@@ -403,4 +398,33 @@ jest w porządku i strona wygląda dobrze, ale autorstwo w historii jest mylące
 
 Ten sam błąd popełniłem wcześniej ze zrzutami audytu. Wniosek na przyszłość: przed
 `git add -A` sprawdzać `git status` i commitować wybiórczo, gdy ktoś pracuje równolegle.
+
+## Po SPEC-006 (2026-09-06)
+
+### 37. Noclegi — link do Booking i zdjęcia pokoi
+
+Sekcja `#noclegi` w `index.html` startuje jako nagłówek + zajawka + **nieaktywny** przycisk
+„Zarezerwuj na Booking" (`<a class="btn-primary is-disabled" href="#noclegi" aria-disabled>`),
+pod nim podpis „Rezerwacja wkrótce". Bez zdjęć — w zasobach nie ma kadru pokoju.
+
+Właściciel wystawia 3 pokoje na Booking.com. Po otrzymaniu materiałów:
+
+- podmienić `href` na realny URL oferty (**nie zgadywać adresu** — czekać na link),
+- usunąć `is-disabled`, `aria-disabled`, `tabindex="-1"` i podpis „Rezerwacja wkrótce",
+- dodać `target="_blank" rel="noopener"` (link wychodzący),
+- wgrać 3 zdjęcia pokoi do `attached_assets/photos/`, rząd `grid md:grid-cols-3` nad
+  przyciskiem, `alt` po polsku, `width`/`height`, `loading="lazy"`.
+
+### 38. Sklep ukryty, nie usunięty — jak przywrócić sprzedaż online
+
+Sprzedaż online wyłączona na start (#23). Kod sklepu, koszyka i `data/wina.json` **zostają
+nietknięte**. Wyłącza je:
+
+- `const SKLEP_WLACZONY = false;` w `assets/js/main.js` (osłania blok sklepowy w `DOMContentLoaded`),
+- `hidden` na `<section id="sklep">`, `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html`,
+- brak pozycji „Sklep" w nawigacji (desktop, mobile, stopka) i w nagłówkach `wina/*.html`,
+- blok `#oferta-odmiany` na podstronach odmian kieruje do `#kontakt` zamiast `#sklep`.
+
+Przywrócenie = odwrócenie powyższego. **Nie usuwać kodu koszyka bez decyzji Właściciela** —
+patrz `.ai/GUARDRAILS.md` → „Architectural boundaries".
 

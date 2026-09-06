@@ -87,6 +87,13 @@
   scroll-behavior: smooth;
 }
 
+/* Atrybut `hidden` ma wygrywać z utility Tailwinda ustawiającymi `display`
+   (np. `inline-flex` na #cart-button, `flex` na .cart-panel). Bez tego `hidden`
+   na takim elemencie nic nie robi. Dotyczy wyłącznie atrybutu, nie klasy `.hidden`. */
+[hidden] {
+  display: none !important;
+}
+
 .text-xs {
   font-size: 1.15rem;
   line-height: 1.6rem;
@@ -113,6 +120,24 @@
 .btn-primary:active {
   transform: translateY(0);
   box-shadow: var(--shadow-sm);
+}
+
+/* Przycisk-zaślepka: wygląda jak akcja, ale jeszcze nie działa (np. rezerwacja noclegu
+   przed dodaniem linku Booking — SPEC-006). Nadpisuje tło i kolor .btn-primary tokenami
+   „muted", żeby czytelnie wyglądał na wyłączony we wszystkich czterech motywach —
+   samo `opacity` gubiło kontrast na ciemnym tle. */
+.is-disabled {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+.is-disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-ghost {

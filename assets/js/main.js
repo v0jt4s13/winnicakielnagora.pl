@@ -148,6 +148,11 @@ const cart = new Map();
 let cennik = null;
 const STAWKA_VAT_DOMYSLNA = 0.23;
 
+// Sprzedaż online wyłączona na start (SPEC-006). Sekcja #sklep i koszyk są `hidden`
+// w index.html; ta flaga wstrzymuje ich inicjalizację. Włączenie sprzedaży = `true`
+// + zdjęcie `hidden` z sekcji, koszyka i pozycji „Sklep" w nawigacji (index.html, wina/*.html).
+const SKLEP_WLACZONY = false;
+
 // Korzen witryny liczony z adresu tego skryptu (assets/js/main.js). Dzieki temu
 // te same pliki dzialaja na stronie glownej i w podkatalogu wina/, a takze gdyby
 // witryna kiedys stanela w podkatalogu domeny.
@@ -752,9 +757,12 @@ function renderSklep() {
 }
 
 /** Blok „Wina z tej odmiany" na stronach odmian. Treść strony działa bez tego. */
-function initWineOffer() {
+async function initWineOffer() {
   const wrap = qs("#oferta-odmiany");
   if (!wrap) return;
+  // Sklep jest wyłączony (SPEC-006), więc blok sklepowy w DOMContentLoaded nie wczytał
+  // cennika. Podstrony odmian nadal pokazują ceny, więc dociągamy go tutaj.
+  if (!cennik) cennik = await wczytajCennik();
   const slug = wrap.dataset.odmiana;
   const pasujace = (cennik?.wina || []).filter((wino) => wino.odmiana_slug === slug);
 
@@ -774,7 +782,7 @@ function initWineOffer() {
               <p class="text-sm text-muted-foreground">${Produkty.escape(opis)}</p>
             </div>
             <div class="flex items-center gap-4">${cena}
-              <a href="${KORZEN}index.html#sklep" class="btn-primary">Zobacz w sklepie</a>
+              <a href="${KORZEN}index.html#kontakt" class="btn-primary">Napisz do nas</a>
             </div>
           </div>`;
     })
@@ -831,7 +839,7 @@ function zakresDatWydarzenia(od, do_) {
  *
  * Serwer oddaje wyłącznie wpisy aktywne dziś (wydarzenia.aktywne w Pythonie), więc tutaj
  * NIE MA żadnej logiki dat — renderujemy to, co przyszło. Pusta lista zostawia sekcję
- * dokładnie taką, jaka jest w HTML-u: samą kartę o degustacjach.
+ * dokładnie taką, jaka jest w HTML-u: samą statyczną kartę „Co się u nas dzieje".
  */
 async function initWydarzenia() {
   const lista = qs("#lista-wydarzen");
@@ -872,8 +880,8 @@ async function initWydarzenia() {
     tresc.textContent = wpis.tresc;
 
     // Bez zdjęcia: zwykła karta z paddingiem. Ze zdjęciem: ten sam układ dwukolumnowy,
-    // co istniejąca karta degustacji w tej sekcji — biblioteka zdjęć ma też kadry
-    // pionowe, a te w pasku 16:9 zostałyby przycięte do wąskiego wycinka.
+    // co statyczna karta „Co się u nas dzieje" w tej sekcji — biblioteka zdjęć ma też
+    // kadry pionowe, a te w pasku 16:9 zostałyby przycięte do wąskiego wycinka.
     if (wpis.zdjecie) {
       karta.className = "rounded-md border border-card-border overflow-hidden";
       const siatka = document.createElement("div");
@@ -925,9 +933,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   initPrzelacznikHero();
 
   initWydarzenia();
-  cennik = await wczytajCennik();
-  renderKategorie();
-  if (renderSklep()) initFilters();
+  if (SKLEP_WLACZONY) {
+    cennik = await wczytajCennik();
+    renderKategorie();
+    if (renderSklep()) initFilters();
+    initCart();
+  }
   initWineOffer();
-  initCart();
 });

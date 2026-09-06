@@ -267,7 +267,7 @@ def zywe_wydarzenia():
         return _json(wydarzenia.aktywne(wydarzenia.wczytaj()))
     except json.JSONDecodeError:
         # Uszkodzony plik nie moze wywalic sekcji na stronie glownej — main.js dostanie
-        # pusta liste i zostawi statyczna tresc o degustacjach.
+        # pusta liste i zostawi statyczna tresc sekcji wydarzen.
         return _json({"wydarzenia": []}, 500)
 
 
