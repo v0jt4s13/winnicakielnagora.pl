@@ -44,6 +44,9 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"Winnica Kielna Góra","alternateName":"winnicakielnagora.pl","url":"https://winnicakielnagora.pl/","inLanguage":"pl-PL","description":"Rodzinna winnica w Kielnarowej pod Rzeszowem. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron."}
   </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":["Organization","Winery"],"name":"Winnica Kielna Góra","url":"https://winnicakielnagora.pl/","logo":"https://winnicakielnagora.pl/favicon.svg","image":"https://winnicakielnagora.pl/attached_assets/photos/winnica-panorama-01.jpg","email":"kielnarowagora@gmail.com","telephone":"+48788058533","description":"Rodzinna winnica na południowym stoku w Kielnarowej, 10 km od Rzeszowa. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron.","address":{"@type":"PostalAddress","streetAddress":"Kielnarowa 303","postalCode":"36-020","addressLocality":"Tyczyn","addressRegion":"Podkarpackie","addressCountry":"PL"}}
+  </script>
 </head>
 <body class="min-h-screen bg-background text-foreground">
   <svg aria-hidden="true" class="hidden">
@@ -574,10 +577,11 @@
               </div>
               <div class="rounded-md border border-card-border overflow-hidden">
                 <div class="aspect-video w-full">
-                  <!-- TODO (TODO.md #9): mapa wroci, gdy bedzie znany dokladny adres.
-                       Poprzedni iframe wskazywal wspolrzedne w okolicach Ustrzyk Dolnych. -->
                   <img src="./attached_assets/photos/winnica-panorama-01.jpg" alt="Winnica Kielna Góra na stoku o południowym nachyleniu" class="w-full h-full object-cover" loading="lazy" width="1600" height="1069">
                 </div>
+                <a href="https://www.google.com/maps/search/?api=1&query=Kielnarowa%20303%2C%2036-020%20Tyczyn" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 p-3 text-sm text-muted-foreground hover:text-ring transition-colors border-t border-card-border">
+                  <svg class="w-4 h-4"><use href="#icon-map-pin"></use></svg>Zobacz na mapie Google
+                </a>
               </div>
             </div>
             <div class="rounded-md border border-card-border bg-card" data-reveal>
