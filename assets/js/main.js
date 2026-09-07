@@ -370,16 +370,21 @@ function initNavigation() {
   const mobileToggle = qs("#mobile-menu-toggle");
   const mobileMenu = qs("#mobile-menu");
 
-  qsa("[data-scroll]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const target = btn.getAttribute("data-scroll");
-      const el = target ? qs(target) : null;
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-        mobileMenu?.classList.add("hidden");
-        const icon = mobileToggle?.querySelector("use");
-        if (icon) icon.setAttribute("href", "#icon-menu");
-      }
+  const bezAnimacji = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  qsa("[data-scroll]").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      // Nawigacja to teraz <a href="#sekcja"> — indeksowalna i obsługiwana klawiaturą.
+      // data-scroll został jako marker „przewiń płynnie"; bez JS zadziała natywny skok.
+      const target = link.getAttribute("data-scroll") || link.getAttribute("href");
+      const el = target && target.startsWith("#") ? qs(target) : null;
+      if (!el) return;
+      e.preventDefault();
+      el.scrollIntoView({ behavior: bezAnimacji.matches ? "auto" : "smooth" });
+      history.replaceState(null, "", target);
+      mobileMenu?.classList.add("hidden");
+      const icon = mobileToggle?.querySelector("use");
+      if (icon) icon.setAttribute("href", "#icon-menu");
     });
   });
 

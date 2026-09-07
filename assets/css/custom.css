@@ -141,6 +141,9 @@
 }
 
 .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid hsl(var(--primary-foreground) / 0.3);
   color: hsl(var(--primary-foreground) / 1);
   background: hsl(var(--background) / 0.2);
