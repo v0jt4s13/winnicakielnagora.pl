@@ -355,6 +355,21 @@ HERO_PORY = ("poranek", "dzien", "zachod", "noc")
 HERO_KOTWICA_IMG = '<img id="hero-image"'
 HERO_KOTWICA_PRELOAD = "<!-- hero-preload -->"
 
+# --- przelacznik slowa "tradycyjne" (?slowo=) --------------------------------
+# Narzedzie redakcyjne na wzor ?hero=: podglad "tradycyjne / kraftowe / rzemieslicze"
+# na zywej stronie, bez zmiany domyslnego "/". Patrz .ai/specs/quick/004-*.
+SLOWA_KANDYDACI = ("tradycyjne", "kraftowe", "rzemieslicze")
+
+# Pary (wzorzec, zamiennik) po formach SLOWA FAKTYCZNIE OBECNYCH w index.html.
+# Dzis jest jedna: "Tradycyjne" (hero: "Tradycyjne wina z bieszczadzkich stokow").
+# Gdy Wlasciciel dopisze do tresci inne formy ("tradycyjnych", "tradycyjna"...),
+# trzeba tu dodac odpowiadajace pary — inaczej ?slowo zwroci 500.
+ZAMIANY_SLOWA = {
+    "kraftowe":     [("Tradycyjne", "Kraftowe"),     ("tradycyjne", "kraftowe")],
+    "rzemieslicze": [("Tradycyjne", "Rzemieślnicze"), ("tradycyjne", "rzemieślnicze")],
+    "tradycyjne":   [],  # wariant oryginalny — no-op
+}
+
 
 def _pora_hero(godzina: int) -> str:
     """Ta sama siatka godzin co heroPeriodForHour() w assets/js/main.js.
@@ -396,6 +411,26 @@ def _wstrzyknij_hero(tresc: str, pora: str) -> str | None:
         f'<link rel="preload" as="image" href="{zdjecie}" fetchpriority="high">', 1)
 
 
+def _wstrzyknij_slowo(tresc: str, slowo: str) -> str | None:
+    """Podmienia slowo "tradycyjne" na wybrany wariant.
+
+    "tradycyjne" -> tresc bez zmian (wariant oryginalny). Dla pozostalych: gdy ZADNA
+    para z ZAMIANY_SLOWA nie trafila, zwraca None — jak _wstrzyknij_hero przy braku
+    kotwicy. Cicha podmiana, ktora nic nie podmienila, zafalszowalaby podglad.
+    """
+    pary = ZAMIANY_SLOWA.get(slowo)
+    if pary is None:
+        return None
+    if not pary:  # "tradycyjne"
+        return tresc
+    trafienie = False
+    for wzorzec, zamiennik in pary:
+        if wzorzec in tresc:
+            tresc = tresc.replace(wzorzec, zamiennik)
+            trafienie = True
+    return tresc if trafienie else None
+
+
 def _index() -> str:
     return (STATIC_ROOT / "index.html").read_text(encoding="utf-8")
 
@@ -416,8 +451,14 @@ def _strona_glowna():
     return odpowiedz.make_conditional(request)
 
 
-def _strona_glowna_z_paskiem(pora: str | None):
-    """Wariant z paskiem wyboru pory (?hero=...) — narzedzie do pomiarow w PageSpeed."""
+def _strona_glowna_z_paskiem(pora: str | None, slowo: str | None,
+                             *, pokaz_hero: bool, pokaz_slowo: bool):
+    """Wariant z paskiem(ami) podgladu — narzedzie redakcyjne (?hero=, ?slowo=).
+
+    `pora` / `slowo` to wybor DO WYKONANIA (None = tylko pasek, bez podmiany).
+    `pokaz_hero` / `pokaz_slowo` mowia, ktory pasek dolozyc — sam ?slowo= tez
+    odpala te funkcje, wiec atrybuty data-*-kandydaci musza byc warunkowe.
+    """
     tresc = _index()
     if pora:
         z_hero = _wstrzyknij_hero(tresc, pora)
@@ -429,8 +470,20 @@ def _strona_glowna_z_paskiem(pora: str | None):
                 "podmienic zdjecia. Sprawdz HERO_KOTWICA_IMG i HERO_KOTWICA_PRELOAD.",
                 500, {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"})
         tresc = z_hero
-    tresc = tresc.replace(
-        "<body ", f'<body data-hero-kandydaci="{",".join(HERO_PORY)}" ', 1)
+    if slowo:
+        podmienione = _wstrzyknij_slowo(tresc, slowo)
+        if podmienione is None:
+            return Response(
+                "Nie znalazlem slowa 'tradycyjne' w index.html — przelacznik ?slowo nie "
+                "moze podmienic tresci. Sprawdz ZAMIANY_SLOWA.",
+                500, {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"})
+        tresc = podmienione
+    atrybuty = ""
+    if pokaz_hero:
+        atrybuty += f' data-hero-kandydaci="{",".join(HERO_PORY)}"'
+    if pokaz_slowo:
+        atrybuty += f' data-slowo-kandydaci="{",".join(SLOWA_KANDYDACI)}"'
+    tresc = tresc.replace("<body ", f"<body{atrybuty} ", 1)
     return Response(tresc, 200, {"Content-Type": "text/html; charset=utf-8",
                                  "Cache-Control": "no-store"})
 
@@ -448,11 +501,17 @@ def _oddaj(wzgledna: str):
 @app.route("/<path:path>")
 def serve(path: str):
     if not path:
-        if "hero" in request.args:
+        if "hero" in request.args or "slowo" in request.args:
             pora = request.args.get("hero")
-            # Nieznana wartosc = sam pasek wyboru, bez podmiany. Lista dozwolonych
-            # zamyka droge sciezkom z zewnatrz (../, adresy http).
-            return _strona_glowna_z_paskiem(pora if pora in HERO_PORY else None)
+            slowo = request.args.get("slowo")
+            # Nieznana wartosc = sam pasek podgladu, bez podmiany (jak ?hero=1).
+            # Lista dozwolonych zamyka droge wartosciom z zewnatrz.
+            return _strona_glowna_z_paskiem(
+                pora if pora in HERO_PORY else None,
+                slowo if slowo in SLOWA_KANDYDACI else None,
+                pokaz_hero="hero" in request.args,
+                pokaz_slowo="slowo" in request.args,
+            )
         return _strona_glowna()
 
     istniejacy = _plik(path)

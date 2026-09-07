@@ -246,6 +246,58 @@ def sprawdz_hero() -> int:
     return bledy
 
 
+def sprawdz_slowo() -> int:
+    """?slowo= podmienia slowo "tradycyjne" w hero, a domyslne "/" zostaje bez zmian."""
+    bledy = 0
+
+    def sprawdz(opis, warunek):
+        nonlocal bledy
+        print(f"{'OK  ' if warunek else 'BLAD'}  {opis}")
+        if not warunek:
+            bledy += 1
+
+    # --- zwykle "/" bez parametru ---
+    wsgi.request.args = {}
+    tresc = wsgi.serve("").tresc
+    sprawdz('"/" zostaje przy "Tradycyjne wina"', "Tradycyjne wina" in tresc)
+    sprawdz('"/" bez paska slowa', "data-slowo-kandydaci" not in tresc)
+
+    # --- ?slowo= z nieznana wartoscia: sam pasek, bez podmiany (jak ?hero=1) ---
+    for wartosc in ("1", "cokolwiek"):
+        wsgi.request.args = {"slowo": wartosc}
+        tresc = wsgi.serve("").tresc
+        sprawdz(f"?slowo={wartosc} pokazuje pasek", "data-slowo-kandydaci" in tresc)
+        sprawdz(f"?slowo={wartosc} nie podmienia tresci", "Tradycyjne wina" in tresc)
+
+    # --- ?slowo=kraftowe / rzemieslicze: realna podmiana ---
+    wsgi.request.args = {"slowo": "kraftowe"}
+    tresc = wsgi.serve("").tresc
+    sprawdz("?slowo=kraftowe → 'Kraftowe wina'", "Kraftowe wina" in tresc)
+    sprawdz("?slowo=kraftowe usuwa 'Tradycyjne wina'", "Tradycyjne wina" not in tresc)
+    sprawdz("?slowo=kraftowe pokazuje pasek", "data-slowo-kandydaci" in tresc)
+
+    wsgi.request.args = {"slowo": "rzemieslicze"}
+    tresc = wsgi.serve("").tresc
+    sprawdz("?slowo=rzemieslicze → 'Rzemieślnicze wina'", "Rzemieślnicze wina" in tresc)
+
+    # --- ?hero= i ?slowo= razem: obie podmiany, oba paski ---
+    wsgi.request.args = {"hero": "noc", "slowo": "kraftowe"}
+    tresc = wsgi.serve("").tresc
+    sprawdz("?hero=noc&slowo=kraftowe podmienia klatke",
+            '<img id="hero-image" src="./attached_assets/photos/hero/noc.webp"' in tresc)
+    sprawdz("?hero=noc&slowo=kraftowe podmienia slowo", "Kraftowe wina" in tresc)
+    sprawdz("?hero=noc&slowo=kraftowe ma oba paski",
+            "data-hero-kandydaci" in tresc and "data-slowo-kandydaci" in tresc)
+    wsgi.request.args = {}
+
+    # --- brak slowa w tresci → None (nie po cichu ta sama tresc) ---
+    sprawdz("brak slowa 'tradycyjne' → None",
+            wsgi._wstrzyknij_slowo("<p>bez slowa</p>", "kraftowe") is None)
+    sprawdz("wariant 'tradycyjne' → tresc bez zmian",
+            wsgi._wstrzyknij_slowo("<p>Tradycyjne</p>", "tradycyjne") == "<p>Tradycyjne</p>")
+    return bledy
+
+
 def main() -> int:
     bledy = 0
     for sciezka, oczekiwany_plik, oczekiwany_kod in PRZYPADKI:
@@ -275,6 +327,7 @@ def main() -> int:
     wsgi.request.script_root = ""
 
     bledy += sprawdz_hero()
+    bledy += sprawdz_slowo()
     bledy += sprawdz_wydarzenia()
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")

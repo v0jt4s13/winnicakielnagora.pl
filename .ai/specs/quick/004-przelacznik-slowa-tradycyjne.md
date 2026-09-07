@@ -86,3 +86,12 @@ to nie kosztuje.
   na siebie; klik opcji w jednym pasku zachowuje wybór z drugiego.
 - Konsola bez błędów. `python3 tools/test-routing.py` przechodzi (z nowymi asercjami).
 - Cztery motywy: pasek(i) czytelne w `classic`, `modern`, `rustic`, `dark`.
+
+## Status
+
+**Zrobione 2026-09-07.** `wsgi.py` (`SLOWA_KANDYDACI`, `ZAMIANY_SLOWA`,
+`_wstrzyknij_slowo`, `_strona_glowna_z_paskiem` + `serve`), `assets/js/main.js`
+(`budujPasekPodgladu` — wspólny helper hero+słowo, `initPrzelacznikSlowa`),
+`assets/css/custom.css` (`.przelacznik-slowo`), `tools/test-routing.py`
+(`sprawdz_slowo`). Sprawdzone na Flasku i w przeglądarce — oba paski, brak nachodzenia,
+zachowanie drugiego parametru.

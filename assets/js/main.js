@@ -795,39 +795,69 @@ async function initWineOffer() {
 }
 
 /**
- * Pasek wyboru zdjęcia wejściowego — narzędzie testowe, nie funkcja witryny.
+ * Wspólny pasek podglądu redakcyjnego (?hero=, ?slowo=) — narzędzie, nie funkcja witryny.
  *
- * Pokazuje się WYŁĄCZNIE gdy serwer doda body[data-hero-kandydaci], czyli gdy adres
- * zawiera ?hero. Zwykły odwiedzający nigdy go nie zobaczy i nic go nie kosztuje.
+ * Renderuje się WYŁĄCZNIE gdy serwer doda body[data-<param>-kandydaci]. Zwykły
+ * odwiedzający nigdy go nie zobaczy i nic go nie kosztuje. Sama podmiana (zdjęcie hero,
+ * słowo w treści) dzieje się po stronie serwera (wsgi.py), więc podgląd pokazuje
+ * naprawdę wybrany wariant, a nie podmianę w locie.
  *
- * Sama podmiana zdjęcia dzieje się po stronie serwera (wsgi.py), więc wynik pomiaru
- * w PageSpeed dotyczy naprawdę wybranego zdjęcia, a nie domyślnego z podmianą w locie.
- *
- * Celowo bez miniatur: podgląd czterech kadrów oznaczałby pobranie ~8,4 MB grafiki
- * i zafałszowanie pomiaru, dla którego ten pasek w ogóle powstał.
+ * Linki budujemy przez URLSearchParams na location.search — dzięki temu drugi parametr
+ * (?hero obok ?slowo i odwrotnie) zostaje zachowany po kliknięciu.
  */
+function budujPasekPodgladu({ klasa, tytul, param, wartosci, aktywna, opisy, etykietaZamkniecia }) {
+  const link = (wartosc, etykieta, aktywnaKlasa) => {
+    const p = new URLSearchParams(location.search);
+    if (wartosc === null) p.delete(param);
+    else p.set(param, wartosc);
+    const qs = p.toString();
+    return `<a class="przelacznik-hero__opcja${aktywnaKlasa}" href="${qs ? "?" + qs : "./"}">${etykieta}</a>`;
+  };
+
+  const pasek = document.createElement("div");
+  pasek.className = klasa;
+  pasek.innerHTML =
+    `<span class="przelacznik-hero__tytul">${tytul}</span>` +
+    wartosci
+      .map((w) => link(w, opisy[w] || w, w === aktywna ? " przelacznik-hero__opcja--aktywna" : ""))
+      .join("") +
+    link(null, etykietaZamkniecia, "");
+  document.body.appendChild(pasek);
+}
+
+/** Pasek wyboru zdjęcia wejściowego (?hero=). Celowo bez miniatur: podgląd czterech
+ *  kadrów to ~8,4 MB grafiki i zafałszowany pomiar, dla którego pasek powstał. */
 function initPrzelacznikHero() {
   const kandydaci = document.body.dataset.heroKandydaci;
   if (!kandydaci) return;
-
   const wybrana = wymuszonaPoraHero();
-  const opisy = { poranek: "Poranek", dzien: "Dzień", zachod: "Zachód", noc: "Noc" };
+  budujPasekPodgladu({
+    klasa: "przelacznik-hero",
+    tytul: "Zdjęcie wejściowe",
+    param: "hero",
+    wartosci: kandydaci.split(","),
+    aktywna: wybrana,
+    opisy: { poranek: "Poranek", dzien: "Dzień", zachod: "Zachód", noc: "Noc" },
+    etykietaZamkniecia: wybrana ? "Wróć do pory dnia" : "Zamknij",
+  });
+}
 
-  const pasek = document.createElement("div");
-  pasek.className = "przelacznik-hero";
-  pasek.innerHTML =
-    '<span class="przelacznik-hero__tytul">Zdjęcie wejściowe</span>' +
-    kandydaci
-      .split(",")
-      .map((pora) => {
-        const aktywna = pora === wybrana ? " przelacznik-hero__opcja--aktywna" : "";
-        return `<a class="przelacznik-hero__opcja${aktywna}" href="?hero=${pora}">${
-          opisy[pora] || pora
-        }</a>`;
-      })
-      .join("") +
-    `<a class="przelacznik-hero__opcja" href="./">${wybrana ? "Wróć do pory dnia" : "Zamknij"}</a>`;
-  document.body.appendChild(pasek);
+/** Pasek podglądu słowa „tradycyjne" w treści (?slowo=) — Właściciel waha się między
+ *  „tradycyjne / kraftowe / rzemieślnicze" i chce zobaczyć każdą wersję na żywej stronie. */
+function initPrzelacznikSlowa() {
+  const kandydaci = document.body.dataset.slowoKandydaci;
+  if (!kandydaci) return;
+  const lista = kandydaci.split(",");
+  const zadane = new URLSearchParams(location.search).get("slowo");
+  budujPasekPodgladu({
+    klasa: "przelacznik-hero przelacznik-slowo",
+    tytul: "Słowo w treści",
+    param: "slowo",
+    wartosci: lista,
+    aktywna: lista.includes(zadane) ? zadane : "tradycyjne",
+    opisy: { tradycyjne: "Tradycyjne", kraftowe: "Kraftowe", rzemieslicze: "Rzemieślnicze" },
+    etykietaZamkniecia: "Zamknij",
+  });
 }
 
 /** Zakres dat wpisu po polsku; wydarzenie jednodniowe pokazuje jedną datę, nie zakres. */
@@ -936,6 +966,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initNavigation();
   initContactForm();
   initPrzelacznikHero();
+  initPrzelacznikSlowa();
 
   initWydarzenia();
   if (SKLEP_WLACZONY) {

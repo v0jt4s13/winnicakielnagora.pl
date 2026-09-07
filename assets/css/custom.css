@@ -707,6 +707,12 @@ body.cart-open #cart-panel {
 .przelacznik-hero__opcja:hover { background: rgba(255, 255, 255, 0.14); }
 .przelacznik-hero__opcja--aktywna { border-color: #d8a24a; color: #d8a24a; }
 
+/* Drugi pasek podglądu (?slowo=) współdzieli wygląd z .przelacznik-hero — element ma
+   obie klasy. Sam siedzi na dole jak hero; gdy w adresie są oba parametry, pasek hero
+   (bez klasy .przelacznik-slowo) stoi przed nim w DOM i wtedy odsuwamy słowo w górę
+   o wysokość paska hero, żeby się nie nakładały. */
+.przelacznik-hero:not(.przelacznik-slowo) ~ .przelacznik-slowo { bottom: 6rem; }
+
 /* Treść wpisu o wydarzeniu zachowuje łamanie wierszy wpisane w panelu.
    Klasy `whitespace-pre-line` NIE MA w bundlu Tailwinda (jedyna klasa whitespace-*
    w assets/css/style.css to `whitespace-nowrap`), więc reguła musi być tutaj. */
