@@ -1,3 +1,28 @@
+
+@media (min-width: 768px) {
+    .md\:text-lg {
+        font-size: 1.425rem;
+        line-height: 1.85rem;
+    }
+}
+@media (max-width: 375px) {
+  .text-xl {
+      font-size: 1rem;
+      line-height: 1.55rem;
+  }
+}
+.py-20 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+button#clear-filters {
+    display: flex;
+    flex-direction: row-reverse;
+}
+p.mt-8 {
+    margin-top: 2em !important;
+}
+
 /* Fonty hostowane u nas — patrz tools/pobierz-fonty.py i assets/fonts/OFL.txt.
    Dzieki temu ze sciezki krytycznej znikaja dwa obce originy i blokujacy arkusz
    z fonts.googleapis.com. Regul ponizej nie edytuj recznie — sa generowane. */

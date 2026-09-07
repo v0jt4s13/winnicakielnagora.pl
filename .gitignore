@@ -14,6 +14,8 @@ venv/
 # --- logi i pliki tymczasowe ---
 *.log
 *.tmp
+TODO.maybefuturemd
+TODONE.md
 
 # --- framework t-shirt size: katalogi generowane przez instalator ---
 # Odtwarza je t-shirt-size-install.sh (patrz TODO.md #17)
@@ -23,6 +25,10 @@ t-shirt-size-install.sh
 .claude/agents/
 .cursor/
 .agents/
+agents/
+audit/
+
+skills/
 
 # --- materialy zrodlowe: 580 MB zdjec i filmow ---
 # Do repozytorium trafiaja wylacznie zoptymalizowane kopie w attached_assets/photos/,
@@ -32,7 +38,9 @@ t-shirt-size-install.sh
 /docs/
 
 # --- kopia zapasowa robiona przez panel redakcyjny ---
-data/wina.json.bak
+data/
+filmy/
+
 
 # --- zrzuty ekranu z audytow (10 MB PNG) ---
 # Raporty .md zostaja w repozytorium, obrazy sa dowodem roboczym i zyja lokalnie.
