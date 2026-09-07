@@ -5,20 +5,24 @@
         line-height: 1.85rem;
     }
 }
+
 @media (max-width: 375px) {
   .text-xl {
       font-size: 1rem;
       line-height: 1.55rem;
   }
 }
-.py-20 {
+
+/* .py-20 {
     padding-top: 2rem;
     padding-bottom: 2rem;
-}
+} */
+
 button#clear-filters {
     display: flex;
     flex-direction: row-reverse;
 }
+
 p.mt-8 {
     margin-top: 2em !important;
 }
@@ -110,6 +114,9 @@ p.mt-8 {
 
 :root {
   scroll-behavior: smooth;
+  /* Zapas na przyklejoną belkę nawigacji (h-16 = 4rem). Bez tego skok do #sekcji
+     chowa <h2> pod paskiem — najbardziej widoczne <768px z menu mobilnym. */
+  scroll-padding-top: 5rem;
 }
 
 /* Atrybut `hidden` ma wygrywać z utility Tailwinda ustawiającymi `display`

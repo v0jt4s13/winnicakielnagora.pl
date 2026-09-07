@@ -385,11 +385,14 @@ function initNavigation() {
       const el = target && target.startsWith("#") ? qs(target) : null;
       if (!el) return;
       e.preventDefault();
-      el.scrollIntoView({ behavior: bezAnimacji.matches ? "auto" : "smooth" });
-      history.replaceState(null, "", target);
+      // Najpierw zwiń menu mobilne (siedzi w <nav sticky>), żeby układ się ustalił,
+      // zanim scrollIntoView policzy cel — inaczej płynne przewijanie przestrzeliwuje
+      // o wysokość menu i <h2> ląduje nad belką (widoczne tylko <768px).
       mobileMenu?.classList.add("hidden");
       const icon = mobileToggle?.querySelector("use");
       if (icon) icon.setAttribute("href", "#icon-menu");
+      el.scrollIntoView({ behavior: bezAnimacji.matches ? "auto" : "smooth" });
+      history.replaceState(null, "", target);
     });
   });
 
