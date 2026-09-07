@@ -848,8 +848,9 @@ function initPrzelacznikHero() {
   });
 }
 
-/** Pasek podglądu słowa „tradycyjne" w treści (?slowo=) — Właściciel waha się między
- *  „tradycyjne / kraftowe / rzemieślnicze" i chce zobaczyć każdą wersję na żywej stronie. */
+/** Pasek podglądu słowa w hero (?slowo=) — porównanie „kraftowe / tradycyjne /
+ *  rzemieślnicze" na żywej stronie. Słowo bazowe w treści to dziś „Kraftowe"
+ *  (pierwszy element data-slowo-kandydaci = wariant no-op). */
 function initPrzelacznikSlowa() {
   const kandydaci = document.body.dataset.slowoKandydaci;
   if (!kandydaci) return;
@@ -860,7 +861,7 @@ function initPrzelacznikSlowa() {
     tytul: "Słowo w treści",
     param: "slowo",
     wartosci: lista,
-    aktywna: lista.includes(zadane) ? zadane : "tradycyjne",
+    aktywna: lista.includes(zadane) ? zadane : lista[0],
     opisy: { tradycyjne: "Tradycyjne", kraftowe: "Kraftowe", rzemieslicze: "Rzemieślnicze" },
     etykietaZamkniecia: "Zamknij",
   });

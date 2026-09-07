@@ -95,3 +95,10 @@ to nie kosztuje.
 `assets/css/custom.css` (`.przelacznik-slowo`), `tools/test-routing.py`
 (`sprawdz_slowo`). Sprawdzone na Flasku i w przeglądarce — oba paski, brak nachodzenia,
 zachowanie drugiego parametru.
+
+**Aktualizacja 2026-09-07 (później tego dnia).** Właściciel zmienił słowo w hero
+z „Tradycyjne" na **„Kraftowe"** (`index.html`). `ZAMIANY_SLOWA`, `SLOWA_KANDYDACI`
+(kolejność: `kraftowe` pierwsze = wariant no-op), komunikat 500 i asercje
+`sprawdz_slowo` przeliczone od nowego słowa bazowego. `?slowo=tradycyjne` /
+`?slowo=rzemieslicze` podmieniają, `?slowo=kraftowe` = no-op. Gdyby słowo bazowe
+zmieniło się znów — poprawić te same cztery miejsca (komentarz w `wsgi.py` to mówi).

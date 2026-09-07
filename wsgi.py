@@ -355,19 +355,21 @@ HERO_PORY = ("poranek", "dzien", "zachod", "noc")
 HERO_KOTWICA_IMG = '<img id="hero-image"'
 HERO_KOTWICA_PRELOAD = "<!-- hero-preload -->"
 
-# --- przelacznik slowa "tradycyjne" (?slowo=) --------------------------------
-# Narzedzie redakcyjne na wzor ?hero=: podglad "tradycyjne / kraftowe / rzemieslicze"
+# --- przelacznik slowa w hero (?slowo=) -------------------------------------
+# Narzedzie redakcyjne na wzor ?hero=: podglad "kraftowe / tradycyjne / rzemieslicze"
 # na zywej stronie, bez zmiany domyslnego "/". Patrz .ai/specs/quick/004-*.
-SLOWA_KANDYDACI = ("tradycyjne", "kraftowe", "rzemieslicze")
+# Pierwszy element = slowo FAKTYCZNIE OBECNE w index.html (wariant no-op).
+SLOWA_KANDYDACI = ("kraftowe", "tradycyjne", "rzemieslicze")
 
-# Pary (wzorzec, zamiennik) po formach SLOWA FAKTYCZNIE OBECNYCH w index.html.
-# Dzis jest jedna: "Tradycyjne" (hero: "Tradycyjne wina z bieszczadzkich stokow").
-# Gdy Wlasciciel dopisze do tresci inne formy ("tradycyjnych", "tradycyjna"...),
-# trzeba tu dodac odpowiadajace pary — inaczej ?slowo zwroci 500.
+# Pary (wzorzec, zamiennik) po formach slowa faktycznie obecnych w index.html.
+# Slowo bazowe zmienil Wlasciciel 2026-09-07: hero to teraz "Kraftowe wina z
+# bieszczadzkich stokow" (wczesniej "Tradycyjne"). Jest jedna forma: "Kraftowe".
+# Gdy w tresci pojawi sie inna forma ("kraftowych", "kraftowa"...) albo zmieni sie
+# slowo bazowe, trzeba tu poprawic pary — inaczej ?slowo zwroci 500.
 ZAMIANY_SLOWA = {
-    "kraftowe":     [("Tradycyjne", "Kraftowe"),     ("tradycyjne", "kraftowe")],
-    "rzemieslicze": [("Tradycyjne", "Rzemieślnicze"), ("tradycyjne", "rzemieślnicze")],
-    "tradycyjne":   [],  # wariant oryginalny — no-op
+    "tradycyjne":   [("Kraftowe", "Tradycyjne"),   ("kraftowe", "tradycyjne")],
+    "rzemieslicze": [("Kraftowe", "Rzemieślnicze"), ("kraftowe", "rzemieślnicze")],
+    "kraftowe":     [],  # slowo obecne w index.html — no-op
 }
 
 
@@ -412,16 +414,16 @@ def _wstrzyknij_hero(tresc: str, pora: str) -> str | None:
 
 
 def _wstrzyknij_slowo(tresc: str, slowo: str) -> str | None:
-    """Podmienia slowo "tradycyjne" na wybrany wariant.
+    """Podmienia slowo bazowe w hero (dzis "Kraftowe") na wybrany wariant.
 
-    "tradycyjne" -> tresc bez zmian (wariant oryginalny). Dla pozostalych: gdy ZADNA
+    Wariant rowny slowu bazowemu -> tresc bez zmian. Dla pozostalych: gdy ZADNA
     para z ZAMIANY_SLOWA nie trafila, zwraca None — jak _wstrzyknij_hero przy braku
     kotwicy. Cicha podmiana, ktora nic nie podmienila, zafalszowalaby podglad.
     """
     pary = ZAMIANY_SLOWA.get(slowo)
     if pary is None:
         return None
-    if not pary:  # "tradycyjne"
+    if not pary:  # wariant rowny slowu bazowemu — no-op
         return tresc
     trafienie = False
     for wzorzec, zamiennik in pary:
@@ -474,8 +476,8 @@ def _strona_glowna_z_paskiem(pora: str | None, slowo: str | None,
         podmienione = _wstrzyknij_slowo(tresc, slowo)
         if podmienione is None:
             return Response(
-                "Nie znalazlem slowa 'tradycyjne' w index.html — przelacznik ?slowo nie "
-                "moze podmienic tresci. Sprawdz ZAMIANY_SLOWA.",
+                "Nie znalazlem slowa bazowego ('Kraftowe') w index.html — przelacznik "
+                "?slowo nie moze podmienic tresci. Sprawdz ZAMIANY_SLOWA.",
                 500, {"Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store"})
         tresc = podmienione
     atrybuty = ""
