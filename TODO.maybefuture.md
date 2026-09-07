@@ -42,18 +42,35 @@ produkcyjnego cennika jest `wina.json.bak` obok oryginału, więc skasowanie kat
 zabiera i cennik, i kopię. Zadanie w `production_tasks.json` kopiujące plik raz na dobę
 rozwiązałoby sprawę.
 
-### 38. Sklep ukryty, nie usunięty — jak przywrócić sprzedaż online
+### 38. Zakupy online wyłączone — jak przywrócić pełną sprzedaż
 
-Sprzedaż online wyłączona na start (`TODONE.md` #23). Kod sklepu, koszyka i `data/wina.json`
-**zostają nietknięte**. Wyłącza je:
+**Stan od 2026-09-07 (decyzja Właściciela):** sekcja win wróciła jako „Cennik" — katalog
+z cenami jest widoczny, ale **bez zakupów online**. Sterują tym dwie flagi w
+`assets/js/main.js`:
 
-- `const SKLEP_WLACZONY = false;` w `assets/js/main.js` (osłania blok sklepowy w `DOMContentLoaded`),
-- `hidden` na `<section id="sklep">`, `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html`,
-- brak pozycji „Sklep" w nawigacji (desktop, mobile, stopka) i w nagłówkach `wina/*.html`,
-- blok `#oferta-odmiany` na podstronach odmian kieruje do `#kontakt` zamiast `#sklep`.
+- `SKLEP_WLACZONY = true` — sekcja `#sklep` widoczna, `renderSklep()` + `initFilters()`.
+- `KOSZYK_WLACZONY = false` — `initCart()` się nie uruchamia, karty bez przycisku „Dodaj"
+  (`Produkty.renderProductCard` dostaje `przyciskKoszyka: KOSZYK_WLACZONY`).
 
-Przywrócenie = odwrócenie powyższego. **Nie usuwać kodu koszyka bez decyzji Właściciela** —
-patrz `.ai/GUARDRAILS.md` → „Architectural boundaries".
+Nadal wyłączone / ukryte:
+
+- `hidden` na `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html`,
+- nagłówki `wina/*.html` bez linku do cennika (celowo odchudzone, patrz SPEC-006),
+- blok `#oferta-odmiany` na podstronach odmian kieruje do `#kontakt` (pokazuje cenę
+  + „Napisz do nas").
+
+**Pełny powrót sprzedaży online:**
+
+1. `KOSZYK_WLACZONY = true` w `assets/js/main.js` — przycisk „Dodaj" wraca sam,
+   `initCart()` się uruchamia.
+2. Zdjąć `hidden` z `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html`.
+3. (Opcjonalnie) przemyśleć nazwę „Cennik" w menu i nagłówek „Nasze wina i ceny" —
+   wtedy pasowałoby raczej „Sklep".
+4. Backend płatności/wysyłki to osobne zadanie **L** (pozycja #7 wyżej).
+
+Kod koszyka (`initCart`, `renderCart`, `openCart`/`closeCart`, `cart`) i `data/wina.json`
+**zostają nietknięte**. **Nie usuwać ani nie „porządkować" tego kodu bez decyzji Właściciela** —
+patrz `.ai/GUARDRAILS.md` → „Architectural boundaries" #6.
 
 ## Zawieszone / czeka na decyzję infrastrukturalną
 

@@ -77,12 +77,19 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
    w `cennik.py` w katalogu głównym. Z `tools/` serwer produkcyjny oddaje wyłącznie trzy pliki
    interfejsu panelu, i to za hasłem.
 5. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
-6. **Sklep online jest wyłączony, nie usunięty** (SPEC-006, decyzja Właściciela z 2026-09-06):
-   sekcja `#sklep` i koszyk są `hidden`, a `const SKLEP_WLACZONY = false` w `assets/js/main.js`
-   wstrzymuje ich inicjalizację. Kod koszyka, filtrów, `renderSklep()` i `data/wina.json`
-   **zostają nietknięte** — sprzedaż ma wrócić. **NIGDY** nie usuwaj tego kodu ani nie
-   „porządkuj" go bez wyraźnej decyzji Właściciela; przywrócenie sprzedaży to odwrócenie
-   flagi i atrybutów `hidden` (patrz `TODO.md` #38).
+6. **Sklep działa w trybie „Cennik", zakupy online wyłączone** (SPEC-006 + decyzja Właściciela
+   z 2026-09-07). Dwie flagi w `assets/js/main.js`:
+   - `SKLEP_WLACZONY = true` → sekcja `#sklep` („Nasze wina i ceny", w menu „Cennik") jest
+     widoczna: `renderSklep()` + `initFilters()` budują listę win z cenami.
+   - `KOSZYK_WLACZONY = false` → `initCart()` się nie uruchamia, a `Produkty.renderProductCard`
+     dostaje `przyciskKoszyka: KOSZYK_WLACZONY`, więc karty są **bez przycisku „Dodaj"**.
+     `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html` zostają `hidden`.
+
+   Kod koszyka (`initCart`, `renderCart`, `openCart`/`closeCart`, `cart`), `data/wina.json`
+   i cała reszta **zostają nietknięte** — sprzedaż ma wrócić w całości. **NIGDY** nie usuwaj
+   tego kodu ani nie „porządkuj" go bez wyraźnej decyzji Właściciela. Pełny powrót sprzedaży
+   = `KOSZYK_WLACZONY = true` + zdjęcie `hidden` z trzech elementów koszyka (patrz
+   `TODO.maybefuture.md` #38).
 
 ## Consistency rules
 

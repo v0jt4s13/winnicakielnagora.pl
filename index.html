@@ -140,6 +140,7 @@
           <div class="hidden md:flex items-center gap-1">
             <a href="#o-nas" data-scroll="#o-nas" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">O Nas</a>
             <a href="#nasze-wina" data-scroll="#nasze-wina" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Nasze Wina</a>
+            <a href="#sklep" data-scroll="#sklep" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Cennik</a>
             <a href="#wydarzenia" data-scroll="#wydarzenia" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Wydarzenia</a>
             <a href="#noclegi" data-scroll="#noclegi" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Noclegi</a>
             <a href="#kontakt" data-scroll="#kontakt" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Kontakt</a>
@@ -195,6 +196,7 @@
         <div class="px-5 py-3 space-y-1">
           <a href="#o-nas" data-scroll="#o-nas" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">O Nas</a>
           <a href="#nasze-wina" data-scroll="#nasze-wina" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Nasze Wina</a>
+          <a href="#sklep" data-scroll="#sklep" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Cennik</a>
           <a href="#wydarzenia" data-scroll="#wydarzenia" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Wydarzenia</a>
           <a href="#noclegi" data-scroll="#noclegi" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Noclegi</a>
           <a href="#kontakt" data-scroll="#kontakt" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Kontakt</a>
@@ -213,7 +215,7 @@
             <svg class="w-10 h-10 text-primary-foreground"><use href="#icon-wine"></use></svg>
             <h1 class="font-serif text-4xl md:text-6xl font-bold text-primary-foreground">Winnica Kielna Góra</h1>
           </div>
-          <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Tradycyjne wina z bieszczadzkich stoków</p>
+          <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Kraftowe wina z bieszczadzkich stoków</p>
           <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
           <div class="flex flex-wrap gap-5 justify-center">
             <a href="#nasze-wina" data-scroll="#nasze-wina" class="btn-ghost">Poznaj nasze wina</a>
@@ -420,14 +422,15 @@
         </div>
       </section>
 
-      <!-- Sprzedaż online wyłączona na start — SPEC-006. Sekcja ukryta (nie usunięta),
-           koszyk niżej też. Włączenie: zdjąć `hidden` tutaj, z #cart-button, #cart-overlay,
-           #cart-panel i ustawić SKLEP_WLACZONY = true w assets/js/main.js. -->
-      <section id="sklep" class="py-20" hidden>
+      <!-- Tryb „Cennik": katalog win z cenami jest widoczny (SKLEP_WLACZONY = true),
+           ale zakupów online nie ma (KOSZYK_WLACZONY = false w assets/js/main.js) — karty
+           bez przycisku „Dodaj". Koszyk (#cart-button, #cart-overlay, #cart-panel) zostaje
+           `hidden`. Pełny powrót sprzedaży: TODO.maybefuture.md #38. W menu: „Cennik". -->
+      <section id="sklep" class="py-20">
         <div class="max-w-7xl mx-auto px-5">
           <div class="text-center mb-12" data-reveal>
-            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Sklep z Winami</h2>
-            <p class="text-muted-foreground max-w-2xl mx-auto">Odkryj naszą kolekcję wyjątkowych win. Wszystkie produkty dostępne z dostawą do domu</p>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nasze wina i ceny</h2>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Pełna lista roczników z aktualnymi cenami. Sprzedaż online jeszcze nie ruszyła — po zakup lub rezerwację napisz albo zadzwoń do nas</p>
           </div>
           <div class="grid lg:grid-cols-4 gap-8">
             <aside class="lg:col-span-1 bg-card border border-card-border rounded-md p-5" data-reveal>
@@ -633,6 +636,7 @@
             <ul class="space-y-3 text-sm text-primary-foreground/80">
               <li><a href="#o-nas" data-scroll="#o-nas" class="hover:text-primary-foreground transition-colors">O Nas</a></li>
               <li><a href="#nasze-wina" data-scroll="#nasze-wina" class="hover:text-primary-foreground transition-colors">Nasze Wina</a></li>
+              <li><a href="#sklep" data-scroll="#sklep" class="hover:text-primary-foreground transition-colors">Cennik</a></li>
               <li><a href="#wydarzenia" data-scroll="#wydarzenia" class="hover:text-primary-foreground transition-colors">Wydarzenia</a></li>
               <li><a href="#noclegi" data-scroll="#noclegi" class="hover:text-primary-foreground transition-colors">Noclegi</a></li>
             </ul>

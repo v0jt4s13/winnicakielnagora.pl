@@ -545,6 +545,21 @@ podglądzie zmian CSS trzeba wymuszać przeładowanie (`?v=` albo świeży port)
 
 ## Changelog
 
+### 2026-09-07
+
+- **Częściowe przywrócenie sklepu jako „Cennik"** (decyzja Właściciela). Jedna flaga
+  `SKLEP_WLACZONY` rozbita na dwie w `assets/js/main.js`:
+  - `SKLEP_WLACZONY = true` — sekcja `#sklep` widoczna (`renderSklep` + `initFilters`);
+    `hidden` zdjęte z `<section id="sklep">`, `<h2>` → „Nasze wina i ceny", opis przepisany
+    (bez „dostawy do domu").
+  - `KOSZYK_WLACZONY = false` — `initCart()` nie startuje, `renderSklep` przekazuje
+    `przyciskKoszyka: KOSZYK_WLACZONY`, więc karty są bez „Dodaj". `#cart-button`,
+    `#cart-overlay`, `#cart-panel` dalej `hidden`.
+- Nawigacja (desktop, mobile, stopka): nowa pozycja **„Cennik"** → `#sklep` (id bez zmian).
+- `wina/*.html` — bez zmian (nagłówki zostają odchudzone; ceny pokazuje `#oferta-odmiany`).
+- `GUARDRAILS.md` #6 i `TODO.maybefuture.md` #38 przepisane pod dwie flagi; pełny powrót
+  sprzedaży = `KOSZYK_WLACZONY = true` + zdjęcie `hidden` z trzech elementów koszyka.
+
 ### 2026-09-06
 
 - Pierwsza wersja specyfikacji: pivot oferty na start — sprzedaż online ukryta (flaga

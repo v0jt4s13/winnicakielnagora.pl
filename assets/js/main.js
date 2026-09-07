@@ -148,10 +148,15 @@ const cart = new Map();
 let cennik = null;
 const STAWKA_VAT_DOMYSLNA = 0.23;
 
-// Sprzedaż online wyłączona na start (SPEC-006). Sekcja #sklep i koszyk są `hidden`
-// w index.html; ta flaga wstrzymuje ich inicjalizację. Włączenie sprzedaży = `true`
-// + zdjęcie `hidden` z sekcji, koszyka i pozycji „Sklep" w nawigacji (index.html, wina/*.html).
-const SKLEP_WLACZONY = false;
+// Sekcja win działa w dwóch etapach (decyzja Właściciela 2026-09-07, TODO.maybefuture.md #38):
+//  - SKLEP_WLACZONY  → wczytanie cennika, renderKategorie, renderSklep, initFilters.
+//                      Dziś `true`: sekcja #sklep to widoczny „Cennik" — lista win z cenami.
+//  - KOSZYK_WLACZONY → initCart() oraz przycisk „Dodaj" na karcie (Produkty.przyciskKoszyka).
+//                      Dziś `false`: brak zakupów online.
+// Pełny powrót sprzedaży = KOSZYK_WLACZONY = true + zdjęcie `hidden` z #cart-button,
+// #cart-overlay, #cart-panel w index.html. Kod koszyka zostaje nietknięty (GUARDRAILS #6).
+const SKLEP_WLACZONY = true;
+const KOSZYK_WLACZONY = false;
 
 // Korzen witryny liczony z adresu tego skryptu (assets/js/main.js). Dzieki temu
 // te same pliki dzialaja na stronie glownej i w podkatalogu wina/, a takze gdyby
@@ -756,6 +761,7 @@ function renderSklep() {
     .map((wino) => Produkty.renderProductCard(wino, stawkaVat(), {
       bazaZdjec: `${KORZEN}attached_assets/photos/`,
       bazaOdmian: `${KORZEN}wina/`,
+      przyciskKoszyka: KOSZYK_WLACZONY,
     }))
     .join("");
   return true;
@@ -973,7 +979,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     cennik = await wczytajCennik();
     renderKategorie();
     if (renderSklep()) initFilters();
-    initCart();
+    if (KOSZYK_WLACZONY) initCart();
   }
   initWineOffer();
 });
