@@ -297,6 +297,26 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
 
 ## Coding Standards
 
+### Motyw: każda strona i szablon w wariancie jasnym i ciemnym
+
+**Reguła dla całego repo, nie tylko `index.html`.** Każda nowa samodzielna strona,
+szablon albo narzędzie HTML (np. `plan-startu.html`, panele, dashboardy, strony statusu)
+**musi mieć paletę jasną i ciemną** oraz **przełącznik zapamiętujący wybór** w `localStorage`.
+
+Wzorzec (patrz `plan-startu.html`):
+
+- paleta jako zmienne CSS na gołym `:root` (wartości jasne),
+- nadpisana w `@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ … } }`
+  **oraz** w `:root[data-theme="dark"]{ … }` — trójstan: Auto / Jasny / Ciemny,
+- przycisk cyklu ze stanem w `localStorage`,
+- stan zastosowany **przed pierwszym malowaniem** (mały skrypt w `<head>`), żeby nie migało,
+- `body` zawsze z jawnym tłem z tokenu (nie przezroczyste).
+
+Sama witryna (`index.html`) ma **własny** system czterech motywów (`themeStyles` w `main.js`,
+`classic/modern/rustic/dark`) — to osobny mechanizm, nie mieszać jednego z drugim.
+
+### Standardy szczegółowe
+
 Detailed standards: `.ai/standards/`
 Index: `.ai/standards/index.yml`
 
