@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from functools import partial
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -36,12 +37,14 @@ class ObslugaWitryny(SimpleHTTPRequestHandler):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", type=int, default=5000)
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "5000")))
+    # Domyslnie loopback; --host 0.0.0.0 (albo HOST w srodowisku) wystawia w LAN.
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
     args = parser.parse_args()
 
     handler = partial(ObslugaWitryny, directory=str(PROJEKT))
-    with ThreadingHTTPServer(("127.0.0.1", args.port), handler) as serwer:
-        print(f"Winnica: http://127.0.0.1:{args.port}")
+    with ThreadingHTTPServer((args.host, args.port), handler) as serwer:
+        print(f"Winnica: http://{args.host}:{args.port}")
         try:
             serwer.serve_forever()
         except KeyboardInterrupt:
