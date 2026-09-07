@@ -1,104 +1,81 @@
 # TODO — znane braki i rozjazdy
 
 Rejestr rzeczy, które w kodzie już są niespójne, świadomie niedokończone albo czekają na dane
-od Właściciela. To nie jest backlog funkcji. Przeczytaj przed większą zmianą; po zamknięciu
-pozycji usuń ją i dopisz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`.
+od Właściciela. To nie jest backlog funkcji. Przeczytaj przed większą zmianą.
 
-Ostatnia aktualizacja: **2026-09-06**.
+Podział na trzy pliki:
+
+- **`TODO.md`** (ten plik) — sprawy wciąż otwarte, nad którymi pracujemy albo które czekają
+  na materiał od Właściciela.
+- **`TODONE.md`** — pozycje domknięte, z datą i opisem rozwiązania. Po zamknięciu pozycji
+  przenosisz ją tam (i dopisujesz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`).
+- **`TODO.maybefuture.md`** — sprawy związane ze sprzedażą online oraz świadomie zawieszone.
+
+Ostatnia aktualizacja: **2026-09-07**.
+
+## Do dodania / uzupelnienia
+
+Skill
+
+Global CLAUDE.md + pamięć realnie załatwiają „pamiętaj za każdym razem" — ładują się do kontekstu na starcie każdej sesji. Istnieje już pusty katalog ~/.claude/skills/frontend-design/. Skill ma sens, jeśli chcesz coś wywoływalnego (/frontend-design) z pełnym szablonem startowym HTML (paleta + przełącznik + reset + siatka). Mogę go zbudować — powiedz tylko, czy ma być sam „motyw light/dark", czy szerszy scaffold nowej strony.
 
 ## Do naprawy
 
-### ~~1. Rozjazd ceny netto~~ — ZAMKNIĘTE 2026-09-02
+### 25. Otwarte bullety z audytu projektanta (2026-09-02)
 
-Atrapy produktów usunięte, netto jest wyliczane z `cena_brutto`.
+Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Zrobione pozycje audytu są w `TODONE.md`
+#25. Zostają:
 
-### ~~2. Filtr cenowy ma zaszyty zakres 0–100 zł~~ — ZAMKNIĘTE 2026-09-02
+- **Krytyczne, mobilne:** nagłówek H1 i ikona wychodzą poza viewport na 390 px — strona wygląda
+  na uciętą.
+- Siedem rozbudowanych kart odmian zajmuje większość strony głównej; na telefonie droga do
+  sklepu i kontaktu jest bardzo długa. Odstępy `py-20` nie zmniejszają się na małych ekranach.
+- Brakuje nazw dostępności przy przyciskach stylu, koszyka i menu oraz `aria-expanded`.
+- Brak linku „Przejdź do treści", widocznego fokusu spójnego z motywami i obsługi
+  `prefers-reduced-motion` (częściowo: `initNavigation` już honoruje `prefers-reduced-motion`
+  przy przewijaniu do sekcji).
 
-Zakres liczy `zakresCen()` z cen w `data/wina.json`.
+`Organization` w JSON-LD — **zrobione 2026-09-07** (`TODONE.md` #9 / #25).
 
-### ~~3. Martwe atrybuty `data-price-net` i `data-discount`~~ — ZAMKNIĘTE 2026-09-02
+### 27. Panel na produkcji wymaga HTTPS
 
-Karty renderuje `Produkty.renderProductCard()`; oba atrybuty zniknęły.
+HTTP Basic Auth przesyła login i hasło (base64, nie szyfrowane) przy **każdym** żądaniu.
+Po HTTP bez TLS każdy po drodze może je odczytać.
 
-### ~~4. VAT 23% zaszyty w dwóch miejscach~~ — ZAMKNIĘTE 2026-09-02
+Do potwierdzenia: czy `winnicakielnagora.pl` będzie serwowane przez HTTPS z wymuszonym
+przekierowaniem z HTTP. Jeśli nie — nie włączaj `PANEL_UZYTKOWNIK` ani `PANEL_HASLO_HASH`.
 
-Stawka pochodzi z `data/wina.json`, etykieta koszyka budowana jest z niej (`#cart-tax-label`).
+Warto też rozważyć ograniczenie `/tools/panel/` po adresie IP na poziomie proxy — wtedy nawet
+wyciek hasła nie wystarczy, żeby wejść.
 
-### ~~5. `wsgi.py` nigdy nie zwraca 404~~ — ZAMKNIĘTE 2026-09-02
+### 35. Długi cache dla CSS i JS wymaga stemplowania wersji
 
-Nieznany adres zwraca `404.html` z kodem 404. Przy okazji zawężono zbiór serwowanych plików
-(patrz niżej) i dodano obsługę adresów bez `.html`.
+`Cache-Control` dla CSS i JS zostaje na `no-cache` (ETag → 304, jedna runda bez ciała).
+Próba `max-age=3600` skończyła się tym, że przeglądarka pokazywała stary `custom.css`
+i strona 404 renderowała się bez stylów — a projektant zmienia CSS na bieżąco.
 
-**Uwaga na przyszłość:** `wsgi.py` ma teraz listę `KATALOGI_PUBLICZNE`. Nowy katalog, który
-ma być widoczny publicznie (np. `filmy/`), trzeba do niej dopisać — inaczej zwróci 404.
+Żeby bezpiecznie wydłużyć cache, adres musi się zmieniać razem z treścią:
+`tools/stempluj-zasoby.py` liczący skrót z każdego pliku CSS/JS i przepisujący odnośniki
+w HTML na `...style.css?v=ab12cd34`. HTML jest `no-cache`, więc nowa strona natychmiast
+wskazuje nowe adresy. Do tego test pilnujący, że skróty w HTML zgadzają się z plikami.
 
-## Do decyzji Właściciela
+Obrazy i fonty mają już `max-age=2592000` — ich nazwy są stabilne.
 
-### ~~6. Rozjazd treści: odmiany vs. produkty w sklepie~~ — ZAMKNIĘTE 2026-09-02
+## Do decyzji / weryfikacji Właściciela
 
-Zmyślone produkty usunięte. Sklep buduje się z `data/wina.json`, dziś pustego —
-pokazuje „Oferta w przygotowaniu" do czasu wprowadzenia asortymentu (#10).
+### 24. „Bieszczadzkie stoki" a lokalizacja winnicy
 
-### 7. Koszyk i formularz są zaślepkami
+Hasło w hero brzmi **„Tradycyjne wina z bieszczadzkich stoków"** (na polecenie Właściciela,
+2026-09-02). Warto to zweryfikować: winnica leży w **Kielnarowej pod Rzeszowem**, a Bieszczady
+to pasmo ok. 100 km na południowy wschód. Reszta strony — tytuł, opisy meta, sekcja „O nas",
+strony odmian — mówi konsekwentnie o Kielnarowej i okolicach Rzeszowa.
 
-- Koszyk to `Map` w pamięci — znika po odświeżeniu strony.
-- Formularz kontaktowy robi `preventDefault()` + `alert()`, nie wysyła nic; przycisk płatności
-  też kończy się `alert()`.
-- **Pytanie**: czy i kiedy dokładamy backend (wysyłka maila, trwały koszyk, płatności)? To
-  zadanie rozmiaru **L**.
-- **Uwaga dla agentów**: `alert()` zawiesza automatyzację przeglądarki — tych przycisków nie
-  klikaj przez Chrome MCP.
+Jeśli to skrót myślowy marketingowy, zostaje. Jeśli nie — naturalniejsze byłoby np.
+„Tradycyjne wina z podkarpackich stoków" albo „…ze stoku nad Rzeszowem".
 
-### 8. `dist/public` — build, którego nie ma
+Do porównania wariantów słowa „tradycyjne" na żywej stronie służy `?slowo=` (`.ai/specs/quick/004`).
 
-- **Gdzie**: `wsgi.py` → `STATIC_CANDIDATES`
-- **Stan**: kod preferuje `dist/public`, ale wdrożenie nie ma kroku budowania, więc na produkcji
-  serwowany jest katalog repo. Gałąź `dist/public` jest martwa.
-- **Pytanie**: dodajemy build, czy usuwamy tę gałąź z `wsgi.py`?
-
-## Brakujące dane do strony
-
-Bez tych informacji na stronie zostają atrapy. Nie da się ich zgadnąć ani wyprowadzić
-z materiałów w `docs/`.
-
-### 9. Dane kontaktowe
-
-Zmyślone dane **zostały usunięte 2026-09-02** — sekcja mówi dziś „Kielnarowa, ok. 10 km od
-centrum Rzeszowa" i uczciwie zaznacza, że reszta będzie podana. Zniknęła też mapa Google, bo
-wskazywała współrzędne w okolicach Ustrzyk Dolnych; na jej miejscu jest zdjęcie winnicy.
-
-Nadal potrzebne: **dokładny adres, telefon, e-mail**, a jeśli ma być sprzedaż — także NIP
-i dane do faktury. Po uzupełnieniu warto przywrócić mapę i dodać `Organization` w JSON-LD.
-
-### ~~10. Asortyment i cennik~~ — ZAMKNIĘTE 2026-09-03
-
-Właściciel wprowadził cennik panelem: 7 win (3 czerwone, 4 białe) i sok winogronowy.
-Dane żyją na produkcji w `/opt/apps/app_winnicakielnagora.pl/dane/wina.json`; w repozytorium
-`data/wina.json` jest wersją startową (patrz #26 i #34).
-
-Sklep na stronie renderuje się z tych danych — zakres filtra cenowego liczy się sam
-(15–222 zł), kategorie też pochodzą z pliku.
-
-
-### ~~11. Adresy stron odmian bez `.html`~~ — ZAMKNIĘTE 2026-09-02
-
-Na produkcji `/wina/monarch` działa tak samo jak `/wina/monarch.html`. Linki w HTML-u zostają
-z rozszerzeniem, bo `python3 -m http.server` używany lokalnie tej sztuczki nie zna — a `canonical`
-i tak wskazuje wariant z `.html`, więc nie ma duplikatu dla wyszukiwarek.
-
-### ~~12. Svenson Red~~ — ZAMKNIĘTE 2026-09-02
-
-Właściciel potwierdził, że wino z tej odmiany jest produkowane. Strona odmiany powstała.
-Do poprawienia przy okazji: pisany opis winnicy w materiałach jej nie wymienia.
-
-### ~~13. Wydarzenia i degustacje~~ — ZAMKNIĘTE 2026-09-06 (SPEC-006)
-
-**Decyzja Właściciela:** degustacji nie oferujemy (na razie). Wszystkie wzmianki zdjęte
-z treści — nagłówek sekcji to „Wydarzenia", statyczną kartę zastąpiła „Co się u nas dzieje"
-(wyprzedaże roczników, pikniki, spotkania przy zbiorach). Kalendarz konkretnych wydarzeń
-prowadzi panel redakcyjny (SPEC-005). Szczegóły: `.ai/specs/SPEC-006-2026-09-06-strona-bez-sklepu-noclegi.md`.
-
-## Materiały
+## Brakujące dane / materiały
 
 ### 14. Zgody na wizerunek — do zebrania na piśmie
 
@@ -108,28 +85,19 @@ osoby. Do czasu potwierdzenia zgód strona używa wyłącznie kadrów bez tego c
 Właściciel zebrał zgody **ustnie przy robieniu zdjęć** (2026-09-03). Formularz do potwierdzenia
 ich na piśmie: `attached_assets/docs/form-zgody-rodo/zgoda-wizerunek-formularz.html` — jedna
 strona A4, osiem wierszy na podpisy, z klauzulą informacyjną RODO. Przed pierwszym użyciem
-trzeba w nim uzupełnić adres,
-e-mail i telefon winnicy (te same dane, których brakuje w pozycji #9) i warto dać go
-do przejrzenia prawnikowi — nie był przez takiego pisany.
+trzeba w nim uzupełnić adres, e-mail i telefon winnicy i warto dać go do przejrzenia prawnikowi.
 
-Ponumerowany przegląd zdjęć: `docs/zgody-wizerunek.jpg` + lista `docs/zgody-wizerunek.txt`.
-Katalog `docs/` **w korzeniu repozytorium** jest w `.gitignore`, więc te dwa pliki zostają
-lokalnie.
+Ponumerowany przegląd zdjęć: `docs/zgody-wizerunek.jpg` + lista `docs/zgody-wizerunek.txt`
+(katalog `docs/` w korzeniu repozytorium jest w `.gitignore`, te dwa pliki zostają lokalnie).
 
-Sam formularz jest już w repozytorium i **jest serwowany publicznie** pod
-`/attached_assets/docs/form-zgody-rodo/zgoda-wizerunek-formularz.html`. Reguła w `.gitignore`
-brzmi `/docs/` — z ukośnikiem z przodu; bez niego łapała katalog o tej nazwie na każdym
-poziomie i po cichu pomijała `attached_assets/docs/` przy commitowaniu.
-
-`robots.txt` ma `Allow: /`, więc formularz jest indeksowany. **Decyzja Właściciela
-(2026-09-03): zostaje tak — nie dodajemy `Disallow`.** To pusty szablon bez danych osobowych,
-a repozytorium i tak jest publiczne. Nie wracaj do tego bez jego słowa.
+Sam formularz jest w repozytorium i **jest serwowany publicznie** pod
+`/attached_assets/docs/form-zgody-rodo/zgoda-wizerunek-formularz.html`. `robots.txt` ma
+`Allow: /`, więc jest indeksowany. **Decyzja Właściciela (2026-09-03): zostaje tak — nie
+dodajemy `Disallow`.** To pusty szablon bez danych osobowych. Nie wracaj do tego bez jego słowa.
 
 **Czego potrzebuję, żeby użyć tych zdjęć:** wyłącznie numery z przeglądu.
 **Nie przysyłaj nazwisk ani podpisanych formularzy** — to dane osobowe, a repozytorium jest
-publiczne (`.ai/GUARDRAILS.md` → STOP #2). Wypełnione formularze zostają u Właściciela,
-poza repozytorium i poza serwerem strony.
-
+publiczne (`.ai/GUARDRAILS.md` → STOP #2).
 
 ### 15. Brakujące ujęcia
 
@@ -141,35 +109,11 @@ Potrzebna sesja zdjęciowa albo zgoda na dalsze korzystanie z grafik zastępczyc
 ### 16. Filmy — czekamy na linki z YouTube
 
 **Decyzja z 2026-09-02:** filmy trafią na YouTube, Właściciel dostarczy linki później.
-Nie kompresujemy ich więc do `filmy/` ani nie hostujemy u siebie.
+Nie kompresujemy ich do `filmy/` ani nie hostujemy u siebie.
 
 Do zrobienia po otrzymaniu linków: sekcja z osadzonymi filmami (najlepiej lazy — miniatura
-plus odtwarzacz dopiero po kliknięciu, żeby YouTube nie ładował skryptów przy każdym wejściu)
-oraz `VideoObject` w JSON-LD, jeśli filmy mają się pojawiać w wynikach wyszukiwania.
-
-Katalog `filmy/` zostaje — przyda się na miniatury albo pliki lokalne, gdyby coś nie miało
-trafić na YouTube.
-
-## Higiena repo
-
-### 17. `.claude/skills/` i `.claude/agents/` są w `.gitignore`
-
-Po świeżym klonie nie ma komend `/…` ani subagentów. Odtworzyć powinien je
-`t-shirt-size-install.sh`, ale **instalator kopiuje z katalogów `skills/` i `agents/`, których
-w repo nie ma** — dziś jedyna kopia frameworka to lokalne `.claude/`. Do rozstrzygnięcia:
-commitować `.claude/`, czy dodać katalogi źródłowe.
-
-### ~~18. Przegląd strony w przeglądarce~~ — WYKONANY 2026-09-02
-
-Sprawdzone: strona główna i strona odmiany w motywach `classic`, `modern` i `rustic`, sklep
-renderowany z cennika (8 pozycji), zakres filtra policzony z danych (15–222 zł), opcje kategorii
-z JSON-a, dodanie do koszyka, etykieta VAT, blok „Wina z tej odmiany", konsola bez błędów.
-
-**Przegląd od razu wykrył błąd**, którego testy nie widziały: `fetch("./data/wina.json")`
-działał na stronie głównej, ale na `/wina/*.html` szukał `/wina/data/wina.json` i cicho
-wpadał w tekst zastępczy. Naprawione — ścieżki liczą się teraz z adresu `main.js`.
-
-Zostaje do obejrzenia: **układ na telefonie** (nie sprawdzałem szerokości mobilnych).
+plus odtwarzacz dopiero po kliknięciu) oraz `VideoObject` w JSON-LD, jeśli filmy mają się
+pojawiać w wynikach wyszukiwania. Katalog `filmy/` zostaje — przyda się na miniatury.
 
 ### 19. Treści stron odmian nie były weryfikowane wobec źródeł
 
@@ -190,216 +134,8 @@ Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pytho
   modeli nie dało się zweryfikować w tej sesji. Jeśli API odpowie błędem o nieznanym modelu,
   ustaw `OPENAI_MODEL` na aktualną nazwę; kod nie wymaga zmian.
 - **Funkcja nie została przetestowana z prawdziwym kluczem** — sprawdzone są tylko ścieżki
-  błędów (brak klucza → 400, zbyt długi tekst → 400, brak połączenia → 502, klucz nie trafia
-  do logów). Pierwsze użycie z realnym kluczem warto obejrzeć.
-- **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać przy
-  wklejaniu czegokolwiek poza notatkami o winie.
-
-### ~~21. Kategorie Dornfeldera i Monarcha~~ — ZAMKNIĘTE 2026-09-03
-
-Poprawione przez Właściciela w panelu. Na produkcji: Dornfelder, Monarch i Swenson Red
-mają „Czerwone", pozostałe cztery odmiany „Białe" — czyli **3 czerwone i 4 białe**,
-zgodnie z opisem winnicy z materiałów źródłowych.
-
-Do potwierdzenia drobiazg: Właściciel napisał „4 czerwone i 3 białe", co jest odwrotnością
-stanu w danych. Jeśli któreś wino ma się jeszcze przenieść — poprawka zajmuje chwilę
-w panelu.
-
-
-### ~~23. Sklep obiecuje dostawę, której nie ma~~ — ZAMKNIĘTE 2026-09-06 (SPEC-006)
-
-**Decyzja Właściciela:** sprzedaż online nie rusza na start (brak logistyki). Sekcja `#sklep`
-i koszyk są ukryte (`hidden` + flaga `SKLEP_WLACZONY = false` w `assets/js/main.js`) — kod
-i `data/wina.json` zostają, gotowe do przywrócenia (patrz #38). Wzmianka o „dostawie do domu"
-zeszła z widoku razem z sekcją. Ogólnikowe „Odkryj naszą kolekcję…" i hero „Odkryj wyjątkowy
-smak…" — nadal do przepisania przy pracach nad treścią (Właściciel).
-
-### 24. „Bieszczadzkie stoki" a lokalizacja winnicy
-
-Hasło w hero brzmi teraz **„Tradycyjne wina z bieszczadzkich stoków"** (na polecenie Właściciela,
-2026-09-02). Warto to zweryfikować: winnica leży w **Kielnarowej pod Rzeszowem**, a Bieszczady
-to pasmo ok. 100 km na południowy wschód. Reszta strony — tytuł, opisy meta, sekcja „O nas",
-strony odmian — mówi konsekwentnie o Kielnarowej i okolicach Rzeszowa.
-
-Jeśli to skrót myślowy marketingowy, zostaje. Jeśli nie — naturalniejsze byłoby np.
-„Tradycyjne wina z podkarpackich stoków" albo „…ze stoku nad Rzeszowem", i wtedy hasło
-zgadzałoby się z resztą treści oraz z lokalizacją, którą podajemy wyszukiwarkom.
-
-### 25. Wnioski z audytu projektanta (2026-09-02)
-
-Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Poza rzeczami już zrobionymi (nazwa marki,
-`WebSite` JSON-LD, metadane Open Graph) zostają:
-
-- **Krytyczne, mobilne:** nagłówek H1 i ikona wychodzą poza viewport na 390 px — strona wygląda
-  na uciętą.
-- Nawigacja sekcyjna i CTA to `<button data-scroll>`, a nie `<a href="#sekcja">` — brak
-  indeksowalnej siatki linków wewnętrznych i gorsza obsługa klawiaturą.
-- „Degustacje" i „Wydarzenia" w menu prowadzą do tej samej sekcji.
-- Siedem rozbudowanych kart odmian zajmuje większość strony głównej; na telefonie droga do
-  sklepu i kontaktu jest bardzo długa. Odstępy `py-20` nie zmniejszają się na małych ekranach.
-- Brakuje nazw dostępności przy przyciskach stylu, koszyka i menu oraz `aria-expanded`.
-- Brak linku „Przejdź do treści", widocznego fokusu spójnego z motywami i obsługi
-  `prefers-reduced-motion`.
-- Nagłówek stron odmian na telefonie: przyciski różnej wysokości, „Nasze odmiany" łamie się
-  na dwa wiersze.
-
-`Organization` w JSON-LD celowo pominięte do czasu uzupełnienia adresu, telefonu i logo
-(pozycja #9) — tak też rekomenduje audyt.
-
-### ~~26. Zmiany cennika na produkcji vs. git~~ — ROZSTRZYGNIĘTE 2026-09-02
-
-**Wariant A: wdrożenie pomija `data/`.** Żywy cennik mieszka poza katalogiem aplikacji,
-a `data/wina.json` w repozytorium jest wersją startową.
-
-Do ustawienia w konfiguracji wdrożeniowej:
-
-```
-CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json
-WYDARZENIA_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wydarzenia.json
-```
-
-`WYDARZENIA_SCIEZKA` działa dokładnie tak samo i z tego samego powodu (SPEC-005). **Bez niej
-wpisy wydarzeń zrobione panelem znikną przy najbliższym wdrożeniu**, bo aplikacja czytałaby
-i zapisywała `data/wydarzenia.json` z katalogu nadpisywanego deployem.
-
-Plus dwie rzeczy po stronie serwera:
-
-1. Katalog `dane/` **poza** katalogiem synchronizowanym z repozytorium, z prawem zapisu
-   dla użytkownika, na którym działa gunicorn.
-2. Wdrożenie ma pomijać `data/` — gdyby jednak je nadpisywało, nic złego się nie stanie,
-   bo aplikacja i tak czyta ze `CENNIK_SCIEZKA`.
-
-Jak to działa: przy pierwszym żądaniu `zapewnij_plik()` kopiuje wersję z repozytorium na
-ścieżkę roboczą; kolejne wdrożenia jej nie ruszają. Bez zmiennej (czyli lokalnie) wszystko
-działa po staremu, na pliku z repozytorium. Sprawdza to `tools/test-cennik-sciezka.py`.
-
-**Konsekwencja do zapamiętania:** `data/wina.json` w repozytorium przestaje odzwierciedlać
-produkcję. Traktuj go jak wersję startową; gdy zechcesz zgrać ceny z powrotem do gita,
-skopiuj plik z serwera ręcznie.
-
-
-### 27. Panel na produkcji wymaga HTTPS
-
-HTTP Basic Auth przesyła login i hasło (zakodowane w base64, nie zaszyfrowane) przy **każdym**
-żądaniu. Po HTTP bez TLS każdy po drodze może je odczytać.
-
-Do potwierdzenia: czy `winnicakielnagora.pl` będzie serwowane przez HTTPS z wymuszonym
-przekierowaniem z HTTP. Jeśli nie — nie włączaj `PANEL_UZYTKOWNIK` ani `PANEL_HASLO_HASH`.
-
-Warto też rozważyć ograniczenie `/tools/panel/` po adresie IP na poziomie proxy — wtedy nawet
-wyciek hasła nie wystarczy, żeby wejść.
-
-### ~~28. Katalog `.git` publicznie dostępny~~ — ZAMKNIĘTE 2026-09-02
-
-Po naprawie #29 ruch przechodzi przez aplikację i lista dozwolonych plików działa.
-Sprawdzone na żywo: `/.git/config`, `/wsgi.py`, `/cennik.py`, `/WDROZENIE.md` → **404**.
-
-Warto mimo to dołożyć `location ~ /\.git { deny all; return 404; }` w nginx — wtedy ochrona
-nie zależy od tego, czy aplikacja działa.
-
-
-### ~~29. Aplikacja nie wykonywała aktualnego kodu~~ — ZAMKNIĘTE 2026-09-02
-
-**Przyczyna: dwie usługi systemd dla tej samej aplikacji.** Port 8004 trzymał gunicorn
-z 1 września należący do unitu **`winnicakielnagora.pl.service`** (z `.pl`), a `projects_manager`
-zarządza unitem **`winnicakielnagora.service`** (bez `.pl`). Nowy proces nie mógł się podpiąć
-pod zajęty port, więc odpowiadał kod sprzed doby.
-
-Naprawione zatrzymaniem starego procesu. Po restarcie: `/zdrowie` zwraca `1764551b7f51`,
-ładne adresy działają, `.git` i pliki źródłowe dają 404, `/data/wina.json` przychodzi
-z naszej trasy (`no-store`).
-
-**Zostaje do zrobienia — patrz #32**, inaczej problem wróci po restarcie maszyny.
-
-
-### 30. Uruchamianie lokalnego serwera panelu z przeglądarki — odrzucone
-
-Pomysł: przycisk w panelu startujący `tools/panel/serwer.py` do czasu wylogowania.
-**Odrzucone 2026-09-02** z trzech powodów: na produkcji API jest w `wsgi.py`, więc lokalny
-serwer nie jest do niczego potrzebny; uruchamianie procesów z żądania HTTP zamienia błąd
-w uwierzytelnianiu w zdalne wykonanie kodu; a przy Basic Auth nie istnieje moment
-„wylogowania", w którym dałoby się taki proces zatrzymać.
-
-### ~~31. Stary bytecode na serwerze~~ — ZAMKNIĘTE 2026-09-02
-
-`__pycache__` usunięty z serwera, `__pycache__/` jest w `.gitignore` od `09178bc`.
-Ostatecznie nie to okazało się przyczyną (patrz #29), ale plik i tak nie miał prawa
-być w repozytorium.
-
-### ~~32. Zduplikowany unit `winnicakielnagora.pl.service`~~ — ZAMKNIĘTE 2026-09-03
-
-`systemctl disable` zwrócił „Unit file … does not exist" — plik unitu już nie istnieje.
-Stary proces działał w cgroup po unicie usuniętym wcześniej z dysku, więc po jego zabiciu
-nie ma czego wskrzeszać przy starcie maszyny.
-
-Potwierdzenie, że został jeden unit:
-
-```bash
-systemctl list-unit-files | grep winnica     # tylko winnicakielnagora.service
-ls /etc/systemd/system | grep winnica
-```
-
-Warto sprawdzić po najbliższym restarcie serwera, czy port 8004 zajmuje właściwa usługa:
-`sudo ss -ltnp | grep 8004` — linia poleceń ma zawierać `--timeout 300`.
-
-
-### ~~33. Panel i cennik na serwerze~~ — ZAMKNIĘTE 2026-09-02
-
-`/zdrowie` potwierdza: `panel_wlaczony: true`, cennik czytany z
-`/opt/apps/app_winnicakielnagora.pl/dane/wina.json`, czyli spoza katalogu wdrożenia.
-
-Sprawdzone z zewnątrz:
-
-| adres | wynik |
-|---|---|
-| `/tools/panel/panel.html`, `.css`, `.js`, `/api/wczytaj` | **401** + `WWW-Authenticate: Basic` |
-| `/tools/panel/serwer.py`, `haslo.py`, `README.md` | **404** mimo włączonego panelu |
-| `/tools/optimize-photos.py` | **404** |
-| `/data/wina.json` | 8 pozycji, zasiane z wersji startowej w repozytorium |
-
-Od tej chwili `data/wina.json` w repozytorium jest **wersją startową** — produkcja żyje
-własnym plikiem (`TODO.md` #26).
-
-### 34. Cennik z produkcji nie wraca do repozytorium — niski priorytet
-
-Panel działa i Właściciel zapisał już zmianę wyłącznie na serwerze (2026-09-02:
-`seyval-blanc-2022` → `seyval-blanc-2023`). Wersja startowa w `data/wina.json` zaczyna się
-rozjeżdżać z produkcją — tak jak przewiduje wariant A z #26, ale warto mieć na to nawyk.
-
-Zgranie produkcji do repozytorium:
-
-```bash
-scp ops02:/opt/apps/app_winnicakielnagora.pl/dane/wina.json data/wina.json
-```
-
-Właściciel uznał to za mało istotne (2026-09-03). Zostaje jako notatka: jedyną kopią
-produkcyjnego cennika jest `wina.json.bak` leżący obok oryginału, więc skasowanie katalogu
-`dane/` zabiera i cennik, i kopię. Gdyby kiedyś miało to zaboleć — zadanie w
-`production_tasks.json` kopiujące plik raz na dobę rozwiązuje sprawę.
-
-### 35. Długi cache dla CSS i JS wymaga stemplowania wersji
-
-`Cache-Control` dla CSS i JS zostaje na `no-cache` (ETag → 304, jedna runda bez ciała).
-Próba `max-age=3600` skończyła się tym, że przeglądarka pokazywała stary `custom.css`
-i strona 404 renderowała się bez stylów — a projektant zmienia CSS na bieżąco.
-
-Żeby bezpiecznie wydłużyć cache, adres musi się zmieniać razem z treścią:
-`tools/stempluj-zasoby.py` liczący skrót z każdego pliku CSS/JS i przepisujący odnośniki
-w HTML na `...style.css?v=ab12cd34`. HTML jest `no-cache`, więc nowa strona natychmiast
-wskazuje nowe adresy. Do tego test pilnujący, że skróty w HTML zgadzają się z plikami.
-
-Obrazy i fonty mają już `max-age=2592000` — ich nazwy są stabilne.
-
-### 36. Style strony 404 weszły do repozytorium moim commitem
-
-`assets/css/custom.css` dostało 41 reguł `error-page` w commicie `10e0209`, czyli moim —
-to była niezacommitowana praca projektanta, którą zgarnąłem przez `git add -A`. Sama praca
-jest w porządku i strona wygląda dobrze, ale autorstwo w historii jest mylące.
-
-Ten sam błąd popełniłem wcześniej ze zrzutami audytu. Wniosek na przyszłość: przed
-`git add -A` sprawdzać `git status` i commitować wybiórczo, gdy ktoś pracuje równolegle.
-
-## Po SPEC-006 (2026-09-06)
+  błędów. Pierwsze użycie z realnym kluczem warto obejrzeć.
+- **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać.
 
 ### 37. Noclegi — link do Booking i zdjęcia pokoi
 
@@ -415,16 +151,11 @@ Właściciel wystawia 3 pokoje na Booking.com. Po otrzymaniu materiałów:
 - wgrać 3 zdjęcia pokoi do `attached_assets/photos/`, rząd `grid md:grid-cols-3` nad
   przyciskiem, `alt` po polsku, `width`/`height`, `loading="lazy"`.
 
-### 38. Sklep ukryty, nie usunięty — jak przywrócić sprzedaż online
+## Higiena repo
 
-Sprzedaż online wyłączona na start (#23). Kod sklepu, koszyka i `data/wina.json` **zostają
-nietknięte**. Wyłącza je:
+### 17. `.claude/skills/` i `.claude/agents/` są w `.gitignore`
 
-- `const SKLEP_WLACZONY = false;` w `assets/js/main.js` (osłania blok sklepowy w `DOMContentLoaded`),
-- `hidden` na `<section id="sklep">`, `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html`,
-- brak pozycji „Sklep" w nawigacji (desktop, mobile, stopka) i w nagłówkach `wina/*.html`,
-- blok `#oferta-odmiany` na podstronach odmian kieruje do `#kontakt` zamiast `#sklep`.
-
-Przywrócenie = odwrócenie powyższego. **Nie usuwać kodu koszyka bez decyzji Właściciela** —
-patrz `.ai/GUARDRAILS.md` → „Architectural boundaries".
-
+Po świeżym klonie nie ma komend `/…` ani subagentów. Odtworzyć powinien je
+`t-shirt-size-install.sh`, ale **instalator kopiuje z katalogów `skills/` i `agents/`, których
+w repo nie ma** — dziś jedyna kopia frameworka to lokalne `.claude/`. Do rozstrzygnięcia:
+commitować `.claude/`, czy dodać katalogi źródłowe.
