@@ -795,9 +795,7 @@ async function initWineOffer() {
               <p class="font-semibold">${Produkty.escape(wino.nazwa)}</p>
               <p class="text-sm text-muted-foreground">${Produkty.escape(opis)}</p>
             </div>
-            <div class="flex items-center gap-4">${cena}
-              <a href="${KORZEN}index.html#kontakt" class="btn-primary">Napisz do nas</a>
-            </div>
+            <div class="flex items-center gap-4">${cena}</div>
           </div>`;
     })
     .join("");

@@ -105,14 +105,35 @@
       </article>
     </main>
 
-    <footer class="bg-primary text-primary-foreground py-10">
-      <div class="max-w-5xl mx-auto px-5 text-sm">
-        <p class="font-serif text-lg mb-2">Winnica Kielna Góra</p>
-        <p class="opacity-80">Wina i soki z jednohektarowej winnicy w Kielnarowej pod Rzeszowem. Pierwsze nasadzenia w 2020 roku.</p>
-        <p class="opacity-80 mt-5"><a href="../index.html#kontakt" class="underline">Kontakt</a></p>
+    <footer class="bg-primary text-primary-foreground">
+      <div class="max-w-5xl mx-auto px-5 py-12">
+        <div class="mb-8">
+          <p class="font-serif text-lg mb-2">Winnica Kielna Góra</p>
+          <p class="text-primary-foreground/80 text-sm">Wina i soki z jednohektarowej winnicy w Kielnarowej pod Rzeszowem. Pierwsze nasadzenia w 2020 roku.</p>
+        </div>
+        <div class="h-px bg-primary-foreground/20 mb-8"></div>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-5 text-sm text-primary-foreground/80">
+          <p>© 2026 Winnica Kielna Góra. Wszelkie prawa zastrzeżone.</p>
+          <div class="flex gap-8">
+            <button class="hover:text-primary-foreground transition-colors">Polityka Prywatności</button>
+            <button class="hover:text-primary-foreground transition-colors">Regulamin</button>
+          </div>
+        </div>
       </div>
     </footer>
   </div>
+
+  <!-- Menu witryny na końcu dokumentu: unikalna treść odmiany jest wyżej w źródle (SEO). -->
+  <nav aria-label="Menu witryny" class="bg-primary border-t border-primary-border">
+    <div class="max-w-5xl mx-auto px-5 py-4 grid grid-cols-3 gap-1 text-center justify-center sm:flex">
+      <a href="../index.html#o-nas" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">O Nas</a>
+      <a href="../index.html#nasze-wina" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Nasze Wina</a>
+      <a href="../index.html#sklep" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Cennik</a>
+      <a href="../index.html#wydarzenia" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Wydarzenia</a>
+      <a href="../index.html#noclegi" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Noclegi</a>
+      <a href="../index.html#kontakt" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Kontakt</a>
+    </div>
+  </nav>
 
   <script src="../assets/js/produkty.js" defer></script>
   <script src="../assets/js/main.js" defer></script>
