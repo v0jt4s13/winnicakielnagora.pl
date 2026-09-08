@@ -211,9 +211,9 @@
         <noscript><img src="./attached_assets/photos/hero/dzien.webp" alt="Winnica panorama" width="1534" height="1025" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover"></noscript>
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
         <div class="relative h-full flex flex-col items-center justify-center text-center px-5 max-w-4xl mx-auto">
-          <div class="flex items-center gap-3 mb-5">
-            <svg class="w-10 h-10 text-primary-foreground"><use href="#icon-wine"></use></svg>
-            <h1 class="font-serif text-4xl md:text-6xl font-bold text-primary-foreground">Winnica Kielna Góra</h1>
+          <div class="flex flex-col sm:flex-row items-center gap-3 mb-5">
+            <svg class="w-10 h-10 text-primary-foreground shrink-0"><use href="#icon-wine"></use></svg>
+            <h1 class="font-serif text-3xl md:text-6xl font-bold text-primary-foreground">Winnica Kielna Góra</h1>
           </div>
           <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Kraftowe wina z połódniowych stoków podkarpacia.</p>
           <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
@@ -527,11 +527,8 @@
             <p class="text-muted-foreground max-w-2xl mx-auto">Trzy pokoje w budynku winiarni, z widokiem na winorośl. Rezerwacja przez Booking.com</p>
           </div>
           <div class="text-center" data-reveal>
-            <!-- TODO: podmienić href na URL oferty Booking od Właściciela, usunąć is-disabled /
-                 aria-disabled / tabindex i podpis „Rezerwacja wkrótce". Zdjęcia 3 pokoi — osobne
-                 zadanie: rząd grid md:grid-cols-3 nad przyciskiem. -->
-            <a class="btn-primary is-disabled" href="#noclegi" role="button" aria-disabled="true" tabindex="-1">Zarezerwuj na Booking</a>
-            <p class="text-sm text-muted-foreground mt-3">Rezerwacja wkrótce — link pojawi się niebawem</p>
+            <!-- TODO: dodać rząd zdjęć 3 pokoi (grid md:grid-cols-3) nad przyciskiem, gdy będą materiały (TODO.md #15). -->
+            <a class="btn-primary" href="https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html" target="_blank" rel="noopener">Zarezerwuj na Booking</a>
           </div>
         </div>
       </section>

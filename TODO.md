@@ -11,7 +11,7 @@ Podział na trzy pliki:
   przenosisz ją tam (i dopisujesz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`).
 - **`TODO.maybefuture.md`** — sprawy związane ze sprzedażą online oraz świadomie zawieszone.
 
-Ostatnia aktualizacja: **2026-09-07**.
+Ostatnia aktualizacja: **2026-09-08**.
 
 ## Do dodania / uzupelnienia
 
@@ -26,8 +26,11 @@ Global CLAUDE.md + pamięć realnie załatwiają „pamiętaj za każdym razem" 
 Pełny raport: `audit/2026-09-02-homepage/AUDIT.md`. Zrobione pozycje audytu są w `TODONE.md`
 #25. Zostają:
 
-- **Krytyczne, mobilne:** nagłówek H1 i ikona wychodzą poza viewport na 390 px — strona wygląda
-  na uciętą.
+- ~~**Krytyczne, mobilne:** nagłówek H1 i ikona wychodzą poza viewport na 390 px — strona wygląda
+  na uciętą.~~ **Zrobione 2026-09-08:** lockup hero (`.flex` z ikoną + `<h1>`) układa się w kolumnę
+  poniżej `sm` (`flex-col sm:flex-row`), `<h1>` zmniejszony z `text-4xl` do `text-3xl` w bazie
+  (`md:text-6xl` bez zmian). Sekcja ma `overflow-hidden` (dla obrazu), więc za szeroki tytuł był
+  ucinany, nie zawijany.
 - Siedem rozbudowanych kart odmian zajmuje większość strony głównej; na telefonie droga do
   sklepu i kontaktu jest bardzo długa. Odstępy `py-20` nie zmniejszają się na małych ekranach.
 - Brakuje nazw dostępności przy przyciskach stylu, koszyka i menu oraz `aria-expanded`.
@@ -137,19 +140,17 @@ Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pytho
   błędów. Pierwsze użycie z realnym kluczem warto obejrzeć.
 - **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać.
 
-### 37. Noclegi — link do Booking i zdjęcia pokoi
+### 37. Noclegi — zdjęcia pokoi
 
-Sekcja `#noclegi` w `index.html` startuje jako nagłówek + zajawka + **nieaktywny** przycisk
-„Zarezerwuj na Booking" (`<a class="btn-primary is-disabled" href="#noclegi" aria-disabled>`),
-pod nim podpis „Rezerwacja wkrótce". Bez zdjęć — w zasobach nie ma kadru pokoju.
+Link do Booking **zrobione 2026-09-08**: przycisk „Zarezerwuj na Booking" w sekcji `#noclegi`
+jest aktywny, prowadzi do `https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html`
+(`target="_blank" rel="noopener"`). Adres podał Właściciel (wariant `.pl` ścieżki, którą
+przysłał jako `.en-gb`); nie udało się go zweryfikować przez WebFetch — Booking blokuje
+automatyczne pobrania — więc warto raz kliknąć ręcznie.
 
-Właściciel wystawia 3 pokoje na Booking.com. Po otrzymaniu materiałów:
-
-- podmienić `href` na realny URL oferty (**nie zgadywać adresu** — czekać na link),
-- usunąć `is-disabled`, `aria-disabled`, `tabindex="-1"` i podpis „Rezerwacja wkrótce",
-- dodać `target="_blank" rel="noopener"` (link wychodzący),
-- wgrać 3 zdjęcia pokoi do `attached_assets/photos/`, rząd `grid md:grid-cols-3` nad
-  przyciskiem, `alt` po polsku, `width`/`height`, `loading="lazy"`.
+Zostaje: brak zdjęć pokoi (w zasobach nie ma kadru pokoju — patrz #15). Po otrzymaniu
+materiałów wgrać 3 zdjęcia do `attached_assets/photos/`, rząd `grid md:grid-cols-3` nad
+przyciskiem, `alt` po polsku, `width`/`height`, `loading="lazy"`.
 
 ## Higiena repo
 

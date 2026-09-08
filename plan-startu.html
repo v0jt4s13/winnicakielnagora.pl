@@ -106,6 +106,16 @@
   header.masthead .sub{
     margin-top:14px; font-size:1.05rem; color:var(--ink-muted); max-width:62ch;
   }
+  .masthead-live{margin:20px 0 0;}
+  .live-link{
+    display:inline-flex; align-items:center; gap:9px; flex-wrap:wrap;
+    padding:10px 17px; border-radius:8px; text-decoration:none;
+    font-weight:600; font-size:.9rem;
+    background:var(--accent); color:#fff; box-shadow:var(--shadow);
+    transition:background .15s;
+  }
+  .live-link:hover{background:var(--accent-strong);}
+  .live-link .url{font-weight:400; opacity:.82; font-size:.82rem;}
   .meta-row{
     margin-top:20px; display:flex; flex-wrap:wrap; gap:8px 18px;
     font-size:.82rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;
@@ -156,6 +166,18 @@
   }
   .done-list .txt b{font-weight:600;}
   .done-list .txt span{color:var(--ink-muted);}
+
+  .done-fold{margin-top:24px;}
+  .done-fold > summary{
+    cursor:pointer; list-style:none; font-family:'Work Sans',sans-serif;
+    font-size:.86rem; font-weight:700; letter-spacing:.04em; color:var(--done);
+    padding:11px 15px; background:var(--done-soft); border:1px solid var(--border); border-radius:9px;
+  }
+  .done-fold > summary::-webkit-details-marker{display:none;}
+  .done-fold > summary::before{content:"\25B8  "; font-size:.8em;}
+  .done-fold[open] > summary::before{content:"\25BE  ";}
+  .done-fold[open] > summary{margin-bottom:2px;}
+  .done-fold .done-groups{margin-top:22px;}
 
   /* --- plan --- */
   .progress-bar{
@@ -254,10 +276,15 @@
     <p class="eyebrow">Winnica Kielna Góra · plan startu</p>
     <h1>Ostatnie kroki przed publikacją</h1>
     <p class="sub">Stan wdrożenia witryny winnicakielnagora.pl i lista tego, co zostało do domknięcia zanim strona pójdzie w świat na dobre — pogrupowana wg tego, co blokuje start, co czeka na Właściciela, a co po prostu czeka na materiały.</p>
+
+    <p class="masthead-live">
+      <a class="live-link" href="https://ops02.jdblayer.com/winnicakielnagora.pl/" target="_blank" rel="noopener">Otwórz winnicę — dev online ↗ <span class="url">ops02.jdblayer.com/winnicakielnagora.pl</span></a>
+    </p>
+
     <div class="meta-row">
-      <span>Stan na <strong>7 września 2026</strong></span>
+      <span>Stan na <strong>8 września 2026</strong></span>
       <span>gałąź <code>master</code></span>
-      <span>ostatni commit <code>98f3704</code> (merge: SPEC-006 + dane kontaktowe)</span>
+      <span>ostatni commit <code>509ed97</code> (strony win: menu w nagłówku)</span>
     </div>
 
     <div class="stats">
@@ -268,30 +295,35 @@
     </div>
   </header>
 
+  <!-- #o-projekcie — sekcja opisowa zakomentowana 2026-09-08 (wyłączona z widoku planu).
   <section id="o-projekcie">
     <h2>O co chodzi w tym projekcie</h2>
     <p class="lede">
       Winnica Kielna Góra to rodzinne, jednohektarowe gospodarstwo w Kielnarowej, 10 km od Rzeszowa,
       na stoku o południowym nachyleniu. Pierwsze krzewy poszły w ziemię w 2020 roku, formalnie winnica
       powstała w 2024. Siedem odmian odpornych daje wina białe, czerwone, różowe i sok winogronowy.
-      Strona jest w całości statyczna — jeden <code style="font-family:ui-monospace,monospace;background:var(--surface-2);padding:1px 6px;border-radius:4px;">index.html</code>
+      Strona jest w całości statyczna: jeden index.html
       i garść assetów, serwowane przez 16-liniowy Flask. Asortyment i wydarzenia Właściciel redaguje
       sam, w panelu za hasłem, bez dotykania kodu. Sprzedaż online i degustacje są świadomie odłożone
-      na później — na start liczą się informacja o winnicy, wydarzenia i noclegi.
+      na później: na start liczą się informacja o winnicy, wydarzenia i noclegi.
     </p>
   </section>
+  -->
+
 
   <section id="dziala">
     <h2>Co już działa</h2>
     <p class="lede">Rzeczy dowiezione i sprawdzone w przeglądarce — punkt wyjścia, nie lista do przejrzenia.</p>
 
-    <div class="done-groups">
+    <details class="done-fold">
+      <summary>Dowiezione i sprawdzone — rozwiń pełną listę</summary>
+      <div class="done-groups">
       <div class="done-group">
         <h3>Zakres oferty na start (SPEC-006)</h3>
         <ul class="done-list">
           <li><span class="tick">✓</span><span class="txt"><b>Sprzedaż online ukryta na start</b> <span>— sekcja sklepu i koszyk za flagą <code style="font-family:ui-monospace,monospace">SKLEP_WLACZONY</code>; kod koszyka i <code style="font-family:ui-monospace,monospace">data/wina.json</code> nietknięte, gotowe do przywrócenia.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Degustacje zdjęte z treści</b> <span>— karta „Co się u nas dzieje" (wyprzedaże roczników, pikniki, spotkania przy zbiorach) zamiast „Degustacje po umówieniu".</span></span></li>
-          <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>— trzy pokoje w budynku winiarni; przycisk do Booking.com nieaktywny do czasu podania linku.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>— trzy pokoje w budynku winiarni; przycisk „Zarezerwuj na Booking" aktywny (link od Właściciela, 2026-09-08), zostają zdjęcia pokoi.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Nawigacja odchudzona</b> <span>— bez „Sklep" i „Degustacje", z „Noclegi"; hero z jednym przyciskiem; podstrony odmian kierują do kontaktu.</span></span></li>
         </ul>
       </div>
@@ -313,6 +345,8 @@
           <li><span class="tick">✓</span><span class="txt"><b>Kadr hero dobierany serwerowo wg pory dnia</b> <span>— poranek/dzień/zachód/noc, preload bez zgadywania po stronie klienta (SPEC-003).</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Osiem stron odmian + sitemap</b> <span>— treść sklepu widoczna dla wyszukiwarek mimo renderu przez JS.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Własna strona 404</b> <span>zamiast serwowania strony głównej pod każdym adresem.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Organization / Winery w JSON-LD + link do mapy</b> <span>— dane firmy dla wyszukiwarek, mapa w sekcji kontaktu (TODO #9).</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nawigacja i CTA jako <code style="font-family:ui-monospace,monospace">&lt;a href&gt;</code></b> <span>— indeksowalne linki wewnętrzne i obsługa klawiaturą; <code style="font-family:ui-monospace,monospace">data-scroll</code> tylko dla płynnego przewijania (audyt 2026-09-02).</span></span></li>
         </ul>
       </div>
 
@@ -322,6 +356,7 @@
           <li><span class="tick">✓</span><span class="txt"><b>Cztery motywy w pełnym parytecie</b> <span>classic, modern, rustic, dark — 29 zmiennych CSS każdy.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Motyw dark włącza się sam po zmroku</b> <span>— jedyny motyw, który strona wybiera bez udziału gościa.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Animacje przy przewijaniu</b> <span>i zwijane sekcje panelu redakcyjnego (SPEC-004).</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Hero mieści się na wąskim telefonie</b> <span>— lockup ikona + H1 układa się w kolumnę poniżej 640&nbsp;px, tytuł zmniejszony; koniec ucinania na 390&nbsp;px (audyt 2026-09-02).</span></span></li>
         </ul>
       </div>
 
@@ -334,16 +369,17 @@
           <li><span class="tick">✓</span><span class="txt"><b><code style="font-family:ui-monospace,monospace">.git</code> i pliki źródłowe niedostępne z zewnątrz</b> <span>— potwierdzone na żywo: 404 dla <code style="font-family:ui-monospace,monospace">.git/config</code>, <code style="font-family:ui-monospace,monospace">wsgi.py</code>.</span></span></li>
         </ul>
       </div>
-    </div>
+      </div>
+    </details>
   </section>
 
   <section id="plan">
     <h2>Co zostało przed publikacją</h2>
-    <p class="lede">19 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu — stan zapisuje się w tej przeglądarce.</p>
+    <p class="lede">16 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu — stan zapisuje się w tej przeglądarce.</p>
 
     <div class="progress-bar">
       <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-      <div class="progress-label" id="progress-label">0 / 25 przejrzanych</div>
+      <div class="progress-label" id="progress-label">0 / 22 przejrzanych</div>
     </div>
 
     <div class="chips" id="chips">
@@ -356,16 +392,7 @@
 
     <!-- KRYTYCZNE -->
     <div class="plan-group" data-group="crit">
-      <div class="plan-group-head"><span class="bar" style="background:var(--crit)"></span><h3>Krytyczne blokery</h3><span class="count">4 pozycje</span></div>
-
-      <label class="row cat-crit" data-cat="crit" data-id="crit-1">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Nagłówek H1 wychodzi poza ekran na 390&nbsp;px</span>
-          <span class="why">Telefon to zapewne większość ruchu na stronie winnicy — pierwsze wrażenie wygląda dziś na uciętą stronę.</span>
-        </span>
-        <span class="badge">Audyt 2026-09-02</span>
-      </label>
+      <div class="plan-group-head"><span class="bar" style="background:var(--crit)"></span><h3>Krytyczne blokery</h3><span class="count">3 pozycje</span></div>
 
       <label class="row cat-crit" data-cat="crit" data-id="crit-3">
         <input type="checkbox">
@@ -397,16 +424,7 @@
 
     <!-- WAŻNE -->
     <div class="plan-group" data-group="important">
-      <div class="plan-group-head"><span class="bar" style="background:var(--important)"></span><h3>Ważne, nieblokujące</h3><span class="count">7 pozycji</span></div>
-
-      <label class="row cat-important" data-cat="important" data-id="imp-1">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Nawigacja i CTA jako przyciski, nie linki</span>
-          <span class="why"><code style="font-family:ui-monospace,monospace">&lt;button data-scroll&gt;</code> zamiast <code style="font-family:ui-monospace,monospace">&lt;a href="#sekcja"&gt;</code> — brak indeksowalnej siatki linków wewnętrznych, gorsza obsługa klawiaturą.</span>
-        </span>
-        <span class="badge">Audyt 2026-09-02</span>
-      </label>
+      <div class="plan-group-head"><span class="bar" style="background:var(--important)"></span><h3>Ważne, nieblokujące</h3><span class="count">5 pozycji</span></div>
 
       <label class="row cat-important" data-cat="important" data-id="imp-slowo">
         <input type="checkbox">
@@ -442,15 +460,6 @@
           <span class="why">Powstały z rozwinięcia treści strony głównej — źródła wskazane w materiałach jeszcze nie sprawdzone przez WebFetch.</span>
         </span>
         <span class="badge">TODO #19</span>
-      </label>
-
-      <label class="row cat-important" data-cat="important" data-id="imp-6">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Dodać <code style="font-family:ui-monospace,monospace">Organization</code> w JSON-LD i przywrócić mapę</span>
-          <span class="why">Adres, telefon i e-mail są już na stronie — to co dotąd blokowało oba te elementy jest już domknięte.</span>
-        </span>
-        <span class="badge">TODO #9</span>
       </label>
 
       <label class="row cat-important" data-cat="important" data-id="imp-7">
@@ -502,8 +511,8 @@
       <label class="row cat-waiting" data-cat="waiting" data-id="wait-5">
         <input type="checkbox">
         <span class="body">
-          <span class="title">Noclegi — link do Booking i zdjęcia 3 pokoi</span>
-          <span class="why">Sekcja „Noclegi" jest już na stronie z nieaktywnym przyciskiem. Właściciel wystawia pokoje na Booking.com — po materiałach podmieniamy link i wgrywamy zdjęcia.</span>
+          <span class="title">Noclegi — zdjęcia 3 pokoi</span>
+          <span class="why">Przycisk „Zarezerwuj na Booking" jest już aktywny i prowadzi do oferty (link od Właściciela, 2026-09-08). Zostają zdjęcia trzech pokoi — czekają na sesję.</span>
         </span>
         <span class="badge">TODO #37</span>
       </label>
