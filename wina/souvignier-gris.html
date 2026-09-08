@@ -26,18 +26,122 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Strona główna","item":"https://winnicakielnagora.pl/"},{"@type":"ListItem","position":2,"name":"Nasze odmiany","item":"https://winnicakielnagora.pl/#nasze-wina"},{"@type":"ListItem","position":3,"name":"Souvignier Gris","item":"https://winnicakielnagora.pl/wina/souvignier-gris.html"}]}
   </script>
+  <style>
+    h2 {
+      margin-top: 1em;
+    }
+    @media (min-width: 768px) {
+      div#oferta-odmiany {
+          max-width: calc(50% - 10px);
+      }
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-background text-foreground">
+  <svg aria-hidden="true" class="hidden" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-wine" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 22h8"></path>
+      <path d="M7 10h10"></path>
+      <path d="M12 15v7"></path>
+      <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"></path>
+    </symbol>
+    <symbol id="icon-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="21" r="1"></circle>
+      <circle cx="19" cy="21" r="1"></circle>
+      <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+    </symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" x2="20" y1="12" y2="12"></line>
+      <line x1="4" x2="20" y1="6" y2="6"></line>
+      <line x1="4" x2="20" y1="18" y2="18"></line>
+    </symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18"></path>
+      <path d="m6 6 12 12"></path>
+    </symbol>
+    <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6 9 17l-5-5"></path>
+    </symbol>
+  </svg>
+
   <div class="min-h-screen flex flex-col">
     <nav class="sticky top-0 z-50 bg-primary border-b border-primary-border">
-      <div class="max-w-5xl mx-auto px-5">
+      <div class="max-w-7xl mx-auto px-5">
         <div class="flex items-center justify-between h-16">
-          <a href="../index.html" class="flex items-center gap-3 min-w-0">
-            <span class="font-serif text-lg font-semibold text-primary-foreground truncate">Winnica Kielna Góra</span>
+          <a href="../index.html" class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-primary-foreground"><use href="#icon-wine"></use></svg>
+            <span class="font-serif text-xl font-semibold text-primary-foreground">Winnica Kielna Góra</span>
           </a>
-          <div class="flex items-center gap-2">
-            <a href="../index.html#nasze-wina" class="btn-ghost whitespace-nowrap shrink-0">Nasze odmiany</a>
+          <div class="hidden md:flex items-center gap-1">
+            <a href="../index.html#o-nas" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">O Nas</a>
+            <a href="../index.html#sklep" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Cennik win</a>
+            <a href="../index.html#nasze-wina" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Odmiany Winogron</a>
+            <a href="../index.html#wydarzenia" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Wydarzenia</a>
+            <a href="../index.html#noclegi" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Noclegi</a>
+            <a href="../index.html#kontakt" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Kontakt</a>
           </div>
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <button id="style-trigger" type="button" aria-label="Wybierz styl" class="w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+                <svg class="w-5 h-5"><use href="#icon-palette"></use></svg>
+              </button>
+              <div id="style-menu" class="hidden absolute right-0 mt-2 w-56 rounded-md border border-card-border bg-card shadow-md">
+                <div class="px-3 py-2 text-sm font-semibold">Wybierz styl</div>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="classic">
+                  <div>
+                    <div class="font-medium">Classic Burgundy</div>
+                    <div class="text-xs text-muted-foreground">Elegancki bordowy z akcentami złota</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="modern">
+                  <div>
+                    <div class="font-medium">Modern Minimal</div>
+                    <div class="text-xs text-muted-foreground">Minimalistyczny z czystymi liniami</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="rustic">
+                  <div>
+                    <div class="font-medium">Rustic Natural</div>
+                    <div class="text-xs text-muted-foreground">Naturalny z ciepłymi tonami</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="dark">
+                  <div>
+                    <div class="font-medium">Dark</div>
+                    <div class="text-xs text-muted-foreground">Ciemny grafit - włącza się sam po zmroku</div>
+                  </div>
+                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
+                </button>
+              </div>
+            </div>
+            <button id="cart-button" hidden class="relative w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+              <svg class="w-5 h-5"><use href="#icon-cart"></use></svg>
+              <span id="cart-count" class="hidden absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-ring text-primary text-xs font-semibold flex items-center justify-center"></span>
+            </button>
+            <button id="mobile-menu-toggle" type="button" aria-label="Menu nawigacyjne" class="md:hidden w-10 h-10 inline-flex items-center justify-center rounded-md text-primary-foreground hover:bg-primary-foreground/10 transition">
+              <svg class="w-5 h-5"><use href="#icon-menu"></use></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="mobile-menu" class="hidden md:hidden bg-primary border-t border-primary-border">
+        <div class="px-5 py-3 space-y-1">
+          <a href="../index.html#o-nas" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">O Nas</a>
+          <a href="../index.html#sklep" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Wina i Ceny</a>
+          <a href="../index.html#nasze-wina" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Odmiany winogron</a>
+          <a href="../index.html#wydarzenia" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Wydarzenia</a>
+          <a href="../index.html#noclegi" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Noclegi</a>
+          <a href="../index.html#kontakt" class="block w-full text-left text-primary-foreground hover:bg-primary-foreground/10 px-3 py-2 rounded-md">Kontakt</a>
         </div>
       </div>
     </nav>
@@ -70,14 +174,14 @@
           <p>Winnica Kielna Góra leży w Kielnarowej, około 10 km od centrum Rzeszowa, na stoku o południowym nachyleniu. Pierwsze krzewy zasadziliśmy w 2020 roku, a gospodarujemy na jednym hektarze. Souvignier Gris jest jedną z siedmiu odmian, które tu uprawiamy — wszystkie dobrane pod kątem odporności i naszego klimatu.</p>
         </div>
 
-        <h2 class="font-serif text-2xl font-bold mb-5">Charakterystyka</h2>
+        <h2 class="font-serif text-2xl font-bold mb-5">Charakterystyka odmiany Souvignier Gris</h2>
         <ul class="space-y-2 mb-10">
           <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">odporna na choroby</span></li>
           <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">aromaty owoców pestkowych</span></li>
           <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="text-sm">dobra do win musujących</span></li>
         </ul>
 
-        <h2 class="font-serif text-2xl font-bold mb-5">Zdjęcia</h2>
+        <h2 class="font-serif text-2xl font-bold mb-5">Fotogaleria</h2>
         <div class="grid sm:grid-cols-2 gap-8 mb-12">
           <figure class="rounded-md overflow-hidden border border-card-border">
             <div class="aspect-[4/3]">
@@ -122,18 +226,6 @@
       </div>
     </footer>
   </div>
-
-  <!-- Menu witryny na końcu dokumentu: unikalna treść odmiany jest wyżej w źródle (SEO). -->
-  <nav aria-label="Menu witryny" class="bg-primary border-t border-primary-border">
-    <div class="max-w-5xl mx-auto px-5 py-4 grid grid-cols-3 gap-1 text-center justify-center sm:flex">
-      <a href="../index.html#o-nas" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">O Nas</a>
-      <a href="../index.html#nasze-wina" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Nasze Wina</a>
-      <a href="../index.html#sklep" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Cennik</a>
-      <a href="../index.html#wydarzenia" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Wydarzenia</a>
-      <a href="../index.html#noclegi" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Noclegi</a>
-      <a href="../index.html#kontakt" class="text-primary-foreground/90 hover:text-primary-foreground px-3 py-2 rounded-md">Kontakt</a>
-    </div>
-  </nav>
 
   <script src="../assets/js/produkty.js" defer></script>
   <script src="../assets/js/main.js" defer></script>

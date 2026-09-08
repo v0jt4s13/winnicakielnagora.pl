@@ -17,6 +17,10 @@
     padding-top: 2rem;
     padding-bottom: 2rem;
 } */
+a.text-primary-foreground.hover\:text-primary-foreground.px-3.py-2.rounded-md {
+    font-size: 0.8em;
+    text-wrap-mode: nowrap;
+}
 
 button#clear-filters {
     display: flex;
