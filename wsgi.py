@@ -47,12 +47,16 @@ app.wsgi_app = ObetnijPrzedrostek(app.wsgi_app)
 # Katalogiem statycznym jest caly katalog repozytorium, wiec bez tej listy publicznie
 # dostepne bylyby takze wsgi.py, AGENTS.md, TODO.md, tools/ oraz .git/ z cala historia.
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
-PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico", "favicon.svg"}
+PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico",
+                   "favicon.svg", "plan-startu.html"}
 # `data` nie ma tu wpisu celowo: /data/wina.json obsluguje osobna trasa, ktora czyta
 # plik roboczy spoza katalogu wdrozenia.
 KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "filmy"}
 # Z calego tools/ dostepne sa wylacznie te trzy pliki — i to za haslem (patrz PANEL_*).
 PLIKI_PANELU = {"tools/panel/panel.html", "tools/panel/panel.css", "tools/panel/panel.js"}
+# Serwowane publicznie, ale z X-Robots-Tag: noindex — wewnetrzna strona planu startu
+# ma byc osiagalna z linku, nie z wyszukiwarki (decyzja Wlasciciela 2026-09-08).
+PLIKI_NIEINDEKSOWANE = {"plan-startu.html"}
 
 
 def _publiczna(wzgledna: Path) -> bool:
@@ -496,6 +500,8 @@ def _oddaj(wzgledna: str):
     naglowek = CACHE_WG_ROZSZERZENIA.get(Path(wzgledna).suffix.lower())
     if naglowek:
         odpowiedz.headers["Cache-Control"] = naglowek
+    if wzgledna in PLIKI_NIEINDEKSOWANE:
+        odpowiedz.headers["X-Robots-Tag"] = "noindex, nofollow"
     return odpowiedz
 
 

@@ -133,6 +133,8 @@ PRZYPADKI = [
     ("tools/panel",                   "404.html",                    404),
     ("tools",                         "404.html",                    404),
     ("404.html",                      "404.html",                    200),
+    # wewnetrzna strona planu startu: serwowana, ale z X-Robots-Tag: noindex
+    ("plan-startu.html",              "plan-startu.html",            200),
 ]
 
 
