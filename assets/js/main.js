@@ -203,28 +203,33 @@ function initAgeGate() {
   const carouselSlides = [
     {
       filename: "agerestriction-under18-story-01.png",
-      title: "Składniki i proporcje",
-      description: "Dojrzałe, najlepiej ciemne winogrona. Na 1 kg owoców dodaj ok. 100-150 ml wody, a cukier - opcjonalnie - 0-100 g zależnie od ich słodyczy."
+      title: "1. Sok z winogron - składniki i proporcje",
+      description: "Zbierz dojrzałe, najlepiej ciemne winogrona. Na 1 kg owoców dodaj ok. 100-150 ml wody, a cukier - opcjonalnie - 0-100 g zależnie od ich słodyczy."
     },
     {
       filename: "agerestriction-under18-story-02.png",
-      title: "1. Przygotowanie owoców",
+      title: "2. Przygotowanie owoców winogron",
       description: "Oderwij winogrona od gałązek, odrzuć zepsute lub niedojrzałe owoce i dokładnie opłucz je w zimnej wodzie."
     },
     {
       filename: "agerestriction-under18-story-03.png",
-      title: "2. Gotowanie",
-      description: "Podgrzewaj owoce z niewielką ilością wody, rozgniataj je tłuczkiem i gotuj na małym ogniu około 10-15 minut, aż całkowicie się rozpadną."
+      title: "3. Gotowanie owoców, doprawianie i pasteryzacja",
+      description: "Podgrzewaj owoce z niewielką ilością wody, rozgniataj je tłuczkiem i gotuj na małym ogniu, aż całkowicie się rozpadną."
     },
     {
       filename: "agerestriction-under18-story-04.png",
-      title: "3. Filtrowanie",
-      description: "Przelej gorącą masę przez gęste sitko z gazą, zostaw do ostygnięcia i dokładnie wyciśnij pozostały miąższ."
+      title: "4. Poczekaj 10-5 min aż owoce się rozpadną",
+      description: "Podgrzewaj owoce z niewielką ilością wody, rozgniataj je tłuczkiem i gotuj na małym ogniu, aż całkowicie się rozpadną."
     },
     {
       filename: "agerestriction-under18-story-05.png",
-      title: "4. Doprawianie i 5. Pasteryzacja",
-      description: "W razie potrzeby dodaj cukier, gotuj sok 3-5 minut i rozlej do wyparzonych naczyń. Dla dłuższej trwałości pasteryzuj je w garnku przez 15 minut."
+      title: "5. Filtrowanie rozgotowanej masy owocowej",
+      description: "Przelej gorącą masę przez gęste sitko z gazą, zostaw do ostygnięcia i dokładnie wyciśnij pozostały miąższ."
+    },
+    {
+      filename: "agerestriction-under18-story-06.png",
+      title: "6. Degustuj i ciesz się smakiem",
+      description: "Teraz możesz się już zająć zaproszeniem znajomych na degustacją Twojego soku winogronowego."
     }
   ];
   const previouslyFocused = document.activeElement;
@@ -292,8 +297,8 @@ function initAgeGate() {
 
   const declineAge = () => {
     if (!carousel || carouselTimer !== null) return;
-    if (title) title.textContent = "Do zobaczenia w przyszłości";
-    if (description) description.textContent = "Wróć do nas, gdy będziesz pełnoletni.";
+    if (title) title.textContent = "Wróć do nas, gdy będziesz pełnoletni.";
+    if (description) description.textContent = "";
     if (underageDescription) underageDescription.hidden = false;
     if (message) message.hidden = true;
     if (confirmButton) confirmButton.hidden = true;

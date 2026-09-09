@@ -53,7 +53,7 @@
   {"@context":"https://schema.org","@type":"WebSite","name":"Winnica Kielna Góra","alternateName":"winnicakielnagora.pl","url":"https://winnicakielnagora.pl/","inLanguage":"pl-PL","description":"Rodzinna winnica w Kielnarowej pod Rzeszowem. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron."}
   </script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":["Organization","Winery"],"name":"Winnica Kielna Góra","url":"https://winnicakielnagora.pl/","logo":"https://winnicakielnagora.pl/favicon.svg","image":"https://winnicakielnagora.pl/attached_assets/photos/winnica-panorama-01.jpg","email":"kielnarowagora@gmail.com","telephone":"+48788058533","description":"Rodzinna winnica na południowym stoku w Kielnarowej, 10 km od Rzeszowa. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron.","address":{"@type":"PostalAddress","streetAddress":"Kielnarowa 303","postalCode":"36-020","addressLocality":"Tyczyn","addressRegion":"Podkarpackie","addressCountry":"PL"}}
+  {"@context":"https://schema.org","@type":["Organization","Winery"],"name":"Winnica Kielna Góra","url":"https://winnicakielnagora.pl/","logo":"https://winnicakielnagora.pl/attached_assets/logos/logo-w512-transparent.png","image":"https://winnicakielnagora.pl/attached_assets/photos/winnica-panorama-01.jpg","email":"kielnarowagora@gmail.com","telephone":"+48788058533","description":"Rodzinna winnica na południowym stoku w Kielnarowej, 10 km od Rzeszowa. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron.","address":{"@type":"PostalAddress","streetAddress":"Kielnarowa 303","postalCode":"36-020","addressLocality":"Tyczyn","addressRegion":"Podkarpackie","addressCountry":"PL"}}
   </script>
 </head>
 <body class="min-h-screen bg-background text-foreground">
@@ -139,13 +139,11 @@
 
   <div id="age-gate" class="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title" aria-describedby="age-gate-description">
     <div id="age-gate-card" class="age-gate__card">
-      <div class="age-gate__mark" aria-hidden="true">
-        <svg class="w-7 h-7"><use href="#icon-wine"></use></svg>
-      </div>
-      <p class="age-gate__eyebrow">Winnica Kielna Góra</p>
+      <!-- <img class="age-gate__logo" src="./attached_assets/logos/logo-1x1-bg-red.jpeg" alt="" width="1250" height="1250"> -->
+      <img class="age-gate__logo" src="./attached_assets/logos/logo-w512-transparent.png" alt="" width="1250" height="1250">
       <h1 id="age-gate-title" class="age-gate__title">Czy masz<br>ukończone 18 lat?</h1>
       <p id="age-gate-description" class="age-gate__description">Ta strona zawiera informacje o winie i jest przeznaczona wyłącznie dla osób pełnoletnich.</p>
-      <p id="age-gate-underage-description" class="age-gate__description" hidden>A tymczasem zobacz jak powstaje sok z winogron.</p>
+      <p id="age-gate-underage-description" class="age-gate__description fontweight800" hidden>A tymczasem zobacz jak powstaje sok z winogron.</p>
       <div class="age-gate__actions">
         <button id="age-gate-yes" type="button" class="btn-primary age-gate__confirm">Tak, mam skończone 18 lat</button>
         <button id="age-gate-no" type="button" class="age-gate__decline">Nie, nie mam 18 lat</button>
@@ -156,7 +154,7 @@
           <img id="age-gate-carousel-image" class="age-gate__carousel-image" width="1522" height="1033" decoding="async" alt="">
         </div>
         <div class="age-gate__carousel-meta">
-          <span id="age-gate-carousel-title">Składniki i proporcje</span>
+          <span id="age-gate-carousel-title">1. Składniki i proporcje</span>
           <span id="age-gate-carousel-counter">1 / 5</span>
         </div>
         <p id="age-gate-carousel-description" class="age-gate__carousel-description"></p>
@@ -168,10 +166,9 @@
     <nav class="sticky top-0 z-50 bg-primary border-b border-primary-border">
       <div class="max-w-7xl mx-auto px-5">
         <div class="flex items-center justify-between h-16">
-          <div class="flex items-center gap-3">
-            <svg class="w-6 h-6 text-primary-foreground"><use href="#icon-wine"></use></svg>
-            <span class="font-serif text-xl font-semibold text-primary-foreground">Winnica Kielna Góra</span>
-          </div>
+          <a href="./" class="site-logo site-logo--nav" aria-label="Winnica Kielna Góra">
+            <img src="./attached_assets/logos/logo-w512-transparent.png" alt="Winnica Kielna Góra" width="400" height="199">
+          </a>
           <div class="hidden md:flex items-center gap-1">
             <a href="#o-nas" data-scroll="#o-nas" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">O Nas</a>
             <a href="#sklep" data-scroll="#sklep" class="text-primary-foreground hover:text-primary-foreground px-3 py-2 rounded-md">Cennik win</a>
@@ -246,10 +243,9 @@
         <noscript><img src="./attached_assets/photos/hero/dzien.webp" alt="Winnica panorama" width="1534" height="1025" fetchpriority="high" decoding="async" class="absolute inset-0 w-full h-full object-cover"></noscript>
         <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
         <div class="relative h-full flex flex-col items-center justify-center text-center px-5 max-w-4xl mx-auto">
-          <div class="flex flex-col sm:flex-row items-center gap-3 mb-5">
-            <svg class="w-10 h-10 text-primary-foreground shrink-0"><use href="#icon-wine"></use></svg>
-            <h1 class="font-serif text-3xl md:text-6xl font-bold text-primary-foreground">Winnica Kielna Góra</h1>
-          </div>
+          <h1 class="hero-logo mb-5">
+            <img src="./attached_assets/logos/logo-w512-transparent.png" alt="Winnica Kielna Góra" width="400" height="199">
+          </h1>
           <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Kraftowe wina z połódniowych stoków podkarpacia.</p>
           <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
           <div class="flex flex-wrap gap-5 justify-center">
@@ -653,9 +649,8 @@
       <div class="max-w-7xl mx-auto px-5 py-12">
         <div class="grid md:grid-cols-4 gap-12 mb-12" data-reveal>
           <div>
-            <div class="flex items-center gap-2 mb-5">
-              <svg class="w-6 h-6"><use href="#icon-wine"></use></svg>
-              <span class="font-serif text-xl font-semibold">Winnica Kielna Góra</span>
+            <div class="site-logo site-logo--footer mb-5">
+              <img src="./attached_assets/logos/logo-w512-transparent.png" alt="Winnica Kielna Góra" width="400" height="199">
             </div>
             <p class="text-primary-foreground/80 text-sm mb-5">Wina i soki z jednohektarowej winnicy w Kielnarowej pod Rzeszowem. Pierwsze nasadzenia w 2020 roku.</p>
             <div class="flex gap-3">
