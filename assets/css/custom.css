@@ -1011,3 +1011,33 @@ body.cart-open #cart-panel {
 .wydarzenie-tresc {
   white-space: pre-line;
 }
+
+/* ── Sekcja #noclegi: formularz „szukaj terminu" ─────────────────────────────
+   Deep-link do karty obiektu na Booking.com natywnym GET-em (działa bez JS —
+   initNoclegi() tylko podpowiada daty). <input type="date"> i <select> nie
+   przyjmują sensownie klas z prebuilt bundla i są brzydkie natywnie, więc cały
+   wygląd i układ są tutaj. Tokeny motywu → czytelne we wszystkich 4 motywach
+   (w dark setTheme() ustawia color-scheme na <html>, więc kalendarz sam ciemnieje).
+   Wiersz na desktopie, kolumna < 640px. */
+.noclegi-form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 42rem; margin: 0 auto; text-align: left; }
+.noclegi-form__row { display: flex; flex-direction: column; gap: 0.75rem; }
+.noclegi-form__field { display: flex; flex-direction: column; gap: 0.35rem; flex: 1 1 auto; min-width: 0; }
+.noclegi-form__field > span { font-size: 0.8rem; font-weight: 600; color: hsl(var(--muted-foreground)); }
+
+.noclegi-form input[type="date"],
+.noclegi-form select {
+  height: 2.75rem; width: 100%; padding: 0 0.75rem; border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--background));
+  color: hsl(var(--foreground)); font: inherit; line-height: 2.75rem;
+  appearance: none; -webkit-appearance: none;
+}
+.noclegi-form input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.7; }
+.noclegi-form input[type="date"]:focus-visible,
+.noclegi-form select:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 1px; border-color: hsl(var(--ring)); }
+.noclegi-form .btn-primary { height: 2.75rem; white-space: nowrap; }
+
+@media (min-width: 640px) {
+  .noclegi-form__row { flex-direction: row; align-items: flex-end; }
+  .noclegi-form__field--adults { flex: 0 0 8.5rem; }
+  .noclegi-form .btn-primary { flex: 0 0 auto; }
+}

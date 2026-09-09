@@ -555,11 +555,60 @@
         <div class="max-w-7xl mx-auto px-5">
           <div class="text-center mb-12" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nocleg w winnicy</h2>
-            <p class="text-muted-foreground max-w-2xl mx-auto">Trzy pokoje w budynku winiarni, z widokiem na winorośl. Rezerwacja przez Booking.com</p>
+            <p class="text-muted-foreground max-w-2xl mx-auto">Trzy pokoje w budynku winiarni, z widokiem na winorośl. Wybierz termin i liczbę osób — przeniesiemy Cię do karty obiektu na Booking.com z wpisanym wyszukiwaniem.</p>
           </div>
-          <div class="text-center" data-reveal>
-            <!-- TODO: dodać rząd zdjęć 3 pokoi (grid md:grid-cols-3) nad przyciskiem, gdy będą materiały (TODO.md #15). -->
-            <a class="btn-primary" href="https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html" target="_blank" rel="noopener">Zarezerwuj na Booking</a>
+
+          <div class="max-w-2xl mx-auto rounded-md border border-card-border bg-card p-8" data-reveal>
+            <!-- TODO(#37 / #15): rząd zdjęć 3 pokoi nad formularzem, gdy będą materiały.
+                 Klasy `md:grid-cols-3` NIE MA w prebuilt bundlu — użyć `grid grid-cols-3 gap-3`.
+            <div class="grid grid-cols-3 gap-3 mb-8">
+              <img src="./attached_assets/photos/pokoj-01.jpg" alt="Pokój nr 1 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
+              <img src="./attached_assets/photos/pokoj-02.jpg" alt="Pokój nr 2 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
+              <img src="./attached_assets/photos/pokoj-03.jpg" alt="Pokój nr 3 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
+            </div>
+            -->
+
+            <form id="noclegi-form" class="noclegi-form"
+                  method="get"
+                  action="https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html"
+                  target="_blank" rel="noopener">
+              <div class="noclegi-form__row">
+                <label class="noclegi-form__field">
+                  <span>Przyjazd</span>
+                  <input type="date" name="checkin" autocomplete="off">
+                </label>
+                <label class="noclegi-form__field">
+                  <span>Wyjazd</span>
+                  <input type="date" name="checkout" autocomplete="off">
+                </label>
+                <label class="noclegi-form__field noclegi-form__field--adults">
+                  <span>Goście</span>
+                  <select name="group_adults">
+                    <option value="1">1 osoba</option>
+                    <option value="2" selected>2 osoby</option>
+                    <option value="3">3 osoby</option>
+                    <option value="4">4 osoby</option>
+                    <option value="5">5 osób</option>
+                    <option value="6">6 osób</option>
+                  </select>
+                </label>
+                <button type="submit" class="btn-primary">Szukaj na Booking</button>
+              </div>
+              <input type="hidden" name="no_rooms" value="1">
+              <input type="hidden" name="group_children" value="0">
+            </form>
+
+            <p class="text-sm text-muted-foreground mt-4">Rezerwację, dostępność i pełny cennik potwierdza obiekt na Booking.com.</p>
+
+            <!-- TODO(#37): gdy Właściciel poda dane — odkomentować i wypełnić. NIE wymyślać wartości.
+            <ul class="mt-4 grid sm:grid-cols-2 gap-3 text-sm text-muted-foreground">
+              <li>Śniadanie: …</li>
+              <li>Parking: …</li>
+              <li>Wi-Fi: …</li>
+              <li>Zwierzęta: …</li>
+            </ul>
+            <p class="mt-4 font-medium">Cena od <span>…</span> zł / noc</p>
+            -->
           </div>
         </div>
       </section>

@@ -11,7 +11,7 @@ Podział na trzy pliki:
   przenosisz ją tam (i dopisujesz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`).
 - **`TODO.maybefuture.md`** — sprawy związane ze sprzedażą online oraz świadomie zawieszone.
 
-Ostatnia aktualizacja: **2026-09-08**.
+Ostatnia aktualizacja: **2026-09-09**.
 
 ## Do dodania / uzupelnienia
 
@@ -140,17 +140,26 @@ Panel woła OpenAI (`/v1/chat/completions`) przez bibliotekę standardową Pytho
   błędów. Pierwsze użycie z realnym kluczem warto obejrzeć.
 - **Treść wychodzi na zewnątrz.** Panel ostrzega przy polu, ale warto o tym pamiętać.
 
-### 37. Noclegi — zdjęcia pokoi
+### 37. Noclegi — zdjęcia pokoi, udogodnienia, „cena od"
 
-Link do Booking **zrobione 2026-09-08**: przycisk „Zarezerwuj na Booking" w sekcji `#noclegi`
-jest aktywny, prowadzi do `https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html`
-(`target="_blank" rel="noopener"`). Adres podał Właściciel (wariant `.pl` ścieżki, którą
-przysłał jako `.en-gb`); nie udało się go zweryfikować przez WebFetch — Booking blokuje
-automatyczne pobrania — więc warto raz kliknąć ręcznie.
+Integracja z Booking **zrobione 2026-09-09**: sekcja `#noclegi` to karta oferty z natywnym
+`<form method="get">` (`#noclegi-form`) kierującym na `https://www.booking.com/hotel/pl/winnica-kielna-gora.pl.html`
+z parametrami `checkin` / `checkout` / `group_adults` / `no_rooms=1` / `group_children=0`.
+Działa bez JS; `initNoclegi()` w `main.js` podpowiada daty jutro/pojutrze i pilnuje
+`wyjazd > przyjazd`. Booking.com **nie daje właścicielowi obiektu osadzalnego widgetu** —
+osadzalne widgety są tylko przez Affiliate Partner Centre (obcy skrypt `aff.bstatic.com`),
+Właściciel świadomie tego nie chce (2026-09-09, GUARDRAILS #6).
 
-Zostaje: brak zdjęć pokoi (w zasobach nie ma kadru pokoju — patrz #15). Po otrzymaniu
-materiałów wgrać 3 zdjęcia do `attached_assets/photos/`, rząd `grid md:grid-cols-3` nad
-przyciskiem, `alt` po polsku, `width`/`height`, `loading="lazy"`.
+Zostaje:
+- **Zdjęcia 3 pokoi** (w zasobach nie ma kadru pokoju — patrz #15). Po materiałach wgrać
+  3 do `attached_assets/photos/`, odkomentować rząd w karcie: `grid grid-cols-3 gap-3`
+  (**nie** `md:grid-cols-3` — nie ma w prebuilt bundlu), `alt` po polsku, `width`/`height`,
+  `loading="lazy"`.
+- **Lista udogodnień i „cena od"** — komentowane sloty w karcie `#noclegi`, wypełnia
+  Właściciel; nie wymyślać wartości.
+- **Ręczne potwierdzenie** — Właściciel klika raz przez formularz i sprawdza, czy Booking
+  honoruje `checkin` / `checkout` / `group_adults` (WebFetch nie zweryfikuje — Booking
+  blokuje boty).
 
 ## Higiena repo
 

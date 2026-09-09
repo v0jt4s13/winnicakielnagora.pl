@@ -1120,6 +1120,45 @@ function initContactForm() {
   });
 }
 
+// Sekcja #noclegi: formularz to natywny GET na kartę obiektu Booking.com —
+// działa bez JS. Tu tylko podpowiadamy daty (jutro / pojutrze) i pilnujemy,
+// żeby wyjazd był po przyjeździe. Bez preventDefault — submit nawiguje sam.
+function initNoclegi() {
+  const form = qs("#noclegi-form");
+  if (!form) return;
+
+  const checkin = form.elements.checkin;
+  const checkout = form.elements.checkout;
+  if (!checkin || !checkout) return;
+
+  // Lokalna data ISO (YYYY-MM-DD) — toISOString() zwraca UTC i wieczorem cofa o dzień.
+  const isoLocal = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const addDays = (d, n) => {
+    const r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = isoLocal(addDays(today, 1));
+  const dayAfter = isoLocal(addDays(today, 2));
+
+  // Nie nadpisuj wartości wpisanej przez użytkownika (powrót z bfcache / „Wstecz").
+  if (!checkin.value) checkin.value = tomorrow;
+  if (!checkout.value) checkout.value = dayAfter;
+  checkin.min = tomorrow;
+  checkout.min = dayAfter;
+
+  checkin.addEventListener("change", () => {
+    if (!checkin.value) return;
+    const minOut = isoLocal(addDays(new Date(checkin.value + "T00:00:00"), 1));
+    checkout.min = minOut;
+    if (!checkout.value || checkout.value <= checkin.value) checkout.value = minOut;
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   initAgeGate();
   initStyleSwitcher();
@@ -1128,6 +1167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initScrollReveal();
   initNavigation();
   initContactForm();
+  initNoclegi();
   initPrzelacznikHero();
   initPrzelacznikSlowa();
 
