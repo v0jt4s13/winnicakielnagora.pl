@@ -44,7 +44,9 @@ const Produkty = {
   sciezkaZdjecia(wino, bazaZdjec = this.BAZA_ZDJEC) {
     if (wino.zdjecie_sklep) {
       const bazaZasobow = bazaZdjec.replace(/photos\/?$/, "");
-      const sciezka = String(wino.zdjecie_sklep).replace(/^\.?\/?attached_assets\//, "");
+      const sciezka = String(wino.zdjecie_sklep)
+        .replace(/^\/?\.?\/?attached_assets\//, "")
+        .replace(/^\/+/, "");
       return `${bazaZasobow}${this.escape(sciezka)}`;
     }
     return `${bazaZdjec}${this.escape(wino.zdjecie)}-sm.jpg`;

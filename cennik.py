@@ -68,9 +68,16 @@ def slugi_odmian() -> list[str]:
 
 def sciezka_zdjecia_sklep(wartosc: object) -> Path | None:
     """Zwraca istniejący obraz sklepu wyłącznie z katalogu attached_assets/."""
-    if not isinstance(wartosc, str) or not wartosc.strip() or Path(wartosc).is_absolute():
+    if not isinstance(wartosc, str) or not wartosc.strip():
         return None
     wartosc = wartosc.strip()
+    if wartosc.startswith("//"):
+        return None
+    if wartosc.startswith("/"):
+        # Starsze wpisy panelu zapisywały ścieżkę URL jako /butelki/plik.jpg.
+        wartosc = wartosc[1:]
+    elif Path(wartosc).is_absolute():
+        return None
     for prefiks in ("./attached_assets/", "attached_assets/"):
         if wartosc.startswith(prefiks):
             wartosc = wartosc[len(prefiks):]
