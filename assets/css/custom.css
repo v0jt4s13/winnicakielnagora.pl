@@ -130,6 +130,196 @@ p.mt-8 {
   display: none !important;
 }
 
+html.age-gate-pending,
+html.age-gate-pending body {
+  overflow: hidden;
+}
+
+html.age-gate-pending .age-gated-content {
+  visibility: hidden;
+}
+
+.age-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 1rem;
+  background: hsl(var(--primary) / 0.94);
+  color: hsl(var(--primary-foreground));
+}
+
+html.age-gate-pending .age-gate {
+  display: flex;
+}
+
+.age-gate__card {
+  width: min(100%, 34rem);
+  padding: clamp(1.75rem, 5vw, 3rem);
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 1.5rem 4rem hsl(var(--primary) / 0.28);
+  text-align: center;
+}
+
+.age-gate__card--carousel {
+  width: min(100%, 52rem);
+}
+
+.age-gate__mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.age-gate__eyebrow {
+  margin-bottom: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.age-gate__title {
+  margin-bottom: 1rem;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.age-gate__description {
+  max-width: 27rem;
+  margin: 0 auto;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.65;
+}
+
+.age-gate__actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.age-gate__actions button {
+  width: 100%;
+}
+
+.age-gate__decline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.age-gate__decline:hover {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--muted));
+}
+
+.age-gate button:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+
+.age-gate__message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--destructive) / 0.35);
+  border-radius: 0.5rem;
+  background: hsl(var(--destructive) / 0.08);
+  color: hsl(var(--destructive));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.age-gate__carousel {
+  margin-top: 2rem;
+  outline: none;
+}
+
+.age-gate__carousel:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 0.4rem;
+  border-radius: 0.75rem;
+}
+
+.age-gate__carousel-frame {
+  aspect-ratio: 1522 / 1033;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background: hsl(var(--muted));
+}
+
+.age-gate__carousel-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 1;
+  transition: opacity 0.36s ease;
+}
+
+.age-gate__carousel-image--fade {
+  opacity: 0;
+}
+
+.age-gate__carousel-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.age-gate__carousel-description {
+  margin: 0.75rem auto 0;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .age-gate__decline,
+  .age-gate__carousel-image {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .age-gate__card--carousel {
+    padding: 1rem;
+  }
+
+  .age-gate__carousel-meta {
+    font-size: 0.7rem;
+  }
+}
+
 .text-xs {
   font-size: 1.15rem;
   line-height: 1.6rem;
@@ -156,6 +346,15 @@ p.mt-8 {
 .btn-primary:active {
   transform: translateY(0);
   box-shadow: var(--shadow-sm);
+}
+
+.age-gate__confirm.btn-primary {
+  background: hsl(var(--age-gate-accent));
+  color: hsl(var(--age-gate-accent-foreground));
+}
+
+.age-gate__confirm.btn-primary:hover {
+  background: hsl(var(--age-gate-accent) / 0.88);
 }
 
 /* Przycisk-zaślepka: wygląda jak akcja, ale jeszcze nie działa (np. rezerwacja noclegu

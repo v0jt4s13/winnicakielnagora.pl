@@ -12,6 +12,14 @@
       });
     }, { once: true });
   </script>
+  <script>
+    try {
+      const ageVerified = window.localStorage.getItem("winnica-age-verified") === "true";
+      document.documentElement.classList.add(ageVerified ? "age-gate-verified" : "age-gate-pending");
+    } catch (_) {
+      document.documentElement.classList.add("age-gate-pending");
+    }
+  </script>
   <title>Winnica Kielna Góra — wina z Kielnarowej pod Rzeszowem</title>
   <meta name="description" content="Rodzinna winnica na południowym stoku w Kielnarowej, 10 km od Rzeszowa. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron.">
   <link rel="canonical" href="https://winnicakielnagora.pl/">
@@ -129,7 +137,34 @@
     </symbol>
   </svg>
 
-  <div class="min-h-screen flex flex-col">
+  <div id="age-gate" class="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title" aria-describedby="age-gate-description">
+    <div id="age-gate-card" class="age-gate__card">
+      <div class="age-gate__mark" aria-hidden="true">
+        <svg class="w-7 h-7"><use href="#icon-wine"></use></svg>
+      </div>
+      <p class="age-gate__eyebrow">Winnica Kielna Góra</p>
+      <h1 id="age-gate-title" class="age-gate__title">Czy masz<br>ukończone 18 lat?</h1>
+      <p id="age-gate-description" class="age-gate__description">Ta strona zawiera informacje o winie i jest przeznaczona wyłącznie dla osób pełnoletnich.</p>
+      <p id="age-gate-underage-description" class="age-gate__description" hidden>A tymczasem zobacz jak powstaje sok z winogron.</p>
+      <div class="age-gate__actions">
+        <button id="age-gate-yes" type="button" class="btn-primary age-gate__confirm">Tak, mam skończone 18 lat</button>
+        <button id="age-gate-no" type="button" class="age-gate__decline">Nie, nie mam 18 lat</button>
+      </div>
+      <p id="age-gate-message" class="age-gate__message" aria-live="polite" hidden></p>
+      <div id="age-gate-carousel" class="age-gate__carousel" aria-label="Historia Winnicy Kielna Góra" hidden>
+        <div class="age-gate__carousel-frame">
+          <img id="age-gate-carousel-image" class="age-gate__carousel-image" width="1522" height="1033" decoding="async" alt="">
+        </div>
+        <div class="age-gate__carousel-meta">
+          <span id="age-gate-carousel-title">Składniki i proporcje</span>
+          <span id="age-gate-carousel-counter">1 / 5</span>
+        </div>
+        <p id="age-gate-carousel-description" class="age-gate__carousel-description"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="age-gated-content min-h-screen flex flex-col">
     <nav class="sticky top-0 z-50 bg-primary border-b border-primary-border">
       <div class="max-w-7xl mx-auto px-5">
         <div class="flex items-center justify-between h-16">
@@ -218,7 +253,7 @@
           <p class="text-xl md:text-2xl text-primary-foreground/90 mb-8 max-w-2xl">Kraftowe wina z połódniowych stoków podkarpacia.</p>
           <p class="text-base md:text-lg text-primary-foreground/80 mb-12 max-w-xl">Odkryj wyjątkowy smak win produkowanych z pasją i dbałością o każdy detal</p>
           <div class="flex flex-wrap gap-5 justify-center">
-            <a href="#nasze-wina" data-scroll="#nasze-wina" class="btn-ghost">Poznaj nasze wina</a>
+            <a href="#sklep" data-scroll="#sklep" class="btn-ghost">Poznaj nasze wina</a>
           </div>
         </div>
       </section>

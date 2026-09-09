@@ -31,7 +31,9 @@ const themeStyles = {
       "--destructive": "0 84% 45%",
       "--destructive-foreground": "0 0% 98%",
       "--input": "0 0% 65%",
-      "--ring": "43 74% 49%"
+      "--ring": "43 74% 49%",
+      "--age-gate-accent": "43 74% 49%",
+      "--age-gate-accent-foreground": "0 100% 27%"
     }
   },
   modern: {
@@ -66,7 +68,9 @@ const themeStyles = {
       "--destructive": "0 84% 45%",
       "--destructive-foreground": "0 0% 98%",
       "--input": "0 0% 65%",
-      "--ring": "0 0% 30%"
+      "--ring": "0 0% 30%",
+      "--age-gate-accent": "0 0% 30%",
+      "--age-gate-accent-foreground": "0 0% 98%"
     }
   },
   rustic: {
@@ -101,7 +105,9 @@ const themeStyles = {
       "--destructive": "0 84% 45%",
       "--destructive-foreground": "0 0% 98%",
       "--input": "0 0% 65%",
-      "--ring": "35 60% 45%"
+      "--ring": "35 60% 45%",
+      "--age-gate-accent": "35 60% 45%",
+      "--age-gate-accent-foreground": "25 20% 15%"
     }
   },
   dark: {
@@ -136,7 +142,9 @@ const themeStyles = {
       "--destructive": "0 68% 46%",
       "--destructive-foreground": "0 0% 98%",
       "--input": "220 10% 35%",
-      "--ring": "38 70% 58%"
+      "--ring": "38 70% 58%",
+      "--age-gate-accent": "38 70% 58%",
+      "--age-gate-accent-foreground": "225 14% 8%"
     }
   }
 };
@@ -172,6 +180,147 @@ function stawkaVat() {
 
 const qs = (sel) => document.querySelector(sel);
 const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+
+function initAgeGate() {
+  const gate = qs("#age-gate");
+  if (!gate || document.documentElement.classList.contains("age-gate-verified")) {
+    if (gate) gate.hidden = true;
+    return;
+  }
+
+  const confirmButton = qs("#age-gate-yes");
+  const declineButton = qs("#age-gate-no");
+  const message = qs("#age-gate-message");
+  const title = qs("#age-gate-title");
+  const description = qs("#age-gate-description");
+  const underageDescription = qs("#age-gate-underage-description");
+  const card = qs("#age-gate-card");
+  const carousel = qs("#age-gate-carousel");
+  const carouselImage = qs("#age-gate-carousel-image");
+  const carouselTitle = qs("#age-gate-carousel-title");
+  const carouselDescription = qs("#age-gate-carousel-description");
+  const carouselCounter = qs("#age-gate-carousel-counter");
+  const carouselSlides = [
+    {
+      filename: "agerestriction-under18-story-01.png",
+      title: "Składniki i proporcje",
+      description: "Dojrzałe, najlepiej ciemne winogrona. Na 1 kg owoców dodaj ok. 100-150 ml wody, a cukier - opcjonalnie - 0-100 g zależnie od ich słodyczy."
+    },
+    {
+      filename: "agerestriction-under18-story-02.png",
+      title: "1. Przygotowanie owoców",
+      description: "Oderwij winogrona od gałązek, odrzuć zepsute lub niedojrzałe owoce i dokładnie opłucz je w zimnej wodzie."
+    },
+    {
+      filename: "agerestriction-under18-story-03.png",
+      title: "2. Gotowanie",
+      description: "Podgrzewaj owoce z niewielką ilością wody, rozgniataj je tłuczkiem i gotuj na małym ogniu około 10-15 minut, aż całkowicie się rozpadną."
+    },
+    {
+      filename: "agerestriction-under18-story-04.png",
+      title: "3. Filtrowanie",
+      description: "Przelej gorącą masę przez gęste sitko z gazą, zostaw do ostygnięcia i dokładnie wyciśnij pozostały miąższ."
+    },
+    {
+      filename: "agerestriction-under18-story-05.png",
+      title: "4. Doprawianie i 5. Pasteryzacja",
+      description: "W razie potrzeby dodaj cukier, gotuj sok 3-5 minut i rozlej do wyparzonych naczyń. Dla dłuższej trwałości pasteryzuj je w garnku przez 15 minut."
+    }
+  ];
+  const previouslyFocused = document.activeElement;
+  let carouselTimer = null;
+
+  const carouselSource = (slide) => `${KORZEN}attached_assets/photos/age-restriction/${slide.filename}`;
+
+  const stopCarousel = () => {
+    if (carouselTimer === null) return;
+    window.clearInterval(carouselTimer);
+    carouselTimer = null;
+  };
+
+  const startCarousel = () => {
+    if (!carousel || !carouselImage || carouselSlides.length === 0) return;
+
+    let slideIndex = 0;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const showSlide = (index, animate = true) => {
+      const update = () => {
+        const slide = carouselSlides[index];
+        carouselImage.src = carouselSource(slide);
+        carouselImage.alt = `${slide.title} - historia powstawania soku z winogron`;
+        if (carouselTitle) carouselTitle.textContent = slide.title;
+        if (carouselDescription) carouselDescription.textContent = slide.description;
+        if (carouselCounter) carouselCounter.textContent = `${index + 1} / ${carouselSlides.length}`;
+        carouselImage.classList.remove("age-gate__carousel-image--fade");
+      };
+
+      if (!animate || reducedMotion) {
+        update();
+        return;
+      }
+
+      carouselImage.classList.add("age-gate__carousel-image--fade");
+      window.setTimeout(update, 180);
+    };
+
+    carouselSlides.forEach((slide) => {
+      const image = new Image();
+      image.src = carouselSource(slide);
+    });
+    carousel.hidden = false;
+    carousel.tabIndex = 0;
+    card?.classList.add("age-gate__card--carousel");
+    showSlide(slideIndex, false);
+    carouselTimer = window.setInterval(() => {
+      slideIndex = (slideIndex + 1) % carouselSlides.length;
+      showSlide(slideIndex);
+    }, 3000);
+  };
+
+  const confirmAge = () => {
+    stopCarousel();
+    try {
+      localStorage.setItem("winnica-age-verified", "true");
+    } catch (_) {
+      // Brak dostepu do localStorage nie powinien blokowac jednorazowego wejscia.
+    }
+    document.documentElement.classList.remove("age-gate-pending");
+    document.documentElement.classList.add("age-gate-verified");
+    gate.hidden = true;
+    previouslyFocused?.focus?.();
+  };
+
+  const declineAge = () => {
+    if (!carousel || carouselTimer !== null) return;
+    if (title) title.textContent = "Do zobaczenia w przyszłości";
+    if (description) description.textContent = "Wróć do nas, gdy będziesz pełnoletni.";
+    if (underageDescription) underageDescription.hidden = false;
+    if (message) message.hidden = true;
+    if (confirmButton) confirmButton.hidden = true;
+    if (declineButton) declineButton.hidden = true;
+    startCarousel();
+    carousel.focus();
+  };
+
+  confirmButton?.addEventListener("click", confirmAge);
+  declineButton?.addEventListener("click", declineAge);
+  gate.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+    const focusable = [confirmButton, declineButton, carousel].filter((element) => element && !element.hidden);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  confirmButton?.focus();
+}
 
 function setTheme(style, persist = true) {
   const theme = themeStyles[style];
@@ -967,6 +1116,7 @@ function initContactForm() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  initAgeGate();
   initStyleSwitcher();
   initTimeTheme();
   initHeroImage();
