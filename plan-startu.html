@@ -324,7 +324,7 @@
         <ul class="done-list">
           <li><span class="tick">✓</span><span class="txt"><b>Sprzedaż online ukryta na start</b> <span>— sekcja sklepu i koszyk za flagą <code style="font-family:ui-monospace,monospace">SKLEP_WLACZONY</code>; kod koszyka i <code style="font-family:ui-monospace,monospace">data/wina.json</code> nietknięte, gotowe do przywrócenia.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Degustacje zdjęte z treści</b> <span>— karta „Co się u nas dzieje" (wyprzedaże roczników, pikniki, spotkania przy zbiorach) zamiast „Degustacje po umówieniu".</span></span></li>
-          <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>— trzy pokoje w budynku winiarni; przycisk „Zarezerwuj na Booking" aktywny (link od Właściciela, 2026-09-08), zostają zdjęcia pokoi.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>- trzy pokoje w budynku winiarni; aktywny jest zwykły link „Zarezerwuj na Booking" (link od Właściciela, 2026-09-08), bez osadzonego widgetu.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Nawigacja odchudzona</b> <span>— bez „Sklep" i „Degustacje", z „Noclegi"; hero z jednym przyciskiem; podstrony odmian kierują do kontaktu.</span></span></li>
         </ul>
       </div>
@@ -376,11 +376,11 @@
 
   <section id="plan">
     <h2>Co zostało przed publikacją</h2>
-    <p class="lede">16 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu — stan zapisuje się w tej przeglądarce.</p>
+    <p class="lede">17 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu - stan zapisuje się w tej przeglądarce.</p>
 
     <div class="progress-bar">
       <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-      <div class="progress-label" id="progress-label">0 / 22 przejrzanych</div>
+      <div class="progress-label" id="progress-label">0 / 23 przejrzanych</div>
     </div>
 
     <div class="chips" id="chips">
@@ -475,7 +475,7 @@
 
     <!-- DECYZJE -->
     <div class="plan-group" data-group="decision">
-      <div class="plan-group-head"><span class="bar" style="background:var(--decision)"></span><h3>Decyzja Właściciela</h3><span class="count">3 pozycje</span></div>
+      <div class="plan-group-head"><span class="bar" style="background:var(--decision)"></span><h3>Decyzja Właściciela</h3><span class="count">4 pozycje</span></div>
 
       <label class="row cat-decision" data-cat="decision" data-id="dec-1">
         <input type="checkbox">
@@ -503,6 +503,15 @@
         </span>
         <span class="badge">TODO #17</span>
       </label>
+
+      <label class="row cat-decision" data-cat="decision" data-id="dec-booking">
+        <input type="checkbox">
+        <span class="body">
+          <span class="title">Integracja Booking.com na stronie</span>
+          <span class="why">Obecnie działa zwykły link do oferty. Booking Button lub widget można dodać po otrzymaniu oficjalnego kodu z Extranetu; nie należy osadzać publicznej strony Booking.com przez przypadkowy iframe.</span>
+        </span>
+        <span class="badge">NOWE 2026-09-09</span>
+      </label>
     </div>
 
     <!-- CZEKA NA MATERIAŁY -->
@@ -513,7 +522,7 @@
         <input type="checkbox">
         <span class="body">
           <span class="title">Noclegi — zdjęcia 3 pokoi</span>
-          <span class="why">Przycisk „Zarezerwuj na Booking" jest już aktywny i prowadzi do oferty (link od Właściciela, 2026-09-08). Zostają zdjęcia trzech pokoi — czekają na sesję.</span>
+          <span class="why">Link „Zarezerwuj na Booking" działa i prowadzi do oferty (link od Właściciela, 2026-09-08). Zostają zdjęcia trzech pokoi - czekają na sesję.</span>
         </span>
         <span class="badge">TODO #37</span>
       </label>
