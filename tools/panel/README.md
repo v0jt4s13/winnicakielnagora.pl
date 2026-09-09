@@ -23,6 +23,10 @@ się od razu na dysku, więc przed wdrożeniem trzeba sprawdzić `git diff`, zro
 i wdrożenie. Generowanie wariantów wymaga biblioteki Pillow, używanej już przez
 `tools/optimize-photos.py`.
 
+Aby podpiąć obraz do produktu: wybierz produkt w sekcji „Pozycje”, znajdź obraz w galerii
+i kliknij „Użyj jako zdjęcia produktu w sklepie”. Ścieżka pojawi się w formularzu produktu;
+kliknięcie „Zapisz” utrwali ją w cenniku. „Wyczyść” usuwa przypisanie po zapisaniu.
+
 ## Czego panel nie robi
 
 - **Nie publikuje.** Po zapisie zmiany są tylko na dysku. Trzeba zrobić commit i wdrożenie.

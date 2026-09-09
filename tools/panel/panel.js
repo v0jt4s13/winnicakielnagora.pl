@@ -165,6 +165,7 @@ function renderFormularz() {
     const wartosc = wino[pole];
     f.elements[pole].value = wartosc === undefined || wartosc === null ? "" : wartosc;
   });
+  f.elements.zdjecie_sklep.value = wino.zdjecie_sklep || "";
   f.elements.dostepne.checked = wino.dostepne !== false;
 
   renderPodglad();
@@ -192,6 +193,9 @@ function zbierzFormularz() {
     if (surowa === "" && POLA_OPCJONALNE.includes(pole)) delete wino[pole];
     else wino[pole] = surowa === "" ? 0 : Number(surowa);
   });
+  const zdjecieSklep = f.elements.zdjecie_sklep.value.trim();
+  if (zdjecieSklep) wino.zdjecie_sklep = zdjecieSklep;
+  else delete wino.zdjecie_sklep;
   wino.dostepne = f.elements.dostepne.checked;
 }
 
@@ -553,6 +557,7 @@ function renderGaleria() {
           <p class="galeria-nazwa">${Produkty.escape(plik.nazwa)}</p>
           <p class="galeria-meta">${Produkty.escape(nazwaKatalogu(plik.katalog))}</p>
           <p class="galeria-meta">${wymiary} · ${rozmiarPliku(plik.rozmiar)}${wariant ? ` · <span class="galeria-wariant">${wariant}</span>` : ""}</p>
+          <button type="button" class="przycisk galeria-uzyj" data-galeria-uzyj="${Produkty.escape(plik.sciezka)}">Użyj jako zdjęcia produktu w sklepie</button>
         </div>
       </article>`;
   }).join("");
@@ -585,6 +590,22 @@ function pokazPodgladGalerii(sciezka) {
   qs("#galeria-modal-opis").textContent = `${nazwaKatalogu(plik.katalog)} · ${rozmiarPliku(plik.rozmiar)}`;
   qs("#galeria-modal").hidden = false;
   qs("#zamknij-galerie").focus();
+}
+
+function uzyjZdjeciaGalerii(sciezka) {
+  if (wybrany === null) {
+    pokazKomunikat("Najpierw wybierz produkt w sekcji „Pozycje”.", "ostrzezenie");
+    return;
+  }
+  const plik = galeriaStan.pliki.find((wpis) => wpis.sciezka === sciezka);
+  if (!plik) return;
+  const wino = cennik.wina[wybrany];
+  wino.zdjecie_sklep = plik.sciezka;
+  qs("#formularz").elements.zdjecie_sklep.value = plik.sciezka;
+  zbierzFormularz();
+  oznaczZmiane();
+  renderPodglad();
+  pokazKomunikat(`Podpięto „${Produkty.escape(plik.nazwa)}” do produktu „${Produkty.escape(wino.nazwa)}”. Kliknij „Zapisz”, aby utrwalić zmianę.`, "ostrzezenie");
 }
 
 function zamknijPodgladGalerii() {
@@ -665,12 +686,26 @@ qs("#galeria-grid").addEventListener("change", (e) => {
 });
 
 qs("#galeria-grid").addEventListener("click", (e) => {
+  const uzyj = e.target.closest("[data-galeria-uzyj]");
+  if (uzyj) {
+    e.preventDefault();
+    uzyjZdjeciaGalerii(uzyj.dataset.galeriaUzyj);
+    return;
+  }
   const podglad = e.target.closest("[data-galeria-podglad]");
   if (podglad) pokazPodgladGalerii(podglad.dataset.galeriaPodglad);
 });
 qs("#odswiez-galerie").addEventListener("click", wczytajGalerie);
 qs("#przenies-zdjecia").addEventListener("click", przeniesZaznaczone);
 qs("#utworz-warianty").addEventListener("click", utworzWarianty);
+qs("#wyczysc-zdjecie-sklep").addEventListener("click", () => {
+  if (wybrany === null) return;
+  qs("#formularz").elements.zdjecie_sklep.value = "";
+  zbierzFormularz();
+  oznaczZmiane();
+  renderPodglad();
+  pokazKomunikat("Usunięto zdjęcie produktu w sklepie z formularza. Kliknij „Zapisz”, aby utrwalić zmianę.", "ostrzezenie");
+});
 qs("#zamknij-galerie").addEventListener("click", zamknijPodgladGalerii);
 qs("#galeria-modal").addEventListener("click", (e) => {
   if (e.target.closest("[data-galeria-zamknij]")) zamknijPodgladGalerii();

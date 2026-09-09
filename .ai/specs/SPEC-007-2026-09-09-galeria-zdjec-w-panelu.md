@@ -126,6 +126,8 @@ Sukces zwraca liczbę utworzonych i pominiętych plików. Każdy wariant ma nazw
 - Filtr katalogu, zaznaczanie wielu kart, wybór katalogu docelowego i wybór wariantów
   są dostępne bez użycia `alert()` lub `confirm()`.
 - Karta pokazuje miniaturę obrazu, nazwę, katalog, wymiary i rozmiar pliku.
+- Przycisk przy obrazie „Użyj jako zdjęcia produktu w sklepie” przypisuje go do
+  aktualnie wybranego produktu; zmiana trafia do cennika dopiero po kliknięciu „Zapisz”.
 - Na wąskim ekranie akcje zawijają się, a siatka przechodzi na jedną kolumnę.
 
 ## Implementation Checklist
@@ -134,6 +136,7 @@ Sukces zwraca liczbę utworzonych i pominiętych plików. Każdy wariant ma nazw
 - [x] `tools/panel/serwer.py` - lokalne endpointy i statyki `attached_assets`
 - [x] `wsgi.py` - zabezpieczone endpointy produkcyjne
 - [x] `panel.html`, `panel.css`, `panel.js` - galeria, podgląd i akcje
+- [x] `panel.js` - przypisanie obrazu z galerii do `zdjecie_sklep` wybranego produktu
 - [x] testy bezpieczeństwa ścieżek, przenoszenia i wariantów
 - [x] aktualizacja README panelu
 
@@ -142,3 +145,4 @@ Sukces zwraca liczbę utworzonych i pominiętych plików. Każdy wariant ma nazw
 ### 2026-09-09
 - Pierwsza specyfikacja galerii zdjęć i operacji na plikach w `attached_assets/`.
 - Zaimplementowano galerię, przenoszenie plików i warianty `-sm` oraz `-thumb`.
+- Dodano przypisywanie obrazu z galerii do aktualnie wybranego produktu sklepu.
