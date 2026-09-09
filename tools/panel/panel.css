@@ -265,3 +265,87 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .stan-aktywne { color: var(--sukces); }
 .stan-przyszle { color: var(--ostrzezenie); }
 .stan-zakonczone { color: var(--przygaszony); }
+
+/* --- galeria ------------------------------------------------------------- */
+.galeria-filtry,
+.galeria-operacje {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+.galeria-filtry label,
+.galeria-operacje label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--przygaszony);
+  font-size: 0.8rem;
+}
+.galeria-filtry select,
+.galeria-operacje select {
+  min-width: 220px;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--ramka);
+  border-radius: 6px;
+  background: var(--karta);
+  color: var(--tekst);
+  font: inherit;
+}
+.galeria-filtry .podpowiedz { margin: 0 0 0.55rem; }
+.galeria-operacje { align-items: center; padding: 0.8rem; background: var(--tlo); border: 1px solid var(--ramka); border-radius: 8px; }
+.galeria-etykieta { color: var(--przygaszony); font-size: 0.85rem; }
+.galeria-checkbox { flex-direction: row !important; align-items: center; color: var(--tekst) !important; }
+.galeria-checkbox input { width: auto; }
+.galeria-separator { width: 1px; height: 1.8rem; background: var(--ramka); }
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1rem;
+}
+.galeria-karta {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ramka);
+  border-radius: 8px;
+  background: var(--karta);
+}
+.galeria-karta.wybrana { border-color: var(--akcent); box-shadow: 0 0 0 2px var(--akcent); }
+.galeria-zaznacz {
+  position: absolute;
+  z-index: 1;
+  top: 0.55rem;
+  left: 0.55rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--akcent);
+}
+.galeria-obraz {
+  display: block;
+  width: 100%;
+  height: 150px;
+  padding: 0;
+  border: 0;
+  background: var(--tlo);
+  cursor: zoom-in;
+}
+.galeria-obraz img { width: 100%; height: 100%; object-fit: contain; }
+.galeria-dane { padding: 0.7rem; }
+.galeria-nazwa { margin: 0 0 0.3rem; overflow-wrap: anywhere; font-weight: 600; font-size: 0.85rem; }
+.galeria-meta { margin: 0; color: var(--przygaszony); font-size: 0.75rem; }
+.galeria-wariant { color: var(--ostrzezenie); }
+.galeria-modal[hidden] { display: none; }
+.galeria-modal { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 1.5rem; }
+.galeria-modal-tlo { position: absolute; inset: 0; background: rgb(0 0 0 / 0.7); }
+.galeria-modal-tresc { position: relative; z-index: 1; display: flex; flex-direction: column; max-width: min(1000px, 100%); max-height: 100%; padding: 1rem; border: 1px solid var(--ramka); border-radius: 8px; background: var(--karta); }
+.galeria-modal-naglowek { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; }
+.galeria-modal-naglowek h2 { margin: 0; font-size: 1rem; overflow-wrap: anywhere; }
+.galeria-modal img { display: block; max-width: 100%; max-height: 72vh; object-fit: contain; background: var(--tlo); }
+.galeria-modal .podpowiedz { margin: 0.7rem 0 0; }
+
+@media (max-width: 600px) {
+  .galeria-grid { grid-template-columns: 1fr; }
+  .galeria-separator { display: none; }
+  .galeria-operacje > * { max-width: 100%; }
+}

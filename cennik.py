@@ -70,6 +70,13 @@ def sciezka_zdjecia_sklep(wartosc: object) -> Path | None:
     """Zwraca istniejący obraz sklepu wyłącznie z katalogu attached_assets/."""
     if not isinstance(wartosc, str) or not wartosc.strip() or Path(wartosc).is_absolute():
         return None
+    wartosc = wartosc.strip()
+    for prefiks in ("./attached_assets/", "attached_assets/"):
+        if wartosc.startswith(prefiks):
+            wartosc = wartosc[len(prefiks):]
+            break
+    if not wartosc:
+        return None
     zasoby = (PROJEKT / "attached_assets").resolve()
     kandydat = (zasoby / wartosc).resolve()
     if not kandydat.is_relative_to(zasoby):

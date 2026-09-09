@@ -200,6 +200,63 @@
       </form>
     </section>
 
+    <section class="sekcja" id="sekcja-galerii">
+      <div class="naglowek-sekcji">
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="true" aria-controls="cialo-galerii">
+            <span class="strzalka" aria-hidden="true"></span>Galeria zdjęć
+          </button>
+          <span id="licznik-galerii" class="licznik"></span>
+        </h2>
+        <div class="akcje-sekcji">
+          <button type="button" id="odswiez-galerie" class="przycisk">Odśwież</button>
+        </div>
+      </div>
+      <div class="cialo-sekcji" id="cialo-galerii">
+        <p class="podpowiedz">
+          Obrazy są pogrupowane według katalogów w <code>attached_assets/</code>.
+          Operacje na plikach zapisują się od razu na dysku.
+        </p>
+        <div class="galeria-filtry">
+          <label>Katalog
+            <select id="galeria-katalog"></select>
+          </label>
+          <span id="galeria-zaznaczenie" class="podpowiedz"></span>
+        </div>
+        <div class="galeria-operacje">
+          <label>Przenieś do
+            <select id="galeria-cel"></select>
+          </label>
+          <button type="button" id="przenies-zdjecia" class="przycisk" disabled>Przenieś zaznaczone</button>
+          <span class="galeria-separator" aria-hidden="true"></span>
+          <span class="galeria-etykieta">Utwórz warianty:</span>
+          <label class="galeria-checkbox">
+            <input type="checkbox" id="wariant-sm" checked>
+            <span>-sm (600 px)</span>
+          </label>
+          <label class="galeria-checkbox">
+            <input type="checkbox" id="wariant-thumb" checked>
+            <span>-thumb (300 px)</span>
+          </label>
+          <button type="button" id="utworz-warianty" class="przycisk" disabled>Utwórz warianty</button>
+        </div>
+        <div id="galeria-grid" class="galeria-grid" aria-live="polite"></div>
+        <p id="galeria-pusto" class="pusto" hidden>Nie znaleziono obrazów w tym katalogu.</p>
+      </div>
+    </section>
+
+    <div id="galeria-modal" class="galeria-modal" hidden role="dialog" aria-modal="true" aria-labelledby="galeria-modal-tytul">
+      <div class="galeria-modal-tlo" data-galeria-zamknij></div>
+      <div class="galeria-modal-tresc">
+        <div class="galeria-modal-naglowek">
+          <h2 id="galeria-modal-tytul">Podgląd zdjęcia</h2>
+          <button type="button" id="zamknij-galerie" class="przycisk">Zamknij</button>
+        </div>
+        <img id="galeria-modal-obraz" alt="">
+        <p id="galeria-modal-opis" class="podpowiedz"></p>
+      </div>
+    </div>
+
     <section class="sekcja">
       <div class="naglowek-sekcji">
         <h2>

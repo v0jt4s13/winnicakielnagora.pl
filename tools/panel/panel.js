@@ -16,6 +16,9 @@ let zdjecia = [];
 let odmiany = [];
 let wybrany = null; // indeks edytowanej pozycji
 let zmienione = false;
+let galeriaStan = { katalogi: [], pliki: [] };
+let galeriaKatalog = "";
+let galeriaZaznaczone = new Set();
 
 // Wydarzenia to drugi, niezalezny plik danych — wlasny stan i wlasny zapis.
 let wydarzenia = [];
@@ -482,6 +485,201 @@ qs("#odrzuc").addEventListener("click", async () => {
 });
 
 
+// --- galeria -------------------------------------------------------------
+
+function nazwaKatalogu(sciezka) {
+  return sciezka ? `attached_assets/${sciezka}` : "attached_assets (główny)";
+}
+
+function adresZasobu(sciezka) {
+  return `../../attached_assets/${sciezka.split("/").map(encodeURIComponent).join("/")}`;
+}
+
+function rozmiarPliku(bajty) {
+  if (bajty < 1024) return `${bajty} B`;
+  if (bajty < 1024 * 1024) return `${(bajty / 1024).toFixed(0)} KB`;
+  return `${(bajty / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function wariantPliku(nazwa) {
+  const wynik = nazwa.match(/-(sm|thumb)\.[^.]+$/i);
+  return wynik ? `-${wynik[1]}` : "";
+}
+
+function ustawOpcjeKatalogow() {
+  const katalogi = galeriaStan.katalogi || [];
+  const filtr = qs("#galeria-katalog");
+  const cel = qs("#galeria-cel");
+  const poprzedniCel = cel.value;
+  filtr.innerHTML = `<option value="">Wszystkie katalogi</option>` +
+    katalogi.map((katalog) => `<option value="${Produkty.escape(katalog)}">${Produkty.escape(nazwaKatalogu(katalog))}</option>`).join("");
+  cel.innerHTML = katalogi
+    .map((katalog) => `<option value="${Produkty.escape(katalog)}">${Produkty.escape(nazwaKatalogu(katalog))}</option>`)
+    .join("");
+  filtr.value = galeriaKatalog;
+  cel.value = katalogi.includes(poprzedniCel) ? poprzedniCel : "";
+}
+
+function odswiezAkcjeGalerii(liczba) {
+  qs("#galeria-zaznaczenie").textContent = liczba
+    ? `Zaznaczono: ${liczba}`
+    : "Zaznacz obrazy, aby je przenieść albo utworzyć warianty.";
+  qs("#przenies-zdjecia").disabled = liczba === 0;
+  qs("#utworz-warianty").disabled = liczba === 0;
+}
+
+function renderGaleria() {
+  ustawOpcjeKatalogow();
+  const widoczne = galeriaStan.pliki.filter((plik) =>
+    !galeriaKatalog || plik.katalog === galeriaKatalog
+  );
+  const grid = qs("#galeria-grid");
+  qs("#licznik-galerii").textContent = `(${widoczne.length} obrazów)`;
+  qs("#galeria-pusto").hidden = widoczne.length > 0;
+  grid.innerHTML = widoczne.map((plik) => {
+    const wybranyPlik = galeriaZaznaczone.has(plik.sciezka);
+    const wymiary = plik.szerokosc && plik.wysokosc
+      ? `${plik.szerokosc} × ${plik.wysokosc} px`
+      : "wymiary niedostępne";
+    const wariant = wariantPliku(plik.nazwa);
+    return `
+      <article class="galeria-karta${wybranyPlik ? " wybrana" : ""}">
+        <input class="galeria-zaznacz" type="checkbox" data-galeria-zaznacz="${Produkty.escape(plik.sciezka)}"
+          aria-label="Zaznacz ${Produkty.escape(plik.nazwa)}"${wybranyPlik ? " checked" : ""}>
+        <button type="button" class="galeria-obraz" data-galeria-podglad="${Produkty.escape(plik.sciezka)}">
+          <img src="${adresZasobu(plik.sciezka)}" alt="${Produkty.escape(plik.nazwa)}" loading="lazy">
+        </button>
+        <div class="galeria-dane">
+          <p class="galeria-nazwa">${Produkty.escape(plik.nazwa)}</p>
+          <p class="galeria-meta">${Produkty.escape(nazwaKatalogu(plik.katalog))}</p>
+          <p class="galeria-meta">${wymiary} · ${rozmiarPliku(plik.rozmiar)}${wariant ? ` · <span class="galeria-wariant">${wariant}</span>` : ""}</p>
+        </div>
+      </article>`;
+  }).join("");
+  odswiezAkcjeGalerii(galeriaZaznaczone.size);
+}
+
+async function wczytajGalerie() {
+  try {
+    const odp = await fetch("api/galeria-wczytaj");
+    const dane = await odp.json();
+    if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
+    galeriaStan = {
+      katalogi: Array.isArray(dane.katalogi) ? dane.katalogi : [],
+      pliki: Array.isArray(dane.pliki) ? dane.pliki : [],
+    };
+    const istniejace = new Set(galeriaStan.pliki.map((plik) => plik.sciezka));
+    galeriaZaznaczone = new Set([...galeriaZaznaczone].filter((plik) => istniejace.has(plik)));
+    renderGaleria();
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się wczytać galerii: ${Produkty.escape(blad.message)}`, "blad");
+  }
+}
+
+function pokazPodgladGalerii(sciezka) {
+  const plik = galeriaStan.pliki.find((wpis) => wpis.sciezka === sciezka);
+  if (!plik) return;
+  qs("#galeria-modal-tytul").textContent = plik.nazwa;
+  qs("#galeria-modal-obraz").src = adresZasobu(plik.sciezka);
+  qs("#galeria-modal-obraz").alt = plik.nazwa;
+  qs("#galeria-modal-opis").textContent = `${nazwaKatalogu(plik.katalog)} · ${rozmiarPliku(plik.rozmiar)}`;
+  qs("#galeria-modal").hidden = false;
+  qs("#zamknij-galerie").focus();
+}
+
+function zamknijPodgladGalerii() {
+  qs("#galeria-modal").hidden = true;
+  qs("#galeria-modal-obraz").removeAttribute("src");
+}
+
+function wybranePlikiGalerii() {
+  return [...galeriaZaznaczone];
+}
+
+async function przeniesZaznaczone() {
+  const pliki = wybranePlikiGalerii();
+  if (!pliki.length) return;
+  const przycisk = qs("#przenies-zdjecia");
+  przycisk.disabled = true;
+  try {
+    const odp = await fetch("api/galeria-przenies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pliki, katalog: qs("#galeria-cel").value }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) throw new Error(wynik.komunikat || `HTTP ${odp.status}`);
+    galeriaZaznaczone.clear();
+    await wczytajGalerie();
+    pokazKomunikat(`✓ Przeniesiono ${wynik.przeniesiono} obrazów. Zmiana jest zapisana na dysku.`, "sukces");
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się przenieść obrazów: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    przycisk.disabled = false;
+  }
+}
+
+async function utworzWarianty() {
+  const warianty = [];
+  if (qs("#wariant-sm").checked) warianty.push("sm");
+  if (qs("#wariant-thumb").checked) warianty.push("thumb");
+  const pliki = wybranePlikiGalerii();
+  if (!pliki.length) return;
+  if (!warianty.length) {
+    pokazKomunikat("Wybierz co najmniej jeden wariant: -sm albo -thumb.", "ostrzezenie");
+    return;
+  }
+  const przycisk = qs("#utworz-warianty");
+  przycisk.disabled = true;
+  try {
+    const odp = await fetch("api/galeria-warianty", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pliki, warianty }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) throw new Error(wynik.komunikat || `HTTP ${odp.status}`);
+    galeriaZaznaczone.clear();
+    await wczytajGalerie();
+    const pominieto = wynik.pominieto ? ` Pominięto istniejących: ${wynik.pominieto}.` : "";
+    pokazKomunikat(`✓ Utworzono wariantów: ${wynik.utworzono}.${pominieto}`, "sukces");
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się utworzyć wariantów: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    przycisk.disabled = false;
+  }
+}
+
+qs("#galeria-katalog").addEventListener("change", (e) => {
+  galeriaKatalog = e.target.value;
+  renderGaleria();
+});
+
+qs("#galeria-grid").addEventListener("change", (e) => {
+  const checkbox = e.target.closest("[data-galeria-zaznacz]");
+  if (!checkbox) return;
+  const sciezka = checkbox.dataset.galeriaZaznacz;
+  if (checkbox.checked) galeriaZaznaczone.add(sciezka);
+  else galeriaZaznaczone.delete(sciezka);
+  renderGaleria();
+});
+
+qs("#galeria-grid").addEventListener("click", (e) => {
+  const podglad = e.target.closest("[data-galeria-podglad]");
+  if (podglad) pokazPodgladGalerii(podglad.dataset.galeriaPodglad);
+});
+qs("#odswiez-galerie").addEventListener("click", wczytajGalerie);
+qs("#przenies-zdjecia").addEventListener("click", przeniesZaznaczone);
+qs("#utworz-warianty").addEventListener("click", utworzWarianty);
+qs("#zamknij-galerie").addEventListener("click", zamknijPodgladGalerii);
+qs("#galeria-modal").addEventListener("click", (e) => {
+  if (e.target.closest("[data-galeria-zamknij]")) zamknijPodgladGalerii();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !qs("#galeria-modal").hidden) zamknijPodgladGalerii();
+});
+
+
 // --- wydarzenia -----------------------------------------------------------
 const POLA_WYDARZENIA = ["tytul", "tresc", "data_od", "data_do", "data_publikacji_od", "zdjecie"];
 const POLA_OPCJONALNE_WYDARZENIA = ["data_publikacji_od", "zdjecie"];
@@ -710,4 +908,4 @@ window.addEventListener("beforeunload", (e) => {
 
 // Sekwencyjnie, nie rownolegle: formularz wydarzenia buduje <select> ze zdjeciami
 // z listy, ktora przychodzi razem z cennikiem.
-wczytaj().then(wczytajWydarzenia);
+wczytaj().then(wczytajWydarzenia).then(wczytajGalerie);

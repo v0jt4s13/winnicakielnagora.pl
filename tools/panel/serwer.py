@@ -26,13 +26,14 @@ from pathlib import Path
 PROJEKT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJEKT))
 import cennik  # noqa: E402  (import po ustaleniu sciezki projektu)
+import galeria  # noqa: E402
 import wydarzenia  # noqa: E402
 
 PANEL = PROJEKT / "tools" / "panel"
 CENNIK = cennik.CENNIK
 KOPIA = cennik.KOPIA
 ZDJECIA = cennik.ZDJECIA
-BUTELKI = PROJEKT / "attached_assets" / "butelki"
+ZASOBY = galeria.ZASOBY
 
 ADRES = "127.0.0.1"
 MAX_ZADANIE = 2 * 1024 * 1024  # cennik to kilkadziesiat kB; wiecej znaczy blad albo naduzycie
@@ -46,7 +47,7 @@ POJEDYNCZE_PLIKI = {
 KATALOGI = {
     "/photos/": ZDJECIA,
     "/attached_assets/photos/": ZDJECIA,
-    "/attached_assets/butelki/": BUTELKI,
+    "/attached_assets/": ZASOBY,
     "/": PANEL,
 }
 
@@ -56,7 +57,11 @@ TYPY = {
     ".css": "text/css; charset=utf-8",
     ".json": "application/json; charset=utf-8",
     ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
     ".svg": "image/svg+xml",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
 }
 
 
@@ -201,15 +206,15 @@ class Panel(BaseHTTPRequestHandler):
         elif sciezka.startswith("/attached_assets/photos/"):
             # Ta sama sciezka, ktorej panel uzywa na produkcji — dziala w obu miejscach.
             kandydat = ZDJECIA / sciezka[len("/attached_assets/photos/"):]
-        elif sciezka.startswith("/attached_assets/butelki/"):
-            kandydat = BUTELKI / sciezka[len("/attached_assets/butelki/"):]
+        elif sciezka.startswith("/attached_assets/"):
+            kandydat = ZASOBY / sciezka[len("/attached_assets/"):]
         else:
             kandydat = PANEL / sciezka.lstrip("/")
 
         # resolve() rozwija dowiazania symboliczne PRZED sprawdzeniem — samo
         # obciecie ".." nie wystarcza.
         kandydat = kandydat.resolve()
-        dozwolone = [p.resolve() for p in (PANEL, ZDJECIA, BUTELKI)]
+        dozwolone = [p.resolve() for p in (PANEL, ZASOBY)]
         dozwolone += [p.resolve() for p in POJEDYNCZE_PLIKI.values()]
         pasuje = any(kandydat == p or (p.is_dir() and kandydat.is_relative_to(p))
                      for p in dozwolone)
@@ -244,6 +249,9 @@ class Panel(BaseHTTPRequestHandler):
                     "ok": False,
                     "komunikat": f"data/wydarzenia.json ma błąd składni: {blad}"})
 
+        if sciezka == "/api/galeria-wczytaj":
+            return self._json(200, galeria.stan())
+
         plik = self._plik_dozwolony(sciezka)
         if not plik:
             return self._json(404, {"ok": False, "komunikat": "Nie ma takiego pliku"})
@@ -253,7 +261,8 @@ class Panel(BaseHTTPRequestHandler):
         if not self._lokalny():
             return self._json(403, {"ok": False, "komunikat": "Panel działa tylko lokalnie"})
         sciezka = self._bez_prefiksu(self.path.split("?")[0])
-        if sciezka not in ("/api/zapisz", "/api/opisz", "/api/wydarzenia-zapisz"):
+        if sciezka not in ("/api/zapisz", "/api/opisz", "/api/wydarzenia-zapisz",
+                           "/api/galeria-przenies", "/api/galeria-warianty"):
             return self._json(404, {"ok": False, "komunikat": "Nieznany adres"})
         if not self._origin_ok():
             return self._json(403, {"ok": False, "komunikat": "Niedozwolone źródło żądania"})
@@ -267,6 +276,24 @@ class Panel(BaseHTTPRequestHandler):
             dane = json.loads(self.rfile.read(dlugosc).decode("utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError) as blad:
             return self._json(400, {"ok": False, "bledy": [{"pozycja": None, "pole": None, "komunikat": str(blad)}]})
+
+        if sciezka == "/api/galeria-przenies":
+            try:
+                liczba = galeria.przenies(dane.get("pliki"), dane.get("katalog"))
+            except ValueError as blad:
+                return self._json(400, {"ok": False, "komunikat": str(blad)})
+            except OSError as blad:
+                return self._json(500, {"ok": False, "komunikat": f"Nie udało się przenieść plików: {blad}"})
+            return self._json(200, {"ok": True, "przeniesiono": liczba})
+
+        if sciezka == "/api/galeria-warianty":
+            try:
+                wynik = galeria.utworz_warianty(dane.get("pliki"), dane.get("warianty"))
+            except ValueError as blad:
+                return self._json(400, {"ok": False, "komunikat": str(blad)})
+            except (OSError, RuntimeError) as blad:
+                return self._json(500, {"ok": False, "komunikat": str(blad)})
+            return self._json(200, {"ok": True, **wynik})
 
         if sciezka == "/api/opisz":
             wynik, komunikat, kod = przygotuj_opis(

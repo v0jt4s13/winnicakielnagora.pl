@@ -9,12 +9,25 @@ python3 tools/panel/serwer.py --port 9000
 
 Zatrzymanie: `Ctrl+C`. Panel nie wymaga instalowania niczego — działa na samym Pythonie.
 
+## Galeria zdjęć
+
+Sekcja „Galeria zdjęć” pokazuje obrazy z całego `attached_assets/`, pogrupowane według
+katalogów. Można zaznaczyć kilka plików, przenieść je do istniejącego katalogu oraz
+utworzyć warianty w tym samym katalogu:
+
+- `-sm` - dłuższy bok 600 px, do kart i mniejszych widoków,
+- `-thumb` - dłuższy bok 300 px, do miniaturek.
+
+Warianty nie nadpisują istniejących plików. Przenoszenie i tworzenie wariantów zapisuje
+się od razu na dysku, więc przed wdrożeniem trzeba sprawdzić `git diff`, zrobić commit
+i wdrożenie. Generowanie wariantów wymaga biblioteki Pillow, używanej już przez
+`tools/optimize-photos.py`.
+
 ## Czego panel nie robi
 
 - **Nie publikuje.** Po zapisie zmiany są tylko na dysku. Trzeba zrobić commit i wdrożenie.
 - **Nie edytuje stron odmian** (`wina/*.html`), sekcji „O nas", kontaktu ani wydarzeń.
-- **Nie wgrywa zdjęć.** Wybiera spośród plików w `attached_assets/photos/`. Nowe zdjęcia
-  dokłada `python3 tools/optimize-photos.py`.
+- **Nie wgrywa zdjęć.** Nowe zdjęcia trzeba dodać do `attached_assets/` poza panelem.
 
 ## Panel na produkcji (za hasłem)
 

@@ -10,6 +10,7 @@ from pathlib import Path
 from flask import Flask, Response, request, send_from_directory
 
 import cennik
+import galeria
 import wydarzenia
 
 BASE = Path(__file__).parent
@@ -288,6 +289,33 @@ def panel_api(akcja: str):
             return _json(cennik.stan_poczatkowy())
         except json.JSONDecodeError as blad:
             return _json({"ok": False, "komunikat": f"data/wina.json ma błąd składni: {blad}"}, 500)
+
+    if akcja == "galeria-wczytaj" and request.method == "GET":
+        return _json(galeria.stan())
+
+    if akcja == "galeria-przenies" and request.method == "POST":
+        dane = request.get_json(silent=True)
+        if not isinstance(dane, dict):
+            return _json({"ok": False, "komunikat": "Nieczytelne żądanie"}, 400)
+        try:
+            liczba = galeria.przenies(dane.get("pliki"), dane.get("katalog"))
+        except ValueError as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 400)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat": f"Nie udało się przenieść plików: {blad}"}, 500)
+        return _json({"ok": True, "przeniesiono": liczba})
+
+    if akcja == "galeria-warianty" and request.method == "POST":
+        dane = request.get_json(silent=True)
+        if not isinstance(dane, dict):
+            return _json({"ok": False, "komunikat": "Nieczytelne żądanie"}, 400)
+        try:
+            wynik = galeria.utworz_warianty(dane.get("pliki"), dane.get("warianty"))
+        except ValueError as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 400)
+        except (OSError, RuntimeError) as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 500)
+        return _json({"ok": True, **wynik})
 
     if akcja == "zapisz" and request.method == "POST":
         dane = request.get_json(silent=True)

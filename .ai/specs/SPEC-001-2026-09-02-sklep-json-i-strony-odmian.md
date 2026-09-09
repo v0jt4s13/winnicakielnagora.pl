@@ -405,7 +405,7 @@ ale ich nie definiuje; ceny brutto są jedynymi zapisanymi — netto i rabat są
 | `dostepne` | boolean | tak | `false` = pozycja znika ze sklepu, zostaje na stronie odmiany |
 | `opis` | string | tak | 1–2 zdania na kartę |
 | `zdjecie` | string | tak | slug z `attached_assets/photos/` **bez** rozszerzenia i bez `-sm` |
-| `zdjecie_sklep` | string | nie | opcjonalna ścieżka względna do obrazu pod `attached_assets/`, np. `butelki/nazwa.jpg`; zastępuje obraz karty sklepu |
+| `zdjecie_sklep` | string | nie | opcjonalna ścieżka względna do obrazu pod `attached_assets/`, np. `butelki/nazwa.jpg`; zastępuje obraz karty sklepu (panel akceptuje też prefiks `attached_assets/`) |
 
 **Reguły wyliczeń** (jedno miejsce w kodzie, `main.js`):
 

@@ -31,9 +31,9 @@
       "cena_brutto": 113,
       "rabat_procent": 15,
       "dostepne": true,
-      "opis": "Monarch 2022 to białe wino z odmiany hybrydowej, charakteryzujące się silnym wzrostem oraz odpornością na choroby. Winogrona dojrzewają na początku października.",
+      "opis": "AAAA Monarch 2022 to białe wino z odmiany hybrydowej, charakteryzujące się silnym wzrostem oraz odpornością na choroby. Winogrona dojrzewają na początku października.",
       "zdjecie": "monarch-butelka-01",
-      "zdjecie_sklep": "butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg",
+      "zdjecie_sklep": "/butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg",
       "rocznik": 2022,
       "alkohol": 7
     },
@@ -48,7 +48,7 @@
       "dostepne": true,
       "opis": "Seyval blanc to mieszaniec winorośli o średnim wzroście, z gronami stożkowato-cylindrycznymi. Jagody mają zielonożółtą skórkę i aromat ziół oraz melona.",
       "zdjecie": "seyval-blanc-kieliszki-01",
-      "zdjecie_sklep": "butelki/rzeski_zefir-vidalSeyval-2023-biale-wytrawne.jpg",
+      "zdjecie_sklep": "/butelki/rzeski_zefir-vidalSeyval-2023-biale-wytrawne.jpg",
       "rocznik": 2022,
       "alkohol": 8
     },
@@ -77,7 +77,7 @@
       "dostepne": true,
       "opis": "St. Pepin to nowoczesna hybrydowa odmiana winogron, idealna do produkcji owocowych win białych. Charakteryzuje się wczesnym dojrzewaniem i odpornością na mróz.",
       "zdjecie": "st-pepin-kiscie-01",
-      "zdjecie_sklep": "butelki/gwiazda_polnocy-StPepin-2024-biale-wytrawne.jpg",
+      "zdjecie_sklep": "/butelki/gwiazda_polnocy-StPepin-2024-biale-wytrawne.jpg",
       "rocznik": 2022,
       "alkohol": 11
     },
@@ -92,7 +92,7 @@
       "dostepne": true,
       "opis": "Winorośl 'Swenson Red' to odmiana deserowa o różowoczerwonych owocach, obficie owocująca. Charakteryzuje się silnym wzrostem i odpornością na mróz.",
       "zdjecie": "swenson-red-kiscie-01",
-      "zdjecie_sklep": "butelki/slodki_sven-svenson_red-2024-biale-slodkie.jpg",
+      "zdjecie_sklep": "/butelki/slodki_sven-svenson_red-2024-biale-slodkie.jpg",
       "rocznik": 2023,
       "alkohol": 7.5
     },
@@ -107,7 +107,7 @@
       "dostepne": true,
       "opis": "Vidal Blanc to biała hybrydowa odmiana winorośli, charakteryzująca się owocowym aromatem grejpfruta i ananasa, idealna do produkcji win słodkich i lodowych.",
       "zdjecie": "vidal-blanc-kiscie-01",
-      "zdjecie_sklep": "butelki/okanagan-vidalblanc-2024-biale-polwytrawne.jpg",
+      "zdjecie_sklep": "/butelki/okanagan-vidalblanc-2024-biale-polwytrawne.jpg",
       "rocznik": 2024,
       "alkohol": 7
     },

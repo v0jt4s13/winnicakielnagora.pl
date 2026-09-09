@@ -31,8 +31,9 @@ Opcjonalne: `rocznik`, `alkohol` (pomijane dla soków), `zdjecie_sklep`.
 - `zdjecie` to slug z `attached_assets/photos/` **bez** rozszerzenia i bez `-sm`; wariant
   miniatury dokłada kod.
 - `zdjecie_sklep` to opcjonalna ścieżka względna do obrazu pod `attached_assets/`, używana
-  bezpośrednio na karcie sklepu, np. `butelki/nazwa.jpg`. Bez tego pola karta korzysta z
-  dotychczasowego wariantu `zdjecie` + `-sm.jpg`.
+  bezpośrednio na karcie sklepu, np. `butelki/nazwa.jpg`. Dla zgodności panel akceptuje
+  także zapis z prefiksem `attached_assets/`. Bez tego pola karta korzysta z dotychczasowego
+  wariantu `zdjecie` + `-sm.jpg`.
 - `dostepne: false` usuwa pozycję ze sklepu, ale **nie** ze strony odmiany — zaindeksowany
   adres ma dalej działać.
 
