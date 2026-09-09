@@ -29,6 +29,11 @@ sprawdz("brak martwych atrybutow", !html.includes("data-price-net") && !html.inc
 sprawdz("link do strony odmiany", html.includes('href="./wina/monarch.html"'));
 sprawdz("miniatura -sm", html.includes("monarch-kieliszek-01-sm.jpg"));
 
+const butelka = { ...promo, zdjecie_sklep: "butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg" };
+const htmlButelka = Produkty.renderProductCard(butelka, 0.23);
+sprawdz("bezpośrednie zdjęcie butelki",
+  htmlButelka.includes("attached_assets/butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg"));
+
 // bez promocji
 const zwykle = { ...promo, id: "x", rabat_procent: 0, cena_brutto: 59 };
 const html2 = Produkty.renderProductCard(zwykle, 0.23);

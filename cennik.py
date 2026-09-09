@@ -49,7 +49,7 @@ PRAWA_PLIKU = 0o640
 
 POLA_WYMAGANE = ("id", "nazwa", "odmiana_slug", "kategoria", "pojemnosc_ml",
                  "cena_brutto", "rabat_procent", "dostepne", "opis", "zdjecie")
-POLA_OPCJONALNE = ("rocznik", "alkohol")
+POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep")
 WZOR_ID = re.compile(r"^[a-z0-9-]+$")
 
 
@@ -64,6 +64,19 @@ def slugi_odmian() -> list[str]:
     if not STRONY_ODMIAN.is_dir():
         return []
     return sorted(p.stem for p in STRONY_ODMIAN.glob("*.html"))
+
+
+def sciezka_zdjecia_sklep(wartosc: object) -> Path | None:
+    """Zwraca istniejący obraz sklepu wyłącznie z katalogu attached_assets/."""
+    if not isinstance(wartosc, str) or not wartosc.strip() or Path(wartosc).is_absolute():
+        return None
+    zasoby = (PROJEKT / "attached_assets").resolve()
+    kandydat = (zasoby / wartosc).resolve()
+    if not kandydat.is_relative_to(zasoby):
+        return None
+    if kandydat.suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp"}:
+        return None
+    return kandydat if kandydat.is_file() else None
 
 
 def wczytaj() -> dict:
@@ -132,6 +145,9 @@ def waliduj(dane) -> list[dict]:
             bledy.append(_blad(i, "odmiana_slug", "Nie ma strony odmiany o tym adresie"))
         if dostepne_zdjecia and wino.get("zdjecie") not in dostepne_zdjecia:
             bledy.append(_blad(i, "zdjecie", "Nie ma takiego zdjęcia"))
+        zdjecie_sklep = wino.get("zdjecie_sklep")
+        if zdjecie_sklep not in (None, "") and sciezka_zdjecia_sklep(zdjecie_sklep) is None:
+            bledy.append(_blad(i, "zdjecie_sklep", "Nie ma takiego pliku obrazu w attached_assets"))
 
         cena = wino.get("cena_brutto")
         if not isinstance(cena, (int, float)) or isinstance(cena, bool) or cena <= 0:

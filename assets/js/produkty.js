@@ -40,6 +40,15 @@ const Produkty = {
     return czesci;
   },
 
+  /** Nowe zdjęcie sklepu może wskazywać plik bezpośrednio pod attached_assets/. */
+  sciezkaZdjecia(wino, bazaZdjec = this.BAZA_ZDJEC) {
+    if (wino.zdjecie_sklep) {
+      const bazaZasobow = bazaZdjec.replace(/photos\/?$/, "");
+      return `${bazaZasobow}${this.escape(wino.zdjecie_sklep)}`;
+    }
+    return `${bazaZdjec}${this.escape(wino.zdjecie)}-sm.jpg`;
+  },
+
   /**
    * Zwraca STRING z HTML-em jednej karty produktu (nie węzeł DOM).
    * opcje: { linkOdmiany = true, przyciskKoszyka = true, bazaZdjec = BAZA_ZDJEC }
@@ -53,7 +62,7 @@ const Produkty = {
       bazaZdjec = this.BAZA_ZDJEC, bazaOdmian = this.BAZA_ODMIAN,
     } = opcje;
     const ceny = this.policzCeny(wino, stawkaVat);
-    const zdjecie = `${bazaZdjec}${wino.zdjecie}-sm.jpg`;
+    const zdjecie = this.sciezkaZdjecia(wino, bazaZdjec);
     const nazwa = this.escape(wino.nazwa);
 
     const badgePromo = ceny.promocja

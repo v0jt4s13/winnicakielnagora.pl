@@ -32,6 +32,7 @@ PANEL = PROJEKT / "tools" / "panel"
 CENNIK = cennik.CENNIK
 KOPIA = cennik.KOPIA
 ZDJECIA = cennik.ZDJECIA
+BUTELKI = PROJEKT / "attached_assets" / "butelki"
 
 ADRES = "127.0.0.1"
 MAX_ZADANIE = 2 * 1024 * 1024  # cennik to kilkadziesiat kB; wiecej znaczy blad albo naduzycie
@@ -42,7 +43,12 @@ POJEDYNCZE_PLIKI = {
     "/assets/js/produkty.js": PROJEKT / "assets" / "js" / "produkty.js",
     "/assets/css/style.css": PROJEKT / "assets" / "css" / "style.css",
 }
-KATALOGI = {"/photos/": ZDJECIA, "/attached_assets/photos/": ZDJECIA, "/": PANEL}
+KATALOGI = {
+    "/photos/": ZDJECIA,
+    "/attached_assets/photos/": ZDJECIA,
+    "/attached_assets/butelki/": BUTELKI,
+    "/": PANEL,
+}
 
 TYPY = {
     ".html": "text/html; charset=utf-8",
@@ -195,13 +201,15 @@ class Panel(BaseHTTPRequestHandler):
         elif sciezka.startswith("/attached_assets/photos/"):
             # Ta sama sciezka, ktorej panel uzywa na produkcji — dziala w obu miejscach.
             kandydat = ZDJECIA / sciezka[len("/attached_assets/photos/"):]
+        elif sciezka.startswith("/attached_assets/butelki/"):
+            kandydat = BUTELKI / sciezka[len("/attached_assets/butelki/"):]
         else:
             kandydat = PANEL / sciezka.lstrip("/")
 
         # resolve() rozwija dowiazania symboliczne PRZED sprawdzeniem — samo
         # obciecie ".." nie wystarcza.
         kandydat = kandydat.resolve()
-        dozwolone = [p.resolve() for p in (PANEL, ZDJECIA)]
+        dozwolone = [p.resolve() for p in (PANEL, ZDJECIA, BUTELKI)]
         dozwolone += [p.resolve() for p in POJEDYNCZE_PLIKI.values()]
         pasuje = any(kandydat == p or (p.is_dir() and kandydat.is_relative_to(p))
                      for p in dozwolone)
