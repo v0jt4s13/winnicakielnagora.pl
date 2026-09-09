@@ -326,6 +326,7 @@
           <li><span class="tick">✓</span><span class="txt"><b>Degustacje zdjęte z treści</b> <span>— karta „Co się u nas dzieje" (wyprzedaże roczników, pikniki, spotkania przy zbiorach) zamiast „Degustacje po umówieniu".</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Nowa sekcja „Noclegi"</b> <span>- trzy pokoje w budynku winiarni; aktywny jest zwykły link „Zarezerwuj na Booking" (link od Właściciela, 2026-09-08), bez osadzonego widgetu.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Nawigacja odchudzona</b> <span>— bez „Sklep" i „Degustacje", z „Noclegi"; hero z jednym przyciskiem; podstrony odmian kierują do kontaktu.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Przełącznik słowa „tradycyjne" wycofany z planu</b> <span>- decyzja Właściciela: wariant <code style="font-family:ui-monospace,monospace">?slowo=</code> nie będzie kontynuowany i nie jest wymagany do publikacji.</span></span></li>
         </ul>
       </div>
 
@@ -336,6 +337,8 @@
           <li><span class="tick">✓</span><span class="txt"><b>Cennik i wydarzenia redagowane w panelu</b> <span>— Właściciel zmienia wina, ceny i terminy bez gita (SPEC-002, SPEC-005).</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Zmyślone produkty i wydarzenia usunięte</b> <span>— sklep i sekcja wydarzeń pokazują wyłącznie prawdziwe dane właściciela.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Jedno źródło ceny</b> <span>— <code style="font-family:ui-monospace,monospace">cena_brutto</code> w JSON, netto i VAT liczone, nie przepisywane ręcznie.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Zdjęcia butelek z etykietami są już dostępne</b> <span>- zoptymalizowane materiały znajdują się w <code style="font-family:ui-monospace,monospace">attached_assets/photos/</code> i <code style="font-family:ui-monospace,monospace">attached_assets/butelki/</code>.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Panel AI-opisów przetestowany</b> <span>- można usunąć oczekiwanie na pierwsze użycie z prawdziwym kluczem.</span></span></li>
         </ul>
       </div>
 
@@ -358,6 +361,7 @@
           <li><span class="tick">✓</span><span class="txt"><b>Motyw dark włącza się sam po zmroku</b> <span>— jedyny motyw, który strona wybiera bez udziału gościa.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Animacje przy przewijaniu</b> <span>i zwijane sekcje panelu redakcyjnego (SPEC-004).</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Hero mieści się na wąskim telefonie</b> <span>— lockup ikona + H1 układa się w kolumnę poniżej 640&nbsp;px, tytuł zmniejszony; koniec ucinania na 390&nbsp;px (audyt 2026-09-02).</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Nagłówek stron odmian poprawiony</b> <span>- problem zgłoszony w audycie 2026-09-02 został usunięty.</span></span></li>
         </ul>
       </div>
 
@@ -366,6 +370,7 @@
         <ul class="done-list">
           <li><span class="tick">✓</span><span class="txt"><b>Osierocony proces na porcie 8004 usunięty</b> <span>— duplikat unitu systemd blokował wdrożenia nowego kodu.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Panel na produkcji za HTTP Basic Auth</b> <span>— bez ustawionych zmiennych środowiskowych zwraca 404, nie 401.</span></span></li>
+          <li><span class="tick">✓</span><span class="txt"><b>Panel na produkcji działa po HTTPS</b> <span>- połączenie szyfruje dane logowania Basic Auth.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b>Cennik i wydarzenia poza katalogiem wdrożenia</b> <span>— zmiany z panelu przeżywają kolejny deploy.</span></span></li>
           <li><span class="tick">✓</span><span class="txt"><b><code style="font-family:ui-monospace,monospace">.git</code> i pliki źródłowe niedostępne z zewnątrz</b> <span>— potwierdzone na żywo: 404 dla <code style="font-family:ui-monospace,monospace">.git/config</code>, <code style="font-family:ui-monospace,monospace">wsgi.py</code>.</span></span></li>
         </ul>
@@ -376,11 +381,11 @@
 
   <section id="plan">
     <h2>Co zostało przed publikacją</h2>
-    <p class="lede">17 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu - stan zapisuje się w tej przeglądarce.</p>
+    <p class="lede">12 pozycji w czterech koszykach. Zaznaczaj w miarę przeglądu - stan zapisuje się w tej przeglądarce.</p>
 
     <div class="progress-bar">
       <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-      <div class="progress-label" id="progress-label">0 / 23 przejrzanych</div>
+      <div class="progress-label" id="progress-label">0 / 18 przejrzanych</div>
     </div>
 
     <div class="chips" id="chips">
@@ -393,7 +398,7 @@
 
     <!-- KRYTYCZNE -->
     <div class="plan-group" data-group="crit">
-      <div class="plan-group-head"><span class="bar" style="background:var(--crit)"></span><h3>Krytyczne blokery</h3><span class="count">3 pozycje</span></div>
+      <div class="plan-group-head"><span class="bar" style="background:var(--crit)"></span><h3>Krytyczne blokery</h3><span class="count">2 pozycje</span></div>
 
       <label class="row cat-crit" data-cat="crit" data-id="crit-3">
         <input type="checkbox">
@@ -413,43 +418,17 @@
         <span class="badge">TODO #14</span>
       </label>
 
-      <label class="row cat-crit" data-cat="crit" data-id="crit-5">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Panel na produkcji musi jechać po HTTPS</span>
-          <span class="why">Basic Auth wysyła login i hasło zakodowane, nie zaszyfrowane — po zwykłym HTTP każdy po drodze je przechwyci.</span>
-        </span>
-        <span class="badge">TODO #27</span>
-      </label>
     </div>
 
     <!-- WAŻNE -->
     <div class="plan-group" data-group="important">
-      <div class="plan-group-head"><span class="bar" style="background:var(--important)"></span><h3>Ważne, nieblokujące</h3><span class="count">5 pozycji</span></div>
-
-      <label class="row cat-important" data-cat="important" data-id="imp-slowo">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Przełącznik słowa „tradycyjne" (<code style="font-family:ui-monospace,monospace">?slowo=</code>) — jeszcze nie zrobiony</span>
-          <span class="why">Narzędzie redakcyjne na wzór <code style="font-family:ui-monospace,monospace">?hero=</code>, do porównania „tradycyjne / kraftowe / rzemieślnicze" na żywej stronie. Rozpisane w quick-spec 004.</span>
-        </span>
-        <span class="badge">SPEC-006</span>
-      </label>
+      <div class="plan-group-head"><span class="bar" style="background:var(--important)"></span><h3>Ważne, nieblokujące</h3><span class="count">3 pozycje</span></div>
 
       <label class="row cat-important" data-cat="important" data-id="imp-3">
         <input type="checkbox">
         <span class="body">
           <span class="title">Brak aria-label, linku „Przejdź do treści" i prefers-reduced-motion</span>
           <span class="why">Przyciski stylu, koszyka i menu bez nazw dostępności; animacje przy przewijaniu nie respektują preferencji systemowej.</span>
-        </span>
-        <span class="badge">Audyt 2026-09-02</span>
-      </label>
-
-      <label class="row cat-important" data-cat="important" data-id="imp-4">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Nagłówek stron odmian rozjeżdża się na telefonie</span>
-          <span class="why">Przyciski różnej wysokości, „Nasze odmiany" łamie się na dwa wiersze.</span>
         </span>
         <span class="badge">Audyt 2026-09-02</span>
       </label>
@@ -499,7 +478,7 @@
         <input type="checkbox">
         <span class="body">
           <span class="title"><code style="font-family:ui-monospace,monospace">.claude/skills</code> i <code style="font-family:ui-monospace,monospace">agents</code> w <code style="font-family:ui-monospace,monospace">.gitignore</code></span>
-          <span class="why">Po świeżym klonie nie ma komend ani subagentów. Commitować cały framework do repo, czy zostawić lokalnie?</span>
+          <span class="why">Sprawdzone 2026-09-09: <code style="font-family:ui-monospace,monospace">.gitignore</code> nadal ignoruje te katalogi, a po świeżym klonie nie ma komend ani subagentów. Nadal do decyzji: odtworzyć framework w repo czy zostawić go lokalnie?</span>
         </span>
         <span class="badge">TODO #17</span>
       </label>
@@ -516,7 +495,7 @@
 
     <!-- CZEKA NA MATERIAŁY -->
     <div class="plan-group" data-group="waiting">
-      <div class="plan-group-head"><span class="bar" style="background:var(--waiting)"></span><h3>Czeka na materiały</h3><span class="count">5 pozycji</span></div>
+      <div class="plan-group-head"><span class="bar" style="background:var(--waiting)"></span><h3>Czeka na materiały</h3><span class="count">3 pozycje</span></div>
 
       <label class="row cat-waiting" data-cat="waiting" data-id="wait-5">
         <input type="checkbox">
@@ -527,15 +506,6 @@
         <span class="badge">TODO #37</span>
       </label>
 
-      <label class="row cat-waiting" data-cat="waiting" data-id="wait-1">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Brak zdjęć butelek z etykietami</span>
-          <span class="why">Sekcja wydarzeń pokazuje dziś grafikę AI zastępczą — potrzebna sesja zdjęciowa.</span>
-        </span>
-        <span class="badge">TODO #15</span>
-      </label>
-
       <label class="row cat-waiting" data-cat="waiting" data-id="wait-2">
         <input type="checkbox">
         <span class="body">
@@ -543,15 +513,6 @@
           <span class="why">Sekcja z osadzonymi filmami czeka na materiał od Właściciela — decyzja o hostingu na YouTube już zapadła.</span>
         </span>
         <span class="badge">TODO #16</span>
-      </label>
-
-      <label class="row cat-waiting" data-cat="waiting" data-id="wait-3">
-        <input type="checkbox">
-        <span class="body">
-          <span class="title">Panel AI-opisów nieprzetestowany z prawdziwym kluczem</span>
-          <span class="why">Sprawdzone są tylko ścieżki błędów; pierwsze użycie z realnym kluczem OpenAI warto obejrzeć.</span>
-        </span>
-        <span class="badge">TODO #20</span>
       </label>
 
       <label class="row cat-waiting" data-cat="waiting" data-id="wait-4">
