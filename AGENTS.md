@@ -462,6 +462,10 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   komunikatu.
 - **VAT 23% jest zaszyty w dwóch miejscach**: `renderCart` w `main.js` (`subtotal / 1.23`)
   i etykieta „VAT (23%)" w panelu koszyka w `index.html`.
+- **Ceny netto nie są wyświetlane w zamkniętym sklepie** — gdy sekcja `#sklep` jest ukryta
+  (np. z powodu wyłączenia sezonu), atrybut `data-price-net` na kartach produktów w `index.html`
+  nadal istnieje, ale żadna wartość nie jest renderowana. To jest pożądane — netto liczy się
+  dopiero dla wyraznego zaznaczenia tego w sklepie `renderCart`.
 - **Cztery motywy po 29 zmiennych CSS.** `setTheme` ustawia je jako style inline na
   `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
   po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich czterech obiektach
