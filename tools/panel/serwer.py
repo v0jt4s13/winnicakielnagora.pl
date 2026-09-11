@@ -273,9 +273,12 @@ class Panel(BaseHTTPRequestHandler):
                 {"pozycja": None, "pole": None, "komunikat": "Puste albo zbyt duże żądanie"}]})
 
         try:
-            dane = json.loads(self.rfile.read(dlugosc).decode("utf-8"))
+            zadanie = json.loads(self.rfile.read(dlugosc).decode("utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError) as blad:
             return self._json(400, {"ok": False, "bledy": [{"pozycja": None, "pole": None, "komunikat": str(blad)}]})
+        # Galeria i /api/opisz dostaja cialo zadania bez zmian — tylko zapisz/wydarzenia-zapisz
+        # opakowuja tresc pliku w {"wersja", "bazowe_dane", "dane"} (patrz nizej).
+        dane = zadanie
 
         if sciezka == "/api/galeria-przenies":
             try:
@@ -303,28 +306,46 @@ class Panel(BaseHTTPRequestHandler):
             return self._json(200, {"ok": True, **wynik})
 
         if sciezka == "/api/wydarzenia-zapisz":
+            if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+                return self._json(400, {"ok": False, "komunikat": "Nieczytelne żądanie"})
+            dane = zadanie["dane"]
             bledy = wydarzenia.waliduj(dane)
             if bledy:
                 return self._json(400, {"ok": False, "bledy": bledy})
             try:
-                wydarzenia.zapisz(dane)
+                nowa_wersja = wydarzenia.zapisz_bezpiecznie(
+                    dane, zadanie.get("wersja"), zadanie.get("bazowe_dane"))
+            except wydarzenia.KonfliktZapisu as konflikt:
+                return self._json(409, {"ok": False, "konflikt": True,
+                                        "komunikat": "Ktoś inny zapisał ten plik, odkąd go "
+                                                     "wczytałeś/aś. Twój zapis NIE trafił na dysk.",
+                                        "roznice": konflikt.roznice})
             except OSError as blad:
                 return self._json(500, {"ok": False,
                                         "komunikat": f"Nie udało się zapisać: {blad}"})
             return self._json(200, {"ok": True, "pozycji": len(dane["wydarzenia"]),
-                                    "kopia": wydarzenia.opis_kopii()})
+                                    "kopia": wydarzenia.opis_kopii(), "wersja": nowa_wersja})
 
+        if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+            return self._json(400, {"ok": False, "komunikat": "Nieczytelne żądanie"})
+        dane = zadanie["dane"]
         bledy = cennik.waliduj(dane)
         if bledy:
             return self._json(400, {"ok": False, "bledy": bledy})
 
         try:
-            cennik.zapisz(dane)
+            nowa_wersja = cennik.zapisz_bezpiecznie(
+                dane, zadanie.get("wersja"), zadanie.get("bazowe_dane"))
+        except cennik.KonfliktZapisu as konflikt:
+            return self._json(409, {"ok": False, "konflikt": True,
+                                    "komunikat": "Ktoś inny zapisał ten plik, odkąd go "
+                                                 "wczytałeś/aś. Twój zapis NIE trafił na dysk.",
+                                    "roznice": konflikt.roznice})
         except OSError as blad:
             return self._json(500, {"ok": False, "komunikat": f"Nie udało się zapisać: {blad}"})
 
         self._json(200, {"ok": True, "pozycji": len(dane["wina"]),
-                         "kopia": cennik.opis_kopii()})
+                         "kopia": cennik.opis_kopii(), "wersja": nowa_wersja})
 
     def log_message(self, format: str, *args) -> None:
         print(f"  {self.command} {self.path} → {args[1] if len(args) > 1 else ''}")

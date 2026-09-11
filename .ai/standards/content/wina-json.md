@@ -49,6 +49,9 @@ Opcjonalne: `rocznik`, `alkohol` (pomijane dla soków), `zdjecie_sklep`.
 Plik zmienia się **panelem redakcyjnym** (`tools/panel/`, tylko `127.0.0.1`) albo ręcznie
 w edytorze tekstu. Po zmianie: commit i wdrożenie — nie ma edycji „na żywo" na serwerze.
 
+Zapis w panelu sprawdza wersję pliku i odrzuca go, gdy ktoś inny zapisał w międzyczasie —
+patrz `.ai/standards/backend/edycja-wspolbiezna.md`.
+
 ## Why
 
 Cennik zmienia się częściej niż kod i zmienia go osoba nietechniczna. Trzymanie go w jednym

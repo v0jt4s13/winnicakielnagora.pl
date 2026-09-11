@@ -3,6 +3,10 @@
 # Wygenerowane z odczytu kodu (index.html, assets/js/main.js, assets/css/custom.css),
 # nie skopiowane z innego projektu.
 
+backend:
+  edycja-wspolbiezna:
+    description: Zapis do wina.json/wydarzenia.json przez zapisz_bezpiecznie() — sprawdzenie wersji pliku, odrzucenie konfliktu zamiast cichego nadpisania
+
 content:
   html-editing:
     description: Zasady edycji index.html — punktowe zmiany, wcięcia, ikony <symbol>, kotwice zamiast numerów linii

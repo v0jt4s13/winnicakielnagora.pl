@@ -12,6 +12,11 @@ const POLA_LICZBOWE = ["rocznik", "alkohol", "pojemnosc_ml", "cena_brutto", "rab
 const POLA_OPCJONALNE = ["rocznik", "alkohol"];
 
 let cennik = null;
+// Niezmutowana migawka cennika z ostatniego wczytania/udanego zapisu — do wykrycia
+// konfliktu (patrz zapisz()). `cennik` jest mutowany w miejscu przy kazdej edycji,
+// wiec bez osobnej kopii nie ma z czym porownac "co bylo, zanim ktos inny zapisal".
+let cennikBazowy = null;
+let wersjaCennika = null;
 let zdjecia = [];
 let odmiany = [];
 let wybrany = null; // indeks edytowanej pozycji
@@ -22,6 +27,8 @@ let galeriaZaznaczone = new Set();
 
 // Wydarzenia to drugi, niezalezny plik danych — wlasny stan i wlasny zapis.
 let wydarzenia = [];
+let wydarzeniaBazowe = null; // migawka jak cennikBazowy, patrz komentarz wyzej
+let wersjaWydarzen = null;
 let wybraneWydarzenie = null; // indeks edytowanego wpisu
 let zmienioneWydarzenia = false;
 
@@ -70,6 +77,8 @@ async function wczytaj() {
     const dane = await odp.json();
     if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
     cennik = dane.cennik;
+    cennikBazowy = JSON.parse(JSON.stringify(cennik));
+    wersjaCennika = dane.wersja;
     zdjecia = dane.zdjecia;
     odmiany = dane.odmiany;
     qs("#sciezka").textContent = dane.sciezka;
@@ -287,10 +296,25 @@ async function zapisz() {
     const odp = await fetch("api/zapisz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(cennik),
+      body: JSON.stringify({ wersja: wersjaCennika, bazowe_dane: cennikBazowy, dane: cennik }),
     });
     const wynik = await odp.json();
     if (!odp.ok) {
+      if (wynik.konflikt) {
+        // Ktos inny zapisal ten plik pomiedzy naszym wczytaniem a naszym zapisem —
+        // zapis serwera odrzucil, dysk nie zostal dotkniety (patrz cennik.zapisz_bezpiecznie).
+        const roznice = Array.isArray(wynik.roznice) ? wynik.roznice : [];
+        const lista = roznice.length
+          ? `<ul>${roznice.map((r) => `<li>${Produkty.escape(r)}</li>`).join("")}</ul>`
+          : "";
+        pokazKomunikat(
+          `${Produkty.escape(wynik.komunikat)}${lista}<br>` +
+            `Kliknij „Odrzuć zmiany”, żeby wczytać najnowszą wersję, a potem wprowadź ` +
+            `swoją zmianę ponownie.`,
+          "ostrzezenie"
+        );
+        return;
+      }
       // Walidacja odsyla `bledy`, awaria zapisu — `komunikat`. Bez tej drugiej galezi
       // blad uprawnien do pliku pokazywal sie jako pusta lista.
       const lista = (wynik.bledy || [])
@@ -303,6 +327,8 @@ async function zapisz() {
       return;
     }
     oznaczZmiane(false);
+    wersjaCennika = wynik.wersja;
+    cennikBazowy = JSON.parse(JSON.stringify(cennik));
     // Na produkcji cennik zyje poza katalogiem wdrozenia, wiec zmiana dziala od razu
     // i nie wymaga commita. Lokalnie zapisuje sie plik z repozytorium.
     const lokalnie = ["localhost", "127.0.0.1"].includes(location.hostname);
@@ -909,6 +935,8 @@ async function wczytajWydarzenia() {
     const dane = await odp.json();
     if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
     wydarzenia = Array.isArray(dane.wydarzenia) ? dane.wydarzenia : [];
+    wydarzeniaBazowe = JSON.parse(JSON.stringify(wydarzenia));
+    wersjaWydarzen = dane.wersja;
     qs("#sciezka-wydarzen").textContent = dane.sciezka;
     renderListeWydarzen();
   } catch (blad) {
@@ -991,10 +1019,27 @@ async function zapiszWydarzenia() {
     const odp = await fetch("api/wydarzenia-zapisz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ wydarzenia }),
+      body: JSON.stringify({
+        wersja: wersjaWydarzen,
+        bazowe_dane: { wydarzenia: wydarzeniaBazowe },
+        dane: { wydarzenia },
+      }),
     });
     const wynik = await odp.json();
     if (!odp.ok) {
+      if (wynik.konflikt) {
+        const roznice = Array.isArray(wynik.roznice) ? wynik.roznice : [];
+        const lista = roznice.length
+          ? `<ul>${roznice.map((r) => `<li>${Produkty.escape(r)}</li>`).join("")}</ul>`
+          : "";
+        pokazKomunikat(
+          `${Produkty.escape(wynik.komunikat)}${lista}<br>` +
+            `Kliknij „Odrzuć zmiany”, żeby wczytać najnowszą wersję, a potem wprowadź ` +
+            `swoją zmianę ponownie.`,
+          "ostrzezenie"
+        );
+        return;
+      }
       const lista = (wynik.bledy || [])
         .map((b) => `<li>${b.pozycja === null ? "cały plik" : `wydarzenie ${b.pozycja + 1}`}: ` +
                     `${Produkty.escape(b.komunikat)}${b.pole ? ` (${Produkty.escape(b.pole)})` : ""}</li>`)
@@ -1007,6 +1052,8 @@ async function zapiszWydarzenia() {
       return;
     }
     oznaczZmianeWydarzen(false);
+    wersjaWydarzen = wynik.wersja;
+    wydarzeniaBazowe = JSON.parse(JSON.stringify(wydarzenia));
     const lokalnie = ["localhost", "127.0.0.1"].includes(location.hostname);
     const skutek = lokalnie
       ? "Zmiana jest na razie tylko na Twoim dysku — żeby trafiła na stronę, zrób commit i wdrożenie."

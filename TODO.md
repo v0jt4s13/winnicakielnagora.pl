@@ -11,7 +11,7 @@ Podział na trzy pliki:
   przenosisz ją tam (i dopisujesz regułę do `.ai/standards/` lub `.ai/GUARDRAILS.md`).
 - **`TODO.maybefuture.md`** — sprawy związane ze sprzedażą online oraz świadomie zawieszone.
 
-Ostatnia aktualizacja: **2026-09-09**.
+Ostatnia aktualizacja: **2026-09-11**.
 
 ## Do dodania / uzupelnienia
 
@@ -63,6 +63,19 @@ w HTML na `...style.css?v=ab12cd34`. HTML jest `no-cache`, więc nowa strona nat
 wskazuje nowe adresy. Do tego test pilnujący, że skróty w HTML zgadzają się z plikami.
 
 Obrazy i fonty mają już `max-age=2592000` — ich nazwy są stabilne.
+
+### 39. Kontrola konfliktu przy zapisie panelu nie scala zmian
+
+Od 2026-09-11 `zapisz_bezpiecznie()` (`cennik.py`/`wydarzenia.py`) odrzuca zapis, gdy plik
+zmienił się od wczytania — patrz `.ai/standards/backend/edycja-wspolbiezna.md`. To wykrywa
+utracony zapis (wypadek z dwoma redaktorami naraz), ale **nie scala** zmian: odrzucony zapis
+wymaga, żeby redaktor kliknął „Odrzuć zmiany" i wprowadził swoją zmianę ponownie ręcznie.
+
+Świadomie poza zakresem: miękka blokada „ktoś inny to teraz edytuje" przy otwarciu pozycji
+(wymagałaby osobnego pliku blokady z czasem wygaśnięcia i obsługi porzuconej karty) oraz
+scalanie pól po stronie serwera (wymagałoby przebudowy zapisu z całego pliku na patch
+pojedynczej pozycji). Żadne z nich nie jest pilne — sam wypadek (cicha utrata danych) już
+nie może się powtórzyć.
 
 ## Do decyzji / weryfikacji Właściciela
 

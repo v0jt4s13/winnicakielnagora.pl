@@ -318,15 +318,24 @@ def panel_api(akcja: str):
         return _json({"ok": True, **wynik})
 
     if akcja == "zapisz" and request.method == "POST":
-        dane = request.get_json(silent=True)
-        if dane is None:
-            return _json({"ok": False, "bledy": [
-                {"pozycja": None, "pole": None, "komunikat": "Nieczytelne żądanie"}]}, 400)
+        zadanie = request.get_json(silent=True)
+        if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+            return _json({"ok": False, "komunikat":
+                          "Nieczytelne żądanie — odśwież panel i spróbuj ponownie."}, 400)
+        dane = zadanie["dane"]
         bledy = cennik.waliduj(dane)
         if bledy:
             return _json({"ok": False, "bledy": bledy}, 400)
         try:
-            cennik.zapisz(dane)
+            nowa_wersja = cennik.zapisz_bezpiecznie(
+                dane, zadanie.get("wersja"), zadanie.get("bazowe_dane"))
+        except cennik.KonfliktZapisu as konflikt:
+            # Ktos inny zapisal ten sam plik pomiedzy wczytaniem a zapisem tej osoby —
+            # bez tego dwoje redaktorow nadpisuje sie w ciszy (TODO #39).
+            return _json({"ok": False, "konflikt": True,
+                          "komunikat": "Ktoś inny zapisał ten plik, odkąd go wczytałeś/aś. "
+                                       "Twój zapis NIE trafił na dysk.",
+                          "roznice": konflikt.roznice}, 409)
         except OSError as blad:
             # Najczestszy powod na produkcji: katalog wskazany przez CENNIK_SCIEZKA
             # nie istnieje albo nalezy do innego uzytkownika niz proces gunicorna.
@@ -335,7 +344,7 @@ def panel_api(akcja: str):
                           "Sprawdź, czy katalog istnieje i czy użytkownik aplikacji ma "
                           "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wina"]),
-                      "kopia": cennik.opis_kopii()})
+                      "kopia": cennik.opis_kopii(), "wersja": nowa_wersja})
 
     if akcja == "wydarzenia-wczytaj" and request.method == "GET":
         try:
@@ -346,22 +355,29 @@ def panel_api(akcja: str):
                           "komunikat": f"data/wydarzenia.json ma błąd składni: {blad}"}, 500)
 
     if akcja == "wydarzenia-zapisz" and request.method == "POST":
-        dane = request.get_json(silent=True)
-        if dane is None:
-            return _json({"ok": False, "bledy": [
-                {"pozycja": None, "pole": None, "komunikat": "Nieczytelne żądanie"}]}, 400)
+        zadanie = request.get_json(silent=True)
+        if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+            return _json({"ok": False, "komunikat":
+                          "Nieczytelne żądanie — odśwież panel i spróbuj ponownie."}, 400)
+        dane = zadanie["dane"]
         bledy = wydarzenia.waliduj(dane)
         if bledy:
             return _json({"ok": False, "bledy": bledy}, 400)
         try:
-            wydarzenia.zapisz(dane)
+            nowa_wersja = wydarzenia.zapisz_bezpiecznie(
+                dane, zadanie.get("wersja"), zadanie.get("bazowe_dane"))
+        except wydarzenia.KonfliktZapisu as konflikt:
+            return _json({"ok": False, "konflikt": True,
+                          "komunikat": "Ktoś inny zapisał ten plik, odkąd go wczytałeś/aś. "
+                                       "Twój zapis NIE trafił na dysk.",
+                          "roznice": konflikt.roznice}, 409)
         except OSError as blad:
             return _json({"ok": False, "komunikat":
                           f"Nie udało się zapisać do {wydarzenia.WYDARZENIA}: {blad}. "
                           "Sprawdź, czy katalog istnieje i czy użytkownik aplikacji ma "
                           "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wydarzenia"]),
-                      "kopia": wydarzenia.opis_kopii()})
+                      "kopia": wydarzenia.opis_kopii(), "wersja": nowa_wersja})
 
     return _json({"ok": False, "komunikat": "Nieznana akcja"}, 404)
 

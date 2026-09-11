@@ -7,10 +7,13 @@ i wolamy funkcje wsgi.py wprost.
 
 Uruchomienie: python3 tools/test-panel-auth.py
 """
+import atexit
 import json
 import os
 import secrets
+import shutil
 import sys
+import tempfile
 import types
 from hashlib import pbkdf2_hmac
 from pathlib import Path
@@ -50,6 +53,14 @@ os.environ["PANEL_UZYTKOWNIK"] = "wlasciciel"
 os.environ["PANEL_HASLO_HASH"] = (
     SOL.hex() + ":" + pbkdf2_hmac("sha256", HASLO.encode(), SOL, 240_000).hex()
 )
+
+# Testy zapisu (dla konfliktu wersji) nie moga tykac prawdziwego data/wina.json —
+# przekierowanie MUSI byc ustawione przed importem wsgi.py, bo cennik.py/wydarzenia.py
+# czytaja CENNIK_SCIEZKA/WYDARZENIA_SCIEZKA raz, przy wlasnym imporcie.
+KATALOG_TYMCZASOWY = Path(tempfile.mkdtemp(prefix="panel-auth-test-"))
+os.environ["CENNIK_SCIEZKA"] = str(KATALOG_TYMCZASOWY / "wina.json")
+os.environ["WYDARZENIA_SCIEZKA"] = str(KATALOG_TYMCZASOWY / "wydarzenia.json")
+atexit.register(shutil.rmtree, KATALOG_TYMCZASOWY, ignore_errors=True)
 
 sys.path.insert(0, str(PROJEKT))
 import wsgi  # noqa: E402
@@ -108,6 +119,34 @@ def main() -> int:
     odp = wsgi.panel_api("wczytaj")
     sprawdz("API wczytaj zwraca cennik", kod(odp) == 200 and "cennik" in json.loads(tresc(odp)))
     sprawdz("nieznana akcja API: 404", kod(wsgi.panel_api("cokolwiek")) == 404)
+
+    # Zapis z nieaktualna wersja pliku musi zostac odrzucony (409), nie po cichu
+    # nadpisany — to test naprawy wypadku z dwoma redaktorami naraz (TODO #39).
+    wsgi.request.method = "POST"
+    dane_do_zapisu = wsgi.cennik.wczytaj()
+    wersja_przed = wsgi.cennik.wersja_pliku()
+
+    wsgi.request.get_json = lambda silent=False: {
+        "wersja": "wersja-widmo", "dane": dane_do_zapisu}
+    odp = wsgi.panel_api("zapisz")
+    sprawdz("zapis z nieaktualną wersją: 409", kod(odp) == 409)
+    sprawdz("409 niesie konflikt=True", json.loads(tresc(odp)).get("konflikt") is True)
+    sprawdz("odrzucony zapis nie dotknął pliku",
+            wsgi.cennik.wersja_pliku() == wersja_przed)
+
+    # Sama tresc musi sie realnie zmienic — identyczny zapis daje identyczny hash,
+    # co nie dowodziloby niczego o samym mechanizmie wersjonowania.
+    dane_zmienione = wsgi.cennik.wczytaj()
+    dane_zmienione["wina"][0]["dostepne"] = not dane_zmienione["wina"][0]["dostepne"]
+    wsgi.request.get_json = lambda silent=False: {
+        "wersja": wersja_przed, "dane": dane_zmienione}
+    odp = wsgi.panel_api("zapisz")
+    sprawdz("zapis z właściwą wersją: 200", kod(odp) == 200)
+    sprawdz("zapis z właściwą wersją faktycznie zmienił plik",
+            wsgi.cennik.wersja_pliku() != wersja_przed)
+
+    del wsgi.request.get_json  # przywraca domyslne z klasy _Zadanie (zwraca None)
+    wsgi.request.method = "GET"
 
     # Uszkodzony hash nie moze udawac dzialajacego panelu. Zdarza sie, gdy wartosc
     # urwie sie na spacji przy przekazywaniu przez EXTRA_SYSTEMD_ENV.

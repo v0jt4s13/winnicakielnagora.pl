@@ -9,6 +9,7 @@ i niczego nie serwuje — same dane.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -223,6 +224,73 @@ def zapisz(dane: dict) -> None:
         raise
 
 
+class KonfliktZapisu(Exception):
+    """Plik zmienil sie na dysku od wczytania — zapis odrzucony, dysk nietkniety."""
+
+    def __init__(self, aktualna_wersja: str, roznice: list[str]):
+        self.aktualna_wersja = aktualna_wersja
+        self.roznice = roznice
+        super().__init__("Plik zmienil sie od wczytania — ktos inny zapisal wczesniej")
+
+
+def wersja_pliku() -> str:
+    """Odcisk aktualnej tresci pliku na dysku — do wykrywania utraconych zapisow.
+
+    Krotki skrot starcza: to etykieta do porownania rownosci, nie dowod
+    kryptograficzny. Brak pliku ma wlasny, stabilny znacznik, zeby nie byl
+    nieodróżnialny od hasha jakiejś realnej treści.
+    """
+    if not CENNIK.exists():
+        return "brak-pliku"
+    return hashlib.sha256(CENNIK.read_bytes()).hexdigest()[:16]
+
+
+def podsumuj_roznice(stare: dict, nowe: dict, limit: int = 5) -> list[str]:
+    """Krotki, czytelny dla czlowieka opis roznic miedzy dwiema wersjami cennika.
+
+    Liczony po polu `id`. Uzywany wylacznie w komunikacie o konflikcie zapisu —
+    nie ma pretensji do pelnego diffa, tylko do zorientowania edytora, co juz
+    jest zapisane, a czego on jeszcze nie widzial.
+    """
+    opisy: list[str] = []
+    for klucz, etykieta in (("kategorie", "Lista kategorii"), ("rodzaje", "Lista rodzajów")):
+        if stare.get(klucz) != nowe.get(klucz):
+            opisy.append(f"{etykieta}: zmieniona")
+
+    stare_poz = {w["id"]: w for w in stare.get("wina", []) if isinstance(w, dict) and "id" in w}
+    nowe_poz = {w["id"]: w for w in nowe.get("wina", []) if isinstance(w, dict) and "id" in w}
+
+    for id_ in nowe_poz.keys() - stare_poz.keys():
+        opisy.append(f"Nowa pozycja: {nowe_poz[id_].get('nazwa', id_)}")
+    for id_ in stare_poz.keys() - nowe_poz.keys():
+        opisy.append(f"Usunięta pozycja: {stare_poz[id_].get('nazwa', id_)}")
+    for id_ in stare_poz.keys() & nowe_poz.keys():
+        s, n = stare_poz[id_], nowe_poz[id_]
+        zmienione = sorted(p for p in s.keys() | n.keys() if s.get(p) != n.get(p))
+        if zmienione:
+            opisy.append(f"{n.get('nazwa', id_)}: zmienione pole(a) {', '.join(zmienione)}")
+
+    if len(opisy) > limit:
+        opisy = opisy[:limit] + [f"...i {len(opisy) - limit} więcej"]
+    return opisy
+
+
+def zapisz_bezpiecznie(dane: dict, bazowa_wersja: str, bazowe_dane: dict | None = None) -> str:
+    """Jak zapisz(), ale odrzuca zapis, gdy plik zmienil sie od `bazowa_wersja`.
+
+    Nie ma bazy danych ani wersjonowania dokumentu — porownanie skrotu pliku na
+    dysku jest najprostszym odpornym zamiennikiem. Bez tego dwoje redaktorow
+    nadpisuje sie w ciszy, bo zapisz() zawsze zamienia CALY plik, nie tylko
+    zmieniona pozycje.
+    """
+    aktualna = wersja_pliku()
+    if bazowa_wersja != aktualna:
+        roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
+        raise KonfliktZapisu(aktualna, roznice)
+    zapisz(dane)
+    return wersja_pliku()
+
+
 def opis_kopii() -> str:
     """Sciezka kopii zapasowej do pokazania w interfejsie.
 
@@ -243,4 +311,5 @@ def stan_poczatkowy() -> dict:
         "zdjecia": slugi_zdjec(),
         "odmiany": slugi_odmian(),
         "sciezka": str(CENNIK),
+        "wersja": wersja_pliku(),
     }

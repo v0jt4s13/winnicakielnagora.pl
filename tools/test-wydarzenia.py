@@ -197,6 +197,34 @@ def main() -> int:
         # zasiew nie moze nadpisac pracy redakcyjnej
         wydarzenia.zapewnij_plik()
         sprawdz("zasiew nie nadpisuje istniejacego pliku", wydarzenia.wczytaj() == drugie)
+
+        # 5) zapisz_bezpiecznie — wykrywanie utraconego zapisu (KonfliktZapisu).
+        #    Ten sam scenariusz co w cennik.py: "redaktor B" wczytal plik ZANIM
+        #    "redaktor A" zapisal swoja zmiane (zapisz() powyzej dokumentuje surowe
+        #    "ostatni zapis wygrywa" — zapisz_bezpiecznie() ma temu zapobiegac).
+        wersja_przed = wydarzenia.wersja_pliku()
+        stan_widziany_przez_b = wydarzenia.wczytaj()  # migawka SPRZED zapisu A
+
+        trzecie = {"wydarzenia": drugie["wydarzenia"] +
+                   [wpis("test-a", "2026-12-01", "2026-12-02", tytul="Test A")]}
+        wersja_po_a = wydarzenia.zapisz_bezpiecznie(trzecie, wersja_przed)
+        sprawdz("zapisz_bezpiecznie ze świeżą wersją: przechodzi i zwraca nowy hash",
+                wersja_po_a != wersja_przed and wersja_po_a == wydarzenia.wersja_pliku())
+
+        czwarte = {"wydarzenia": stan_widziany_przez_b["wydarzenia"] +
+                   [wpis("test-b", "2026-12-05", "2026-12-06", tytul="Test B")]}
+        try:
+            wydarzenia.zapisz_bezpiecznie(czwarte, wersja_przed, bazowe_dane=stan_widziany_przez_b)
+            sprawdz("zapisz_bezpiecznie z nieaktualną wersją rzuca KonfliktZapisu", False)
+        except wydarzenia.KonfliktZapisu as konflikt:
+            sprawdz("KonfliktZapisu niesie aktualną (nie odrzuconą) wersję",
+                    konflikt.aktualna_wersja == wersja_po_a)
+            sprawdz("KonfliktZapisu wskazuje w różnicach zmianę, której B nie widział",
+                    any("Test A" in r for r in konflikt.roznice))
+        sprawdz("odrzucony zapis B nie dotknął pliku (zostaje wersja po A)",
+                wydarzenia.wersja_pliku() == wersja_po_a)
+        sprawdz("odrzucony zapis B nie dotknął pliku (zawartość też nietknięta)",
+                wydarzenia.wczytaj() == trzecie)
     finally:
         shutil.rmtree(katalog, ignore_errors=True)
         os.environ.pop("WYDARZENIA_SCIEZKA", None)

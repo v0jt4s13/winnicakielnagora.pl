@@ -83,6 +83,33 @@ def main() -> int:
         cennik.zapewnij_plik()
         sprawdz("zasiew nie nadpisuje istniejacego cennika",
                 json.loads(cennik.CENNIK.read_text(encoding="utf-8"))["wina"] == [])
+
+        # 7) zapisz_bezpiecznie — wykrywanie utraconego zapisu (KonfliktZapisu).
+        #    Scenariusz z wypadku: "edytor B" wczytal plik ZANIM "edytor A" zapisal
+        #    swoja zmiane, wiec B probuje zapisac na podstawie juz nieaktualnej wersji.
+        wersja_przed = cennik.wersja_pliku()
+        stan_widziany_przez_b = cennik.wczytaj()  # migawka SPRZED zapisu A
+
+        dane_a = cennik.wczytaj()
+        dane_a["wina"] = [{"id": "test-a", "nazwa": "Test A"}]
+        wersja_po_a = cennik.zapisz_bezpiecznie(dane_a, wersja_przed)
+        sprawdz("zapisz_bezpiecznie ze świeżą wersją: przechodzi i zwraca nowy hash",
+                wersja_po_a != wersja_przed and wersja_po_a == cennik.wersja_pliku())
+
+        dane_b = cennik.wczytaj()
+        dane_b["wina"] = stan_widziany_przez_b["wina"] + [{"id": "test-b", "nazwa": "Test B"}]
+        try:
+            cennik.zapisz_bezpiecznie(dane_b, wersja_przed, bazowe_dane=stan_widziany_przez_b)
+            sprawdz("zapisz_bezpiecznie z nieaktualną wersją rzuca KonfliktZapisu", False)
+        except cennik.KonfliktZapisu as konflikt:
+            sprawdz("KonfliktZapisu niesie aktualną (nie odrzuconą) wersję",
+                    konflikt.aktualna_wersja == wersja_po_a)
+            sprawdz("KonfliktZapisu wskazuje w różnicach zmianę, której B nie widział",
+                    any("Test A" in r for r in konflikt.roznice))
+        sprawdz("odrzucony zapis B nie dotknął pliku (zostaje wersja po A)",
+                cennik.wersja_pliku() == wersja_po_a)
+        sprawdz("odrzucony zapis B nie dotknął pliku (zawartość też nietknięta)",
+                cennik.wczytaj()["wina"] == dane_a["wina"])
     finally:
         shutil.rmtree(katalog, ignore_errors=True)
         os.environ.pop("CENNIK_SCIEZKA", None)

@@ -12,6 +12,7 @@ te funkcje i oddac wynik.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -283,6 +284,66 @@ def zapisz(dane: dict) -> None:
         raise
 
 
+class KonfliktZapisu(Exception):
+    """Plik zmienil sie na dysku od wczytania — zapis odrzucony, dysk nietkniety."""
+
+    def __init__(self, aktualna_wersja: str, roznice: list[str]):
+        self.aktualna_wersja = aktualna_wersja
+        self.roznice = roznice
+        super().__init__("Plik zmienil sie od wczytania — ktos inny zapisal wczesniej")
+
+
+def wersja_pliku() -> str:
+    """Odcisk aktualnej treści pliku na dysku — do wykrywania utraconych zapisów.
+
+    Krótki skrót starcza: to etykieta do porównania równości, nie dowód
+    kryptograficzny. Brak pliku ma własny, stabilny znacznik, żeby nie był
+    nieodróżnialny od hasha jakiejś realnej treści.
+    """
+    if not WYDARZENIA.exists():
+        return "brak-pliku"
+    return hashlib.sha256(WYDARZENIA.read_bytes()).hexdigest()[:16]
+
+
+def podsumuj_roznice(stare: dict, nowe: dict, limit: int = 5) -> list[str]:
+    """Krótki, czytelny dla człowieka opis różnic między dwiema wersjami wydarzeń.
+
+    Liczony po polu `id`. Używany wyłącznie w komunikacie o konflikcie zapisu —
+    nie ma pretensji do pełnego diffa, tylko do zorientowania edytora, co już
+    jest zapisane, a czego on jeszcze nie widział.
+    """
+    stare_poz = {w["id"]: w for w in stare.get("wydarzenia", []) if isinstance(w, dict) and "id" in w}
+    nowe_poz = {w["id"]: w for w in nowe.get("wydarzenia", []) if isinstance(w, dict) and "id" in w}
+
+    opisy: list[str] = []
+    for id_ in nowe_poz.keys() - stare_poz.keys():
+        opisy.append(f"Nowe wydarzenie: {nowe_poz[id_].get('tytul', id_)}")
+    for id_ in stare_poz.keys() - nowe_poz.keys():
+        opisy.append(f"Usunięte wydarzenie: {stare_poz[id_].get('tytul', id_)}")
+    for id_ in stare_poz.keys() & nowe_poz.keys():
+        s, n = stare_poz[id_], nowe_poz[id_]
+        zmienione = sorted(p for p in s.keys() | n.keys() if s.get(p) != n.get(p))
+        if zmienione:
+            opisy.append(f"{n.get('tytul', id_)}: zmienione pole(a) {', '.join(zmienione)}")
+
+    if len(opisy) > limit:
+        opisy = opisy[:limit] + [f"...i {len(opisy) - limit} więcej"]
+    return opisy
+
+
+def zapisz_bezpiecznie(dane: dict, bazowa_wersja: str, bazowe_dane: dict | None = None) -> str:
+    """Jak zapisz(), ale odrzuca zapis, gdy plik zmienił się od `bazowa_wersja`.
+
+    Patrz cennik.py — analogiczna funkcja, ten sam powód.
+    """
+    aktualna = wersja_pliku()
+    if bazowa_wersja != aktualna:
+        roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
+        raise KonfliktZapisu(aktualna, roznice)
+    zapisz(dane)
+    return wersja_pliku()
+
+
 def opis_kopii() -> str:
     """Sciezka kopii zapasowej do pokazania w interfejsie."""
     try:
@@ -296,4 +357,5 @@ def stan_poczatkowy() -> dict:
     return {
         "wydarzenia": wczytaj().get("wydarzenia", []),
         "sciezka": str(WYDARZENIA),
+        "wersja": wersja_pliku(),
     }
