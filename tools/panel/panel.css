@@ -19,7 +19,7 @@
 
 body {
   margin: 0;
-  padding: 0 0 4rem;
+  padding: 0.5em 0.1em 4rem;
   background: var(--tlo);
   color: var(--tekst);
   font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -84,6 +84,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
   border-radius: 8px;
 }
 .sekcja h2 { margin: 0; font-size: 1.05rem; }
+#sekcja-formularza { background: seashell; }
 .naglowek-sekcji {
   display: flex;
   align-items: center;

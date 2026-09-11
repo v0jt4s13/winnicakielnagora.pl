@@ -42,7 +42,7 @@ def zapewnij_plik() -> None:
     if CENNIK_W_REPO.exists():
         CENNIK.write_bytes(CENNIK_W_REPO.read_bytes())
 
-SZKIELET = {"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "wina": []}
+SZKIELET = {"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "rodzaje": [], "wina": []}
 
 # Wlasciciel i grupa moga czytac, reszta nie. Grupa to zwykle www-data.
 PRAWA_PLIKU = 0o640
@@ -50,6 +50,8 @@ PRAWA_PLIKU = 0o640
 POLA_WYMAGANE = ("id", "nazwa", "odmiana_slug", "kategoria", "pojemnosc_ml",
                  "cena_brutto", "rabat_procent", "dostepne", "opis", "zdjecie")
 POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep", "rodzaj")
+# Wartosc startowa dla plikow sprzed wprowadzenia edytowalnej listy "rodzaje" — patrz
+# `wczytaj()`. Od tej chwili zrodlem prawdy jest pole w danych, tak jak dla "kategorie".
 RODZAJE_WIN = ("musujące", "wytrawne", "półsłodkie")
 WZOR_ID = re.compile(r"^[a-z0-9-]+$")
 
@@ -98,7 +100,12 @@ def wczytaj() -> dict:
     """Zwraca cennik. Gdy pliku nie ma — szkielet, ale go nie tworzy."""
     if not CENNIK.exists():
         return dict(SZKIELET)
-    return json.loads(CENNIK.read_text(encoding="utf-8"))
+    dane = json.loads(CENNIK.read_text(encoding="utf-8"))
+    # Pliki zapisane przed wprowadzeniem edytowalnej listy rodzajow nie maja tego klucza —
+    # zasiej go domyslnymi wartosciami, zeby istniejace wina.rodzaj nie stracily wazności.
+    if isinstance(dane, dict) and "rodzaje" not in dane:
+        dane["rodzaje"] = list(RODZAJE_WIN)
+    return dane
 
 
 def _blad(pozycja, pole, komunikat) -> dict:
@@ -118,6 +125,11 @@ def waliduj(dane) -> list[dict]:
     if not isinstance(kategorie, list) or not kategorie:
         bledy.append(_blad(None, "kategorie", "Lista kategorii nie może być pusta"))
         kategorie = []
+
+    rodzaje = dane.get("rodzaje")
+    if not isinstance(rodzaje, list):
+        bledy.append(_blad(None, "rodzaje", "Lista rodzajów musi być tablicą"))
+        rodzaje = []
 
     stawka = dane.get("stawka_vat")
     if not isinstance(stawka, (int, float)) or not 0 <= stawka < 1:
@@ -157,7 +169,7 @@ def waliduj(dane) -> list[dict]:
         if kategorie and wino.get("kategoria") not in kategorie:
             bledy.append(_blad(i, "kategoria", "Nieznana kategoria"))
         rodzaj = wino.get("rodzaj")
-        if rodzaj and rodzaj not in RODZAJE_WIN:
+        if rodzaj and rodzaj not in rodzaje:
             bledy.append(_blad(i, "rodzaj", f"Nieznany rodzaj: {rodzaj}"))
         if dostepne_odmiany and wino.get("odmiana_slug") not in dostepne_odmiany:
             bledy.append(_blad(i, "odmiana_slug", "Nie ma strony odmiany o tym adresie"))

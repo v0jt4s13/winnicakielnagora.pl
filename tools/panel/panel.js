@@ -141,9 +141,19 @@ function renderKategorie() {
     .join("");
 }
 
+function renderRodzaje() {
+  qs("#lista-rodzajow").innerHTML = (cennik.rodzaje || [])
+    .map(
+      (nazwa) => `<li>${Produkty.escape(nazwa)}
+        <button type="button" data-rodzaj="${Produkty.escape(nazwa)}" title="Usuń">×</button></li>`
+    )
+    .join("");
+}
+
 function renderWszystko() {
   renderLista();
   renderKategorie();
+  renderRodzaje();
   if (wybrany !== null) renderFormularz();
 }
 
@@ -167,7 +177,7 @@ function renderFormularz() {
   const f = qs("#formularz");
   f.elements.odmiana_slug.innerHTML = opcje(odmiany, wino.odmiana_slug);
   f.elements.kategoria.innerHTML = opcje(cennik.kategorie || [], wino.kategoria);
-  f.elements.rodzaj.innerHTML = opcje(["musujące", "wytrawne", "półsłodkie"], wino.rodzaj);
+  f.elements.rodzaj.innerHTML = opcje(cennik.rodzaje || [], wino.rodzaj);
   f.elements.zdjecie.innerHTML = opcje(zdjecia, wino.zdjecie);
 
   ["nazwa", "id", "opis", ...POLA_LICZBOWE].forEach((pole) => {
@@ -224,7 +234,7 @@ function bledyPozycji(wino, indeks) {
   if (!wino.opis) dodaj("opis", "Pole wymagane");
   if (!wino.odmiana_slug) dodaj("odmiana_slug", "Wybierz stronę odmiany");
   if (!(cennik.kategorie || []).includes(wino.kategoria)) dodaj("kategoria", "Wybierz kategorię");
-  if (wino.rodzaj && !["musujące", "wytrawne", "półsłodkie"].includes(wino.rodzaj))
+  if (wino.rodzaj && !(cennik.rodzaje || []).includes(wino.rodzaj))
     dodaj("rodzaj", "Nieznany rodzaj");
   if (!zdjecia.includes(wino.zdjecie)) dodaj("zdjecie", "Wybierz zdjęcie");
   if (!(wino.cena_brutto > 0)) dodaj("cena_brutto", "Cena musi być większa od zera");
@@ -417,6 +427,36 @@ qs("#lista-kategorii").addEventListener("click", (e) => {
   cennik.kategorie = cennik.kategorie.filter((k) => k !== nazwa);
   oznaczZmiane();
   renderKategorie();
+  if (wybrany !== null) renderFormularz();
+});
+
+qs("#dodaj-rodzaj").addEventListener("click", () => {
+  const pole = qs("#nowy-rodzaj");
+  const nazwa = pole.value.trim();
+  if (!nazwa) return;
+  if ((cennik.rodzaje || []).includes(nazwa)) {
+    pokazKomunikat(`Rodzaj „${Produkty.escape(nazwa)}” już istnieje.`, "ostrzezenie");
+    return;
+  }
+  cennik.rodzaje = [...(cennik.rodzaje || []), nazwa];
+  pole.value = "";
+  oznaczZmiane();
+  renderRodzaje();
+  if (wybrany !== null) renderFormularz();
+  pokazKomunikat(`Rodzaj „${Produkty.escape(nazwa)}” pojawi się w formularzu pozycji po zapisie.`, "ostrzezenie");
+});
+
+qs("#lista-rodzajow").addEventListener("click", (e) => {
+  const nazwa = e.target.dataset?.rodzaj;
+  if (!nazwa) return;
+  const uzywany = cennik.wina.filter((w) => w.rodzaj === nazwa).length;
+  if (uzywany > 0) {
+    pokazKomunikat(`Nie można usunąć — rodzaju „${Produkty.escape(nazwa)}” używa ${uzywany} pozycji.`, "blad");
+    return;
+  }
+  cennik.rodzaje = cennik.rodzaje.filter((r) => r !== nazwa);
+  oznaczZmiane();
+  renderRodzaje();
   if (wybrany !== null) renderFormularz();
 });
 
@@ -1093,6 +1133,11 @@ function initZwijanieSekcji() {
       const rozwiniete = przycisk.getAttribute("aria-expanded") === "true";
       przycisk.setAttribute("aria-expanded", String(!rozwiniete));
       cialo.hidden = rozwiniete;
+      // Formularz pozycji jest logicznie czescia sekcji "Pozycje" — zwiniecie listy
+      // chowa go razem z nia, rozwiniecie przywraca go tylko gdy cos jest wybrane.
+      if (cialo.id === "cialo-pozycje") {
+        qs("#sekcja-formularza").hidden = rozwiniete || wybrany === null;
+      }
     });
   });
 }

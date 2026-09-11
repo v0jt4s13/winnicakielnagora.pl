@@ -7,6 +7,12 @@
     "Różowe",
     "Soki"
   ],
+  "rodzaje": [
+    "musujące",
+    "wytrawne",
+    "półsłodkie",
+    "słodkie"
+  ],
   "wina": [
     {
       "id": "dornfelder-2022",
@@ -37,7 +43,7 @@
       "zdjecie_sklep": "/butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg",
       "rocznik": 2022,
       "alkohol": 7,
-      "rodzaj": "wytrawne"
+      "rodzaj": "słodkie"
     },
     {
       "id": "seyval-blanc-2022",
@@ -53,7 +59,7 @@
       "zdjecie_sklep": "/butelki/rzeski_zefir-vidalSeyval-2023-biale-wytrawne.jpg",
       "rocznik": 2022,
       "alkohol": 8,
-      "rodzaj": "półsłodkie"
+      "rodzaj": "słodkie"
     },
     {
       "id": "souvignier-gris-2022",
