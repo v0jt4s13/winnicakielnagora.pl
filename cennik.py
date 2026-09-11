@@ -49,7 +49,8 @@ PRAWA_PLIKU = 0o640
 
 POLA_WYMAGANE = ("id", "nazwa", "odmiana_slug", "kategoria", "pojemnosc_ml",
                  "cena_brutto", "rabat_procent", "dostepne", "opis", "zdjecie")
-POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep")
+POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep", "rodzaj")
+RODZAJE_WIN = ("musujące", "wytrawne", "półsłodkie")
 WZOR_ID = re.compile(r"^[a-z0-9-]+$")
 
 
@@ -155,6 +156,9 @@ def waliduj(dane) -> list[dict]:
 
         if kategorie and wino.get("kategoria") not in kategorie:
             bledy.append(_blad(i, "kategoria", "Nieznana kategoria"))
+        rodzaj = wino.get("rodzaj")
+        if rodzaj and rodzaj not in RODZAJE_WIN:
+            bledy.append(_blad(i, "rodzaj", f"Nieznany rodzaj: {rodzaj}"))
         if dostepne_odmiany and wino.get("odmiana_slug") not in dostepne_odmiany:
             bledy.append(_blad(i, "odmiana_slug", "Nie ma strony odmiany o tym adresie"))
         if dostepne_zdjecia and wino.get("zdjecie") not in dostepne_zdjecia:

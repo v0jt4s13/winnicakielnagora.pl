@@ -1041,3 +1041,14 @@ body.cart-open #cart-panel {
   .noclegi-form__field--adults { flex: 0 0 8.5rem; }
   .noclegi-form .btn-primary { flex: 0 0 auto; }
 }
+
+/* Rodzaj wina w karcie produktu */
+.rodzaj-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  font-weight: 500;
+}

@@ -109,6 +109,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .lista li.wybrana { background: var(--tlo); box-shadow: inset 3px 0 0 var(--akcent); }
 .lista .nazwa { flex: 1 1 auto; font-weight: 600; }
 .lista .meta { color: var(--przygaszony); font-size: 0.85rem; }
+.lista .meta.id { font-size: 0.75rem; color: #999; min-width: 120px; }
 .lista .cena { font-variant-numeric: tabular-nums; }
 .lista .kropka { font-size: 0.8rem; }
 .lista .dostepna { color: var(--sukces); }
@@ -137,6 +138,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .formularz .pole-szerokie { grid-column: 1 / -1; }
 .formularz .pole-checkbox { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--tekst); }
 .formularz .pole-checkbox input { width: auto; }
+.pole-radio { display: flex; align-items: center; gap: 0.5rem; color: var(--tekst); margin-bottom: 0.6rem; }
+.pole-radio input { width: auto; }
 .formularz .blad-pola { color: var(--blad); font-size: 0.75rem; }
 .formularz .niepoprawne input,
 .formularz .niepoprawne select,

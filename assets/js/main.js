@@ -1112,6 +1112,68 @@ async function initWydarzenia() {
   lista.hidden = false;
 }
 
+async function initNoclegiWydarzenie() {
+  let wpisy;
+  try {
+    const odpowiedz = await fetch(`${KORZEN}data/wydarzenia.json`, { cache: "no-store" });
+    if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
+    const dane = await odpowiedz.json();
+    if (!Array.isArray(dane?.wydarzenia)) throw new Error("brak tablicy 'wydarzenia'");
+    wpisy = dane.wydarzenia;
+  } catch (blad) {
+    console.error("Nie udało się wczytać eventos dla #noclegi:", blad);
+    return;
+  }
+
+  // Znajdź które osób z wyswietl_w === "noclegi" które są aktywne
+  const dzis = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date());
+  const aktywneNoclegi = wpisy.filter(w => {
+    if (w.wyswietl_w !== "noclegi") return false;
+    const poczatek = w.data_publikacji_od || w.data_od;
+    return dzis >= poczatek && dzis <= w.data_do;
+  });
+
+  if (aktywneNoclegi.length === 0) {
+    // Brak aktywnego — ukryj sloty
+    qs("#noclegi-tresc-domyslna")?.classList.remove("hidden");
+    const trescWydarzenia = qs("#noclegi-tresc-wydarzenia");
+    if (trescWydarzenia) trescWydarzenia.hidden = true;
+    const zdjeciaWydarzenia = qs("#noclegi-zdjecia-wydarzenia");
+    if (zdjeciaWydarzenia) zdjeciaWydarzenia.hidden = true;
+    return;
+  }
+
+  // Weź pierwsze (najwcześniejsze)
+  const wpis = aktywneNoclegi[0];
+
+  // Wyświetl treść Wydarzenia zamiast domyślnego tekstu
+  const trescDefault = qs("#noclegi-tresc-domyslna");
+  const trescWydarzenia = qs("#noclegi-tresc-wydarzenia");
+  if (trescDefault && trescWydarzenia) {
+    trescDefault.hidden = true;
+    trescWydarzenia.textContent = wpis.tresc;
+    trescWydarzenia.hidden = false;
+  }
+
+  // Wyświetl zdjęcia (jeśli są)
+  if (wpis.zdjecia && wpis.zdjecia.length > 0) {
+    const kontener = qs("#noclegi-zdjecia-wydarzenia");
+    const grid = qs("#noclegi-zdjecia-grid");
+    if (kontener && grid) {
+      grid.innerHTML = wpis.zdjecia.map(zdjecie => `
+        <img
+          src="${KORZEN}attached_assets/photos/${zdjecie}"
+          alt="${wpis.tytul || ""}"
+          loading="lazy"
+          decoding="async"
+          class="w-full h-full object-cover rounded-md"
+          style="aspect-ratio: 4/3;">
+      `).join("");
+      kontener.hidden = false;
+    }
+  }
+}
+
 function initContactForm() {
   const form = qs("#contact-form");
   form?.addEventListener("submit", (e) => {
@@ -1173,6 +1235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initPrzelacznikSlowa();
 
   initWydarzenia();
+  initNoclegiWydarzenie();
   if (SKLEP_WLACZONY) {
     cennik = await wczytajCennik();
     renderKategorie();

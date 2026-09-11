@@ -69,6 +69,10 @@
         <label>Kategoria
           <select name="kategoria" required></select>
         </label>
+        <label>Rodzaj
+          <select name="rodzaj" required></select>
+          <small>Typologia wina.</small>
+        </label>
         <label>Rocznik
           <input name="rocznik" type="number" min="1900" max="2100" step="1">
           <small>Zostaw puste dla soków.</small>
@@ -205,6 +209,37 @@
           <small>Zwykły tekst. Puste linie zostaną zachowane na stronie.</small>
         </label>
       </form>
+
+      <fieldset class="pole-szerokie" style="margin-top: 1.5rem; border: 1px solid var(--ramka); border-radius: 6px; padding: 1rem;">
+        <legend style="font-weight: 600;">Wyświetl w</legend>
+        <label class="pole-radio">
+          <input type="radio" name="wyswietl_w" value="wydarzenia" required>
+          <span>Sekcja Wydarzenia</span>
+        </label>
+        <label class="pole-radio">
+          <input type="radio" name="wyswietl_w" value="noclegi" required>
+          <span>Sekcja Noclegi</span>
+        </label>
+      </fieldset>
+
+      <details class="galeria-wydarzenia" open style="margin-top: 1.5rem; border: 1px solid var(--ramka); border-radius: 6px; padding: 1rem;">
+        <summary style="font-weight: 600; cursor: pointer;">Galeria zdjęć do wydarzenia</summary>
+        <div class="galeria-wydarzenia-filtry" style="display: flex; align-items: flex-end; flex-wrap: wrap; gap: 0.7rem; margin-top: 1rem; margin-bottom: 1rem;">
+          <label style="display: flex; flex-direction: column; gap: 0.25rem; color: var(--przygaszony); font-size: 0.8rem;">
+            Katalog
+            <select id="galeria-wydarzenia-katalog" style="min-width: 220px; padding: 0.5rem 0.6rem; border: 1px solid var(--ramka); border-radius: 6px;"></select>
+          </label>
+          <span id="galeria-wydarzenia-zaznaczenie" class="podpowiedz" style="margin: 0 0 0.55rem;"></span>
+        </div>
+        <div id="galeria-wydarzenia-grid" class="galeria-grid"></div>
+        <div id="galeria-wydarzenia-paginacja" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: center;"></div>
+        <button type="button" id="dodaj-zdjecia-do-wydarzenia" class="przycisk" style="margin-top: 1rem; width: 100%; display: none;">Dodaj zaznaczone do wydarzenia</button>
+      </details>
+
+      <div id="zdjecia-wydarzenia" hidden style="margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--ramka); border-radius: 6px; background: var(--tlo);">
+        <h4 style="margin: 0 0 1rem; font-size: 0.95rem;">Zdjęcia w tym wydarzeniu</h4>
+        <ul id="lista-zdjecialb-wydarzenia" class="lista" style="max-height: 300px; overflow-y: auto;"></ul>
+      </div>
     </section>
 
     <section class="sekcja" id="sekcja-galerii">

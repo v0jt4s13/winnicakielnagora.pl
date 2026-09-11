@@ -71,6 +71,9 @@ const Produkty = {
     const badgePromo = ceny.promocja
       ? `<span class="absolute top-3 right-3 inline-flex items-center rounded-md bg-ring text-primary font-semibold px-3 py-1 text-xs">-${Number(wino.rabat_procent)}%</span>`
       : "";
+    const rodzajBadge = wino.rodzaj
+      ? `<span class="rodzaj-badge">${this.escape(wino.rodzaj)}</span>`
+      : "";
     const cenaPrzed = ceny.przedRabatem
       ? `<span class="text-sm text-muted-foreground line-through">${this.formatujCene(ceny.przedRabatem)}</span>`
       : "";
@@ -99,6 +102,7 @@ const Produkty = {
                     <h3 class="font-serif text-xl font-semibold mb-2">${tytul}</h3>
                     <p class="text-muted-foreground text-sm mb-3 line-clamp-2">${this.escape(wino.opis)}</p>
                     <div class="flex items-baseline gap-2 text-sm text-muted-foreground">${podtytul}</div>
+                    ${rodzajBadge ? `<div style="margin-top: 0.5rem;">${rodzajBadge}</div>` : ""}
                   </div>
                   <div class="p-5 pt-0 flex items-center justify-between gap-3">
                     <div class="flex flex-col">

@@ -25,6 +25,13 @@ let wydarzenia = [];
 let wybraneWydarzenie = null; // indeks edytowanego wpisu
 let zmienioneWydarzenia = false;
 
+// Galeria dla zdarzeń — niezalezny stan
+let galeriaWydarzeniaStan = { katalogi: [], pliki: [] };
+let galeriaWydarzeniaStan_katalog = "";
+let galeriaWydarzeniaStan_zaznaczone = new Set();
+let galeriaWydarzeniaStan_strona = 0;
+const GALERIA_Wydarzenia_NA_STRONE = 16;
+
 // --- komunikaty -----------------------------------------------------------
 
 function pokazKomunikat(tresc, rodzaj = "") {
@@ -115,6 +122,7 @@ function renderLista() {
       return `
         <li data-indeks="${i}" class="${i === wybrany ? "wybrana" : ""}">
           <span class="nazwa">${Produkty.escape(wino.nazwa || "(bez nazwy)")}</span>
+          <span class="meta id">${Produkty.escape(wino.id || "—")}</span>
           <span class="meta">${Produkty.escape(wino.kategoria || "—")}</span>
           <span class="meta cena">${Produkty.formatujCene(ceny.brutto)}</span>
           ${promo}
@@ -159,6 +167,7 @@ function renderFormularz() {
   const f = qs("#formularz");
   f.elements.odmiana_slug.innerHTML = opcje(odmiany, wino.odmiana_slug);
   f.elements.kategoria.innerHTML = opcje(cennik.kategorie || [], wino.kategoria);
+  f.elements.rodzaj.innerHTML = opcje(["musujące", "wytrawne", "półsłodkie"], wino.rodzaj);
   f.elements.zdjecie.innerHTML = opcje(zdjecia, wino.zdjecie);
 
   ["nazwa", "id", "opis", ...POLA_LICZBOWE].forEach((pole) => {
@@ -185,7 +194,7 @@ function zbierzFormularz() {
   const f = qs("#formularz");
   const wino = cennik.wina[wybrany];
 
-  ["nazwa", "id", "opis", "odmiana_slug", "kategoria", "zdjecie"].forEach((pole) => {
+  ["nazwa", "id", "opis", "odmiana_slug", "kategoria", "rodzaj", "zdjecie"].forEach((pole) => {
     wino[pole] = f.elements[pole].value.trim();
   });
   POLA_LICZBOWE.forEach((pole) => {
@@ -212,6 +221,7 @@ function bledyPozycji(wino, indeks) {
   if (!wino.opis) dodaj("opis", "Pole wymagane");
   if (!wino.odmiana_slug) dodaj("odmiana_slug", "Wybierz stronę odmiany");
   if (!(cennik.kategorie || []).includes(wino.kategoria)) dodaj("kategoria", "Wybierz kategorię");
+  if (!["musujące", "wytrawne", "półsłodkie"].includes(wino.rodzaj)) dodaj("rodzaj", "Wybierz rodzaj wina");
   if (!zdjecia.includes(wino.zdjecie)) dodaj("zdjecie", "Wybierz zdjęcie");
   if (!(wino.cena_brutto > 0)) dodaj("cena_brutto", "Cena musi być większa od zera");
   else if (Math.round(wino.cena_brutto * 100) / 100 !== wino.cena_brutto)
@@ -573,6 +583,11 @@ async function wczytajGalerie() {
       katalogi: Array.isArray(dane.katalogi) ? dane.katalogi : [],
       pliki: Array.isArray(dane.pliki) ? dane.pliki : [],
     };
+    // Także dla galerii w formularzu zadarzeń
+    galeriaWydarzeniaStan = {
+      katalogi: galeriaStan.katalogi,
+      pliki: galeriaStan.pliki,
+    };
     const istniejace = new Set(galeriaStan.pliki.map((plik) => plik.sciezka));
     galeriaZaznaczone = new Set([...galeriaZaznaczone].filter((plik) => istniejace.has(plik)));
     renderGaleria();
@@ -741,6 +756,109 @@ function stanWydarzenia(wpis) {
   return { klasa: "stan-aktywne", opis: "aktywne" };
 }
 
+function renderFormularzWydarzenia() {
+  const wpis = wydarzenia[wybraneWydarzenie];
+  const sekcja = qs("#sekcja-formularza-wydarzenia");
+  if (!wpis) {
+    sekcja.hidden = true;
+    return;
+  }
+  sekcja.hidden = false;
+  qs("#tytul-formularza-wydarzenia").textContent = wpis.tytul || "Wydarzenie";
+  const formularz = qs("#formularz-wydarzenia");
+  formularz.elements.zdjecie.innerHTML = opcje(zdjecia, wpis.zdjecie);
+  POLA_WYDARZENIA.forEach((pole) => {
+    formularz.elements[pole].value = wpis[pole] || "";
+  });
+  // Ustaw radio wyswietl_w
+  const wyswietl_w = wpis.wyswietl_w || "wydarzenia";
+  qsa("input[name='wyswietl_w']").forEach(r => r.checked = (r.value === wyswietl_w));
+  // Pokaż/ukryj galerię i listę zdjęć
+  if (wpis.zdjecia && wpis.zdjecia.length > 0) {
+    qs("#zdjecia-wydarzenia").hidden = false;
+    renderZdjeciaWydarzenia();
+  } else {
+    qs("#zdjecia-wydarzenia").hidden = true;
+  }
+  // Przygotuj galerię (ustal katalogi)
+  ustawOpcjeKataloguWydarzenia();
+  renderGaleriaWydarzenia();
+}
+
+function ustawOpcjeKataloguWydarzenia() {
+  const katalogi = galeriaWydarzeniaStan.katalogi || [];
+  const filtr = qs("#galeria-wydarzenia-katalog");
+  const poprzedniKatalog = galeriaWydarzeniaStan_katalog;
+  filtr.innerHTML = `<option value="">Wszystkie katalogi</option>` +
+    katalogi.map((katalog) => `<option value="${Produkty.escape(katalog)}">${Produkty.escape(nazwaKatalogu(katalog))}</option>`).join("");
+  filtr.value = galeriaWydarzeniaStan_katalog;
+}
+
+function renderGaleriaWydarzenia() {
+  const widoczne = galeriaWydarzeniaStan.pliki.filter((plik) =>
+    !galeriaWydarzeniaStan_katalog || plik.katalog === galeriaWydarzeniaStan_katalog
+  );
+  const stronaStart = galeriaWydarzeniaStan_strona * GALERIA_Wydarzenia_NA_STRONE;
+  const stronaKoniec = stronaStart + GALERIA_Wydarzenia_NA_STRONE;
+  const naStrone = widoczne.slice(stronaStart, stronaKoniec);
+
+  const grid = qs("#galeria-wydarzenia-grid");
+  grid.innerHTML = naStrone.map((plik) => {
+    const wybranyPlik = galeriaWydarzeniaStan_zaznaczone.has(plik.sciezka);
+    const wymiary = plik.szerokosc && plik.wysokosc
+      ? `${plik.szerokosc} × ${plik.wysokosc} px`
+      : "wymiary niedostępne";
+    return `
+      <article class="galeria-karta${wybranyPlik ? " wybrana" : ""}">
+        <input class="galeria-zaznacz" type="checkbox" data-galeria-wydarzenie="${Produkty.escape(plik.sciezka)}"
+          aria-label="Zaznacz ${Produkty.escape(plik.nazwa)}"${wybranyPlik ? " checked" : ""}>
+        <button type="button" class="galeria-obraz" data-galeria-podglad-wyd="${Produkty.escape(plik.sciezka)}">
+          <img src="${adresZasobu(plik.sciezka)}" alt="${Produkty.escape(plik.nazwa)}" loading="lazy">
+        </button>
+        <div class="galeria-dane">
+          <p class="galeria-nazwa">${Produkty.escape(plik.nazwa)}</p>
+          <p class="galeria-meta">${wymiary}</p>
+        </div>
+      </article>`;
+  }).join("");
+
+  renderPaginacjaWydarzenia(widoczne.length);
+  odswiezAkcjeGaleriiWydarzenia(galeriaWydarzeniaStan_zaznaczone.size);
+}
+
+function renderPaginacjaWydarzenia(wszystko) {
+  const liczbStron = Math.ceil(wszystko / GALERIA_Wydarzenia_NA_STRONE);
+  const paginacja = qs("#galeria-wydarzenia-paginacja");
+  if (liczbStron <= 1) {
+    paginacja.innerHTML = "";
+    return;
+  }
+  let html = "";
+  for (let i = 0; i < liczbStron; i++) {
+    const aktywna = i === galeriaWydarzeniaStan_strona ? " style=\"font-weight: 600; color: var(--akcent);\"" : "";
+    html += `<button type="button" data-strona="${i}" class="przycisk" ${aktywna} style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">${i + 1}</button>`;
+  }
+  paginacja.innerHTML = html;
+}
+
+function renderZdjeciaWydarzenia() {
+  if (wybraneWydarzenie === null) return;
+  const wpis = wydarzenia[wybraneWydarzenie];
+  const lista = qs("#lista-zdjecialb-wydarzenia");
+  lista.innerHTML = (wpis.zdjecia || []).map((zdjecie, i) => `
+    <li data-indeks="${i}" style="padding: 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+      <span>${Produkty.escape(zdjecie)}</span>
+      <button type="button" class="przycisk" data-usun-zdjecie="${i}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Usuń</button>
+    </li>`).join("");
+}
+
+function odswiezAkcjeGaleriiWydarzenia(liczba) {
+  qs("#galeria-wydarzenia-zaznaczenie").textContent = liczba
+    ? `Zaznaczono: ${liczba}`
+    : "Zaznacz obrazy, aby je dodać do tego Wydarzenia.";
+  qs("#dodaj-zdjecia-do-wydarzenia").style.display = liczba > 0 ? "block" : "none";
+}
+
 async function wczytajWydarzenia() {
   try {
     const odp = await fetch("api/wydarzenia-wczytaj");
@@ -775,24 +893,6 @@ function renderListeWydarzen() {
     .join("");
 }
 
-function renderFormularzWydarzenia() {
-  const wpis = wydarzenia[wybraneWydarzenie];
-  const sekcja = qs("#sekcja-formularza-wydarzenia");
-  if (!wpis) {
-    sekcja.hidden = true;
-    return;
-  }
-  sekcja.hidden = false;
-  qs("#tytul-formularza-wydarzenia").textContent = wpis.tytul || "Wydarzenie";
-  const formularz = qs("#formularz-wydarzenia");
-  // Lista zdjec przychodzi z cennika (cennik.stan_poczatkowy) — jedna biblioteka
-  // obsluguje oba formularze, wiec nie budujemy drugiej.
-  formularz.elements.zdjecie.innerHTML = opcje(zdjecia, wpis.zdjecie);
-  POLA_WYDARZENIA.forEach((pole) => {
-    formularz.elements[pole].value = wpis[pole] || "";
-  });
-}
-
 function wybierzWydarzenie(indeks) {
   wybraneWydarzenie = indeks;
   renderListeWydarzen();
@@ -811,6 +911,9 @@ function zbierzFormularzWydarzenia() {
   POLA_OPCJONALNE_WYDARZENIA.forEach((pole) => {
     if (!wpis[pole]) delete wpis[pole];
   });
+  // Ustaw wyswietl_w z wybranego radio
+  const wyswietl_w = qs("input[name='wyswietl_w']:checked")?.value || "wydarzenia";
+  wpis.wyswietl_w = wyswietl_w;
   // Identyfikator nie jest polem formularza — wynika z tytulu i musi zostac unikalny,
   // bo to on rozroznia wpisy przy zapisie.
   wpis.id = unikalneIdWydarzenia(wpis.tytul, wybraneWydarzenie);
@@ -915,6 +1018,63 @@ qs("#odrzuc-wydarzenia").addEventListener("click", async () => {
   oznaczZmianeWydarzen(false);
   ukryjKomunikat();
   await wczytajWydarzenia();
+});
+
+// --- galeria dla wydarzeń ---
+
+qs("#galeria-wydarzenia-katalog").addEventListener("change", (e) => {
+  galeriaWydarzeniaStan_katalog = e.target.value;
+  galeriaWydarzeniaStan_strona = 0;
+  renderGaleriaWydarzenia();
+});
+
+qs("#galeria-wydarzenia-grid").addEventListener("change", (e) => {
+  const checkbox = e.target.closest("[data-galeria-wydarzenie]");
+  if (!checkbox) return;
+  const sciezka = checkbox.dataset.galeriaWydarzenie;
+  if (checkbox.checked) galeriaWydarzeniaStan_zaznaczone.add(sciezka);
+  else galeriaWydarzeniaStan_zaznaczone.delete(sciezka);
+  renderGaleriaWydarzenia();
+});
+
+qs("#galeria-wydarzenia-paginacja").addEventListener("click", (e) => {
+  const strona = e.target.dataset.strona;
+  if (strona !== undefined) {
+    galeriaWydarzeniaStan_strona = Number(strona);
+    renderGaleriaWydarzenia();
+  }
+});
+
+qs("#dodaj-zdjecia-do-wydarzenia").addEventListener("click", () => {
+  if (wybraneWydarzenie === null) return;
+  const wpis = wydarzenia[wybraneWydarzenie];
+  if (!wpis.zdjecia) wpis.zdjecia = [];
+  galeriaWydarzeniaStan_zaznaczone.forEach(sciezka => {
+    if (!wpis.zdjecia.includes(sciezka)) wpis.zdjecia.push(sciezka);
+  });
+  galeriaWydarzeniaStan_zaznaczone.clear();
+  oznaczZmianeWydarzen();
+  qs("#zdjecia-wydarzenia").hidden = false;
+  renderZdjeciaWydarzenia();
+  renderGaleriaWydarzenia();
+  pokazKomunikat(`✓ Dodano ${wpis.zdjecia.length} zdjęć do tego Wydarzenia.`, "sukces");
+});
+
+qs("#lista-zdjecialb-wydarzenia").addEventListener("click", (e) => {
+  const usun = e.target.closest("[data-usun-zdjecie]");
+  if (!usun) return;
+  if (wybraneWydarzenie === null) return;
+  const indeks = Number(usun.dataset.usunZdjecie);
+  const wpis = wydarzenia[wybraneWydarzenie];
+  if (wpis.zdjecia) {
+    wpis.zdjecia.splice(indeks, 1);
+    if (wpis.zdjecia.length === 0) {
+      qs("#zdjecia-wydarzenia").hidden = true;
+      delete wpis.zdjecia;
+    }
+    oznaczZmianeWydarzen();
+    renderZdjeciaWydarzenia();
+  }
 });
 
 // --- zwijanie sekcji ------------------------------------------------------

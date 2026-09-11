@@ -41,7 +41,10 @@ PROJEKT_ZDJEC = PROJEKT / "attached_assets" / "photos"
 POLA_WYMAGANE = ("id", "tytul", "tresc", "data_od", "data_do")
 # `data_publikacji_od` puste = wpis pokazuje sie od `data_od`, czyli tak jak przed
 # dodaniem tego pola. Dzieki temu pliki sprzed zmiany nie wymagaja migracji.
-POLA_OPCJONALNE = ("data_publikacji_od", "zdjecie")
+# `zdjecia` (lista sciezek galerii) wspolistnieje ze starym pojedynczym `zdjecie`.
+POLA_OPCJONALNE = ("data_publikacji_od", "zdjecie", "zdjecia", "wyswietl_w")
+# Gdzie wpis ma sie pokazac: domyslnie w sekcji Wydarzenia, opcjonalnie w Noclegach.
+MIEJSCA_WYSWIETLANIA = ("wydarzenia", "noclegi")
 WZOR_ID = re.compile(r"^[a-z0-9-]+$")
 WZOR_DATY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # Ten sam ksztalt slugu co `zdjecie` pozycji cennika. Wzorzec odcina takze wyjscie
@@ -218,6 +221,40 @@ def waliduj(dane) -> list[dict]:
                                    "Podaj slug bez końcówki „-sm” — to wariant miniatury"))
             elif not (PROJEKT_ZDJEC / f"{zdjecie}.jpg").is_file():
                 bledy.append(_blad(i, "zdjecie", "Nie ma takiego zdjęcia"))
+
+        # `zdjecia` to lista sciezek z galerii panelu, wzgledem attached_assets/
+        # (np. "photos/altana.jpg"). Panel zapisuje dokladnie to, co zwrocil
+        # galeria.stan(); tutaj tylko pilnujemy, ze kazdy wpis to bezpieczna
+        # sciezka do istniejacego pliku obrazu.
+        zdjecia = wpis.get("zdjecia")
+        if zdjecia not in (None, []):
+            if not isinstance(zdjecia, list):
+                bledy.append(_blad(i, "zdjecia", "Musi być listą ścieżek do zdjęć"))
+            else:
+                for k, sciezka in enumerate(zdjecia):
+                    etykieta = f"zdjęcie {k + 1}"
+                    if not isinstance(sciezka, str) or not sciezka.strip():
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: pusta ścieżka"))
+                        continue
+                    if "\\" in sciezka or "\x00" in sciezka or sciezka.startswith("/"):
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: nieprawidłowa ścieżka"))
+                        continue
+                    czesci = Path(sciezka).parts
+                    if any(c in ("", ".", "..") for c in czesci):
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: nieprawidłowa ścieżka"))
+                        continue
+                    cel = (PROJEKT / "attached_assets" / sciezka).resolve()
+                    korzen = (PROJEKT / "attached_assets").resolve()
+                    if not cel.is_relative_to(korzen):
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: ścieżka wychodzi poza katalog zdjęć"))
+                    elif not cel.is_file():
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: nie ma takiego pliku"))
+
+        wyswietl_w = wpis.get("wyswietl_w")
+        if wyswietl_w not in (None, "") and wyswietl_w not in MIEJSCA_WYSWIETLANIA:
+            bledy.append(_blad(
+                i, "wyswietl_w",
+                f"Dozwolone wartości: {', '.join(MIEJSCA_WYSWIETLANIA)}"))
 
     return bledy
 
