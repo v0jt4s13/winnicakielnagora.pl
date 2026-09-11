@@ -31,8 +31,11 @@ Każdy obiekt w `wina.json` zyska nowe pole:
 ```
 
 **Reguły:**
-- `rodzaj` jest obligatoryjne (walidacja po stronie serwera i przeglądarki)
-- Trzy wartości: `"musujące"`, `"wytrawne"`, `"półsłodkie"`
+- `rodzaj` jest **opcjonalne** — także w formularzu panelu, nie tylko na poziomie danych
+  (decyzja z 2026-09-11: soki i inne pozycje niebędące winem nie mają rodzaju, wymuszanie
+  wyboru na formularzu soku było błędem)
+- Jeśli ustawione, musi być jedną z trzech wartości: `"musujące"`, `"wytrawne"`, `"półsłodkie"`
+  (walidacja po stronie serwera i przeglądarki dopuszcza tylko te trzy albo brak pola)
 - Wyświetla się w karcie produktu pod kategorią (obok, inny wiersz)
 - Filtr sklepu NIE zmienia się — filtruje się dalej tylko po kategorii
 
@@ -200,9 +203,13 @@ Jeśli wydarzenie ma `wyswietl_w: "noclegi"` — pojawia się w sekcji `#noclegi
 
 ✓ **Czy Nocleg może mieć wiele wydarzeń** — tylko **jedno w tym samym czasie**. Jeśli kilka się pokrywa, wyświetla się aktualnie trwające (lub przyszłe) z najwcześniejszą datą. Logika będzie po stronie serwera (funkcja `wydarzenia.aktywne()` już filtruje).
 
-✓ **Czy starsze wpisy (brak pola `rodzaj`) mają dostać wartość domyślną** — **nie**. Brak pola `rodzaj` powoduje jedynie, że nazwa rodzaju się nie wyświetla. Zapisanie pozycji bez rodzaju nie jest błędem — pole jest opcjonalne na poziomie danych, obowiązkowe jedynie w panelu (aby nowe wpisy zawsze miały wartość).
+✓ **Czy starsze wpisy (brak pola `rodzaj`) mają dostać wartość domyślną** — **nie**. Brak pola `rodzaj` powoduje jedynie, że nazwa rodzaju się nie wyświetla. Zapisanie pozycji bez rodzaju nie jest błędem — pole jest opcjonalne, także w formularzu panelu (patrz zmiana z 2026-09-11 w sekcji wyżej — soki nie mają rodzaju i formularz nie może tego wymuszać).
 
 ## Changelog
+
+### 2026-09-11
+- `rodzaj` zmienione z obowiązkowego na opcjonalne w formularzu panelu — sok winogronowy
+  (kategoria „Soki") nie ma rodzaju wina i nie powinien być blokowany walidacją
 
 ### 2026-09-10
 - Wstępna specyfikacja

@@ -20,7 +20,8 @@
       "opis": "Dornfelder to szczep winogron o ciemnej skórce, znany z produkcji ciemnych, aksamitnych win z nutami śliwek i wiśni, doskonałych do starzenia w beczkach dębowych.",
       "zdjecie": "dornfelder-kieliszek-01",
       "rocznik": 2022,
-      "alkohol": 7
+      "alkohol": 7,
+      "rodzaj": "półsłodkie"
     },
     {
       "id": "monarch-2022",
@@ -35,7 +36,8 @@
       "zdjecie": "monarch-butelka-01",
       "zdjecie_sklep": "/butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg",
       "rocznik": 2022,
-      "alkohol": 7
+      "alkohol": 7,
+      "rodzaj": "wytrawne"
     },
     {
       "id": "seyval-blanc-2022",
@@ -50,7 +52,8 @@
       "zdjecie": "seyval-blanc-kieliszki-01",
       "zdjecie_sklep": "/butelki/rzeski_zefir-vidalSeyval-2023-biale-wytrawne.jpg",
       "rocznik": 2022,
-      "alkohol": 8
+      "alkohol": 8,
+      "rodzaj": "półsłodkie"
     },
     {
       "id": "souvignier-gris-2022",
@@ -64,7 +67,8 @@
       "opis": "Souvignier gris to biała odmiana winorośli stworzona w 1983 roku w Niemczech. Jest krzyżówką Seyval blanc i Zähringer.",
       "zdjecie": "souvignier-gris-kiscie-01",
       "rocznik": 2022,
-      "alkohol": 6.5
+      "alkohol": 6.5,
+      "rodzaj": "wytrawne"
     },
     {
       "id": "st-pepin-2022",
@@ -79,7 +83,8 @@
       "zdjecie": "st-pepin-kiscie-01",
       "zdjecie_sklep": "/butelki/gwiazda_polnocy-StPepin-2024-biale-wytrawne.jpg",
       "rocznik": 2022,
-      "alkohol": 11
+      "alkohol": 11,
+      "rodzaj": "wytrawne"
     },
     {
       "id": "swenson-red-2023",
@@ -94,7 +99,8 @@
       "zdjecie": "swenson-red-kiscie-01",
       "zdjecie_sklep": "/butelki/slodki_sven-svenson_red-2024-biale-slodkie.jpg",
       "rocznik": 2023,
-      "alkohol": 7.5
+      "alkohol": 7.5,
+      "rodzaj": "wytrawne"
     },
     {
       "id": "vidal-blanc-2024",
@@ -109,7 +115,8 @@
       "zdjecie": "vidal-blanc-kiscie-01",
       "zdjecie_sklep": "/butelki/okanagan-vidalblanc-2024-biale-polwytrawne.jpg",
       "rocznik": 2024,
-      "alkohol": 7
+      "alkohol": 7,
+      "rodzaj": "musujące"
     },
     {
       "id": "sok-winogronowy-750ml",

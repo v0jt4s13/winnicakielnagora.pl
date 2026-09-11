@@ -194,7 +194,7 @@ function zbierzFormularz() {
   const f = qs("#formularz");
   const wino = cennik.wina[wybrany];
 
-  ["nazwa", "id", "opis", "odmiana_slug", "kategoria", "rodzaj", "zdjecie"].forEach((pole) => {
+  ["nazwa", "id", "opis", "odmiana_slug", "kategoria", "zdjecie"].forEach((pole) => {
     wino[pole] = f.elements[pole].value.trim();
   });
   POLA_LICZBOWE.forEach((pole) => {
@@ -202,6 +202,9 @@ function zbierzFormularz() {
     if (surowa === "" && POLA_OPCJONALNE.includes(pole)) delete wino[pole];
     else wino[pole] = surowa === "" ? 0 : Number(surowa);
   });
+  const rodzaj = f.elements.rodzaj.value.trim();
+  if (rodzaj) wino.rodzaj = rodzaj;
+  else delete wino.rodzaj;
   const zdjecieSklep = f.elements.zdjecie_sklep.value.trim();
   if (zdjecieSklep) wino.zdjecie_sklep = zdjecieSklep;
   else delete wino.zdjecie_sklep;
@@ -221,7 +224,8 @@ function bledyPozycji(wino, indeks) {
   if (!wino.opis) dodaj("opis", "Pole wymagane");
   if (!wino.odmiana_slug) dodaj("odmiana_slug", "Wybierz stronę odmiany");
   if (!(cennik.kategorie || []).includes(wino.kategoria)) dodaj("kategoria", "Wybierz kategorię");
-  if (!["musujące", "wytrawne", "półsłodkie"].includes(wino.rodzaj)) dodaj("rodzaj", "Wybierz rodzaj wina");
+  if (wino.rodzaj && !["musujące", "wytrawne", "półsłodkie"].includes(wino.rodzaj))
+    dodaj("rodzaj", "Nieznany rodzaj");
   if (!zdjecia.includes(wino.zdjecie)) dodaj("zdjecie", "Wybierz zdjęcie");
   if (!(wino.cena_brutto > 0)) dodaj("cena_brutto", "Cena musi być większa od zera");
   else if (Math.round(wino.cena_brutto * 100) / 100 !== wino.cena_brutto)
