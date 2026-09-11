@@ -383,7 +383,7 @@ function updateStyleMenu(style) {
 
 function preferredTheme() {
   const saved = localStorage.getItem("winery-style");
-  return themeStyles[saved] ? saved : "classic";
+  return themeStyles[saved] ? saved : "light";
 }
 
 function initStyleSwitcher() {

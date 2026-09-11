@@ -34,7 +34,8 @@ done   # pięć razy ta sama liczba
   wypadnie z systemu motywów.
 - Każdy motyw deklaruje `colorScheme` (`light` albo `dark`), a `setTheme` przekazuje tę
   wartość do `document.documentElement.style.colorScheme`.
-- Wybrany motyw ląduje w `localStorage["winery-style"]`; domyślny (brak wpisu) to `classic`.
+- Wybrany motyw ląduje w `localStorage["winery-style"]`; domyślny (brak wpisu) to `light`
+  (Forest Green, decyzja Właściciela 2026-09-11).
 - Automatyczne, chwilowe przełączenie wyglądu wywołuje `setTheme(style, false)`, żeby nie
   nadpisać ręcznie zapisanej preferencji. Nocna pora jest takim przełączeniem na `dark`;
   po wyjściu z niej wraca `preferredTheme()`.
