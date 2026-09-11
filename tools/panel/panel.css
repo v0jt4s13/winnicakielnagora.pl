@@ -193,6 +193,51 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
   margin-top: 0.6rem;
 }
 .pomoc .podpowiedz { margin: 0.6rem 0 0; }
+
+/* Wskazówka rozwijana ikoną "?" — patrz sekcja "Konfiguracja poczty" */
+.wskazowka { margin-top: 0.6rem; }
+.wskazowka-znacznik {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 1px solid var(--ramka);
+  border-radius: 999px;
+  background: var(--karta);
+  color: var(--przygaszony);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.wskazowka-znacznik::-webkit-details-marker { display: none; }
+.wskazowka-znacznik:hover,
+.wskazowka[open] .wskazowka-znacznik {
+  border-color: var(--akcent);
+  color: var(--akcent);
+}
+.wskazowka-tresc {
+  margin-top: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ramka);
+  border-radius: 8px;
+  background: var(--tlo);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.wskazowka-tresc p { margin: 0 0 0.5rem; }
+.wskazowka-tresc ol { margin: 0.5rem 0 0.5rem 1.2rem; padding: 0; }
+.wskazowka-tresc li { margin-bottom: 0.5rem; }
+.wskazowka-tresc a { color: var(--akcent); }
+.wskazowka-tresc code {
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  background: var(--karta);
+  font-size: 0.8em;
+}
 .wynik {
   margin-top: 1rem;
   padding: 0.9rem;
