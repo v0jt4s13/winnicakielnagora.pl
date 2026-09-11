@@ -12,6 +12,7 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 PROJEKT = Path(__file__).resolve().parent.parent
@@ -110,6 +111,36 @@ def main() -> int:
                 cennik.wersja_pliku() == wersja_po_a)
         sprawdz("odrzucony zapis B nie dotknął pliku (zawartość też nietknięta)",
                 cennik.wczytaj()["wina"] == dane_a["wina"])
+
+        # 8) blokada wokół sprawdzenia+zapisu — regresja na wyścig zgłoszony w code
+        #    review: bez `flock` dwa NIEMAL JEDNOCZESNE zapisy z tą samą bazową wersją
+        #    mogłyby oba przejść sprawdzenie, zanim którykolwiek zdążyłby zapisać.
+        wersja_startowa = cennik.wersja_pliku()
+        bramka = threading.Barrier(2)
+        wyniki: dict[str, tuple] = {}
+
+        def probuj(klucz: str, nazwa: str) -> None:
+            bramka.wait()
+            dane_w = cennik.wczytaj()
+            dane_w["wina"] = dane_w["wina"] + [{"id": klucz, "nazwa": nazwa}]
+            try:
+                wyniki[klucz] = ("ok", cennik.zapisz_bezpiecznie(dane_w, wersja_startowa))
+            except cennik.KonfliktZapisu as konflikt:
+                wyniki[klucz] = ("konflikt", konflikt.aktualna_wersja)
+
+        w1 = threading.Thread(target=probuj, args=("watek-1", "Watek 1"))
+        w2 = threading.Thread(target=probuj, args=("watek-2", "Watek 2"))
+        w1.start()
+        w2.start()
+        w1.join()
+        w2.join()
+
+        udane = [k for k, v in wyniki.items() if v[0] == "ok"]
+        odrzucone = [k for k, v in wyniki.items() if v[0] == "konflikt"]
+        sprawdz("dwa równoległe zapisy z tą samą bazą: dokładnie jeden przechodzi",
+                len(udane) == 1 and len(odrzucone) == 1)
+        sprawdz("odrzucony wątek dostał aktualną wersję zwycięzcy",
+                len(odrzucone) == 1 and wyniki[odrzucone[0]][1] == wyniki[udane[0]][1])
     finally:
         shutil.rmtree(katalog, ignore_errors=True)
         os.environ.pop("CENNIK_SCIEZKA", None)

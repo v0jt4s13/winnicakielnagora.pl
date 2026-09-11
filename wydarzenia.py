@@ -12,6 +12,7 @@ te funkcje i oddac wynik.
 """
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -31,6 +32,8 @@ WYDARZENIA_W_REPO = PROJEKT / "data" / "wydarzenia.json"
 # cenniku, patrz TODO #26.
 WYDARZENIA = Path(os.environ.get("WYDARZENIA_SCIEZKA") or WYDARZENIA_W_REPO).expanduser()
 KOPIA = WYDARZENIA.with_suffix(WYDARZENIA.suffix + ".bak")
+# Wylacznie do serializacji zapisz_bezpiecznie() — patrz tam. Pusty plik, tresc bez znaczenia.
+BLOKADA = WYDARZENIA.with_suffix(WYDARZENIA.suffix + ".lock")
 
 SZKIELET: dict = {"wydarzenia": []}
 
@@ -334,14 +337,19 @@ def podsumuj_roznice(stare: dict, nowe: dict, limit: int = 5) -> list[str]:
 def zapisz_bezpiecznie(dane: dict, bazowa_wersja: str, bazowe_dane: dict | None = None) -> str:
     """Jak zapisz(), ale odrzuca zapis, gdy plik zmienił się od `bazowa_wersja`.
 
-    Patrz cennik.py — analogiczna funkcja, ten sam powód.
+    Patrz cennik.py — analogiczna funkcja, ten sam powód, ta sama blokada `flock`
+    wokol sprawdzenia+zapisu (bez niej dwa niemal jednoczesne zapisy moglyby oba
+    przejsc sprawdzenie wersji, zanim ktorykolwiek zdazylby zapisac).
     """
-    aktualna = wersja_pliku()
-    if bazowa_wersja != aktualna:
-        roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
-        raise KonfliktZapisu(aktualna, roznice)
-    zapisz(dane)
-    return wersja_pliku()
+    BLOKADA.parent.mkdir(parents=True, exist_ok=True)
+    with open(BLOKADA, "a") as uchwyt_blokady:
+        fcntl.flock(uchwyt_blokady, fcntl.LOCK_EX)
+        aktualna = wersja_pliku()
+        if bazowa_wersja != aktualna:
+            roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
+            raise KonfliktZapisu(aktualna, roznice)
+        zapisz(dane)
+        return wersja_pliku()
 
 
 def opis_kopii() -> str:

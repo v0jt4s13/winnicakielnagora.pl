@@ -9,6 +9,7 @@ i niczego nie serwuje — same dane.
 """
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -29,6 +30,8 @@ CENNIK_W_REPO = PROJEKT / "data" / "wina.json"
 # z 2026-09-02, wariant A z TODO #26. Lokalnie zostaje plik z repozytorium.
 CENNIK = Path(os.environ.get("CENNIK_SCIEZKA") or CENNIK_W_REPO).expanduser()
 KOPIA = CENNIK.with_suffix(CENNIK.suffix + ".bak")
+# Wylacznie do serializacji zapisz_bezpiecznie() — patrz tam. Pusty plik, tresc bez znaczenia.
+BLOKADA = CENNIK.with_suffix(CENNIK.suffix + ".lock")
 
 
 def zapewnij_plik() -> None:
@@ -253,7 +256,12 @@ def podsumuj_roznice(stare: dict, nowe: dict, limit: int = 5) -> list[str]:
     jest zapisane, a czego on jeszcze nie widzial.
     """
     opisy: list[str] = []
-    for klucz, etykieta in (("kategorie", "Lista kategorii"), ("rodzaje", "Lista rodzajów")):
+    for klucz, etykieta in (
+        ("kategorie", "Lista kategorii"),
+        ("rodzaje", "Lista rodzajów"),
+        ("stawka_vat", "Stawka VAT"),
+        ("waluta", "Waluta"),
+    ):
         if stare.get(klucz) != nowe.get(klucz):
             opisy.append(f"{etykieta}: zmieniona")
 
@@ -282,13 +290,20 @@ def zapisz_bezpiecznie(dane: dict, bazowa_wersja: str, bazowe_dane: dict | None 
     dysku jest najprostszym odpornym zamiennikiem. Bez tego dwoje redaktorow
     nadpisuje sie w ciszy, bo zapisz() zawsze zamienia CALY plik, nie tylko
     zmieniona pozycje.
+
+    Sprawdzenie wersji i zapis sa pod jedna blokada (`BLOKADA`, `flock`) — bez niej
+    dwa niemal jednoczesne zapisy moglyby oba przejsc sprawdzenie, zanim ktorykolwiek
+    zdazylby zapisac (tools/panel/serwer.py obsluguje zadania w osobnych watkach).
     """
-    aktualna = wersja_pliku()
-    if bazowa_wersja != aktualna:
-        roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
-        raise KonfliktZapisu(aktualna, roznice)
-    zapisz(dane)
-    return wersja_pliku()
+    BLOKADA.parent.mkdir(parents=True, exist_ok=True)
+    with open(BLOKADA, "a") as uchwyt_blokady:
+        fcntl.flock(uchwyt_blokady, fcntl.LOCK_EX)
+        aktualna = wersja_pliku()
+        if bazowa_wersja != aktualna:
+            roznice = podsumuj_roznice(bazowe_dane, wczytaj()) if isinstance(bazowe_dane, dict) else []
+            raise KonfliktZapisu(aktualna, roznice)
+        zapisz(dane)
+        return wersja_pliku()
 
 
 def opis_kopii() -> str:
