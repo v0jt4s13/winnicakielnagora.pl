@@ -1053,77 +1053,51 @@ body.cart-open #cart-panel {
   font-weight: 500;
 }
 
-/* Wariant do porównania (#o-nas) — baner statystyk na tle --primary, jak nagłówek.
-   Klasy Tailwinda z wklejonego wzorca (rounded-2xl, emerald-*, md:grid-cols-3, gap-6,
-   w-14…) nie ma w bundlu (patrz .ai/standards/frontend/styling.md) — stąd własny komponent. */
-.stat-banner {
+/* Pasek statystyk (#o-nas) — wybrany po porównaniu z wariantami v1/v2 (usunięte).
+   Kolory przez zmienne motywu, jak nagłówek (bg-primary/text-primary-foreground),
+   więc pozostają spójne we wszystkich 4 motywach strony — patrz frontend/theming. */
+.page-stats-bar {
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: var(--shadow-xl);
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  padding: 2.5rem 1.5rem;
+  padding: 1rem 1rem;
 }
 
-.stat-banner__grid {
+.page-stats-bar__grid {
   max-width: 64rem;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  text-align: center;
 }
 
-.stat-banner__card {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  background: hsl(var(--primary-foreground) / 0.08);
-  border: 1px solid hsl(var(--primary-foreground) / 0.15);
-  transition: border-color 0.2s ease;
-}
-
-.stat-banner__card:hover {
-  border-color: hsl(var(--ring) / 0.6);
-}
-
-.stat-banner__icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
-  background: hsl(var(--primary-foreground) / 0.12);
-  border: 1px solid hsl(var(--primary-foreground) / 0.2);
-  color: hsl(var(--ring));
-}
-
-.stat-banner__icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.stat-banner__value {
+.page-stats-bar__value {
   font-family: "Playfair Display", serif;
-  font-size: 1.875rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  line-height: 1;
 }
 
-.stat-banner__label {
-  margin-top: 0.15rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: hsl(var(--primary-foreground) / 0.7);
+.page-stats-bar__label {
+  margin-top: 0.5rem;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: hsl(var(--primary-foreground) / 0.8);
 }
 
-@media (min-width: 768px) {
-  .stat-banner { padding: 2.5rem 3rem; }
-  .stat-banner__grid { grid-template-columns: repeat(3, 1fr); }
+.page-stats-bar__vine {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 190;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  color: hsl(var(--primary-foreground) / 0.35);
+}
+
+@media (max-width: 639px) {
+  .page-stats-bar__grid { grid-template-columns: 1fr; gap: 2rem; }
 }
