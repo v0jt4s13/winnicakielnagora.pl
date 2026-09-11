@@ -9,8 +9,10 @@ import re
 import secrets
 import smtplib
 import ssl
+import tempfile
 import time
 from email.message import EmailMessage
+from pathlib import Path
 
 
 IKONY = ("wine", "sprout", "square", "users", "map-pin", "clock", "mail")
@@ -18,6 +20,18 @@ CZAS_WAZNOSCI_WYZWANIA = 300
 MAX_CIAZAR_ZADANIA = 16 * 1024
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+PROJEKT = Path(__file__).resolve().parent
+
+# Dane logowania SMTP wpisywane przez Wlasciciela z panelu (zamiast/obok zmiennych
+# CONTACT_SMTP_USER/CONTACT_SMTP_PASSWORD) — patrz zapisz_smtp_dane(). Na produkcji
+# wskaz je POZA katalog wdrozenia (CONTACT_SMTP_SCIEZKA), ten sam uklad co CENNIK_SCIEZKA.
+# Lokalnie ladują do data/ — katalog jest w .gitignore, wiec plik z sekretem nigdy
+# nie trafi przypadkiem do repo.
+SMTP_DANE = Path(os.environ.get("CONTACT_SMTP_SCIEZKA") or
+                  (PROJEKT / "data" / "smtp-dane.json")).expanduser()
+# Tylko wlasciciel procesu — to sekret, nie dane redakcyjne jak wina.json (tam 0o640).
+PRAWA_PLIKU_SEKRETU = 0o600
 
 
 class NiepoprawneDane(ValueError):
@@ -136,6 +150,62 @@ def waliduj(dane: dict) -> dict:
     }
 
 
+def wczytaj_smtp_dane() -> dict | None:
+    """Dane logowania SMTP zapisane z panelu, albo None gdy pliku nie ma / jest uszkodzony.
+
+    Uszkodzony plik traktujemy jak brak danych (spadamy na zmienne srodowiskowe),
+    zamiast wywalac cala wysylke z powodu niezwiazanej awarii dysku.
+    """
+    if not SMTP_DANE.is_file():
+        return None
+    try:
+        dane = json.loads(SMTP_DANE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(dane, dict):
+        return None
+    user, password = dane.get("user"), dane.get("password")
+    if not isinstance(user, str) or not isinstance(password, str) or not user or not password:
+        return None
+    return {"user": user, "password": password}
+
+
+def zapisz_smtp_dane(user: str, password: str) -> None:
+    """Zapisuje dane logowania SMTP z panelu — kazdy zapis nadpisuje poprzedni w calosci.
+
+    Haslo aplikacji Gmaila przegladarka pokazuje w czterech grupach ze spacjami
+    ("abcd efgh ijkl mnop") — SMTP go nie przyjmie w tej postaci, wiec usuwamy
+    biale znaki, zeby wklejenie 1:1 ze strony Google zadzialalo bez tlumaczenia.
+    """
+    user = (user or "").strip()
+    password = re.sub(r"\s+", "", password or "")
+    if not user or not _EMAIL_RE.fullmatch(user):
+        raise NiepoprawneDane("Podaj prawidlowy adres e-mail konta SMTP")
+    if not password:
+        raise NiepoprawneDane("Haslo jest wymagane")
+
+    SMTP_DANE.parent.mkdir(parents=True, exist_ok=True)
+    tresc = json.dumps({"user": user, "password": password}, ensure_ascii=False) + "\n"
+    uchwyt, tymczasowy = tempfile.mkstemp(dir=str(SMTP_DANE.parent), suffix=".tmp")
+    try:
+        with os.fdopen(uchwyt, "w", encoding="utf-8") as plik:
+            plik.write(tresc)
+        os.chmod(tymczasowy, PRAWA_PLIKU_SEKRETU)
+        os.replace(tymczasowy, SMTP_DANE)
+    except BaseException:
+        Path(tymczasowy).unlink(missing_ok=True)
+        raise
+
+
+def smtp_skonfigurowane() -> bool:
+    """Do statusu w panelu — nie zdradza samych wartosci, tylko czy wysylka zadziala."""
+    try:
+        _smtp_config()
+        return True
+    except BrakKonfiguracji:
+        return False
+
+
 def _smtp_config() -> dict:
     host = os.environ.get("CONTACT_SMTP_HOST", "").strip()
     recipient = os.environ.get("CONTACT_TO", "").strip()
@@ -146,10 +216,18 @@ def _smtp_config() -> dict:
         port = int(os.environ.get("CONTACT_SMTP_PORT", "587"))
     except ValueError as blad:
         raise BrakKonfiguracji("CONTACT_SMTP_PORT musi byc liczba") from blad
-    user = os.environ.get("CONTACT_SMTP_USER", "").strip()
-    password = os.environ.get("CONTACT_SMTP_PASSWORD", "")
-    if bool(user) != bool(password):
-        raise BrakKonfiguracji("CONTACT_SMTP_USER i CONTACT_SMTP_PASSWORD musza wystapic razem")
+
+    # Dane z panelu (SMTP_DANE) maja pierwszenstwo przed zmiennymi srodowiskowymi —
+    # to one sa teraz zrodlem prawdy, gdy istnieja (decyzja Wlasciciela 2026-09-11).
+    z_panelu = wczytaj_smtp_dane()
+    if z_panelu:
+        user, password = z_panelu["user"], z_panelu["password"]
+    else:
+        user = os.environ.get("CONTACT_SMTP_USER", "").strip()
+        password = os.environ.get("CONTACT_SMTP_PASSWORD", "")
+        if bool(user) != bool(password):
+            raise BrakKonfiguracji("CONTACT_SMTP_USER i CONTACT_SMTP_PASSWORD musza wystapic razem")
+
     return {
         "host": host,
         "port": port,

@@ -472,6 +472,55 @@ qs("#dodaj-rodzaj").addEventListener("click", () => {
   pokazKomunikat(`Rodzaj „${Produkty.escape(nazwa)}” pojawi się w formularzu pozycji po zapisie.`, "ostrzezenie");
 });
 
+// --- konfiguracja poczty (SMTP) ---------------------------------------------
+// Dane logowania nie wracaja z serwera nigdy — tylko status "skonfigurowano/brak".
+// Kazdy zapis nadpisuje poprzednie dane w calosci (patrz kontakt.zapisz_smtp_dane).
+
+async function wczytajStatusSmtp() {
+  const status = qs("#smtp-status");
+  try {
+    const odp = await fetch("api/smtp-wczytaj");
+    const dane = await odp.json();
+    status.textContent = dane.skonfigurowano ? "skonfigurowano ✓" : "brak danych logowania";
+  } catch (_) {
+    status.textContent = "nie udało się sprawdzić";
+  }
+}
+
+qs("#zapisz-smtp").addEventListener("click", async () => {
+  const formularz = qs("#formularz-smtp");
+  const user = formularz.elements.smtp_user.value.trim();
+  const password = formularz.elements.smtp_password.value;
+  if (!user || !password) {
+    pokazKomunikat("Podaj adres e-mail i hasło aplikacji przed zapisem.", "blad");
+    return;
+  }
+  const przycisk = qs("#zapisz-smtp");
+  przycisk.disabled = true;
+  try {
+    const odp = await fetch("api/smtp-zapisz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user, password }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok || !wynik.ok) {
+      pokazKomunikat(
+        `Nie udało się zapisać danych logowania: ${Produkty.escape(wynik.komunikat || "serwer nie podał powodu")}`,
+        "blad"
+      );
+      return;
+    }
+    formularz.reset();
+    await wczytajStatusSmtp();
+    pokazKomunikat("✓ Zapisano dane logowania SMTP.", "sukces");
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się zapisać danych logowania: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    przycisk.disabled = false;
+  }
+});
+
 qs("#lista-rodzajow").addEventListener("click", (e) => {
   const nazwa = e.target.dataset?.rodzaj;
   if (!nazwa) return;
@@ -1200,3 +1249,4 @@ window.addEventListener("beforeunload", (e) => {
 // Sekwencyjnie, nie rownolegle: formularz wydarzenia buduje <select> ze zdjeciami
 // z listy, ktora przychodzi razem z cennikiem.
 wczytaj().then(wczytajWydarzenia).then(wczytajGalerie);
+wczytajStatusSmtp();

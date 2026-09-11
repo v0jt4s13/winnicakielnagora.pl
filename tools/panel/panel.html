@@ -334,6 +334,35 @@
         </div>
       </div>
     </section>
+
+    <section class="sekcja">
+      <div class="naglowek-sekcji">
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="false" aria-controls="cialo-smtp">
+            <span class="strzalka" aria-hidden="true"></span>Konfiguracja poczty
+          </button>
+        </h2>
+      </div>
+      <div class="cialo-sekcji" id="cialo-smtp" hidden>
+        <p class="podpowiedz">
+          Dane logowania SMTP do wysyłki formularza kontaktowego. Zapisane hasło nigdy nie jest
+          tu ponownie pokazywane — status niżej mówi tylko, czy wysyłka jest gotowa do działania.
+          Każdy zapis nadpisuje poprzednie dane w całości.
+        </p>
+        <p>Status: <strong id="smtp-status">sprawdzanie…</strong></p>
+        <form id="formularz-smtp" class="formularz" autocomplete="off">
+          <label>Adres e-mail konta SMTP
+            <input name="smtp_user" type="email" placeholder="np. kielnarowagora@gmail.com" autocomplete="off">
+          </label>
+          <label class="pole-szerokie">Hasło aplikacji
+            <input name="smtp_password" type="password" placeholder="hasło aplikacji Gmail" autocomplete="new-password">
+            <small>Dla Gmaila to 16-znakowe hasło aplikacji (wymaga włączonej weryfikacji
+              dwuetapowej) — nie zwykłe hasło do konta. Spacje w haśle usuwają się same.</small>
+          </label>
+        </form>
+        <button type="button" id="zapisz-smtp" class="przycisk glowny" style="margin-top: 1rem; width: 100%;">Zapisz dane logowania</button>
+      </div>
+    </section>
   </main>
 
   <script src="../../assets/js/produkty.js"></script>

@@ -24,6 +24,7 @@ PROJEKT = Path(__file__).resolve().parent.parent
 class _App:
     def __init__(self, *a, **k):
         self.wsgi_app = lambda environ, start_response: None
+        self.config = {}
     def route(self, *a, **k): return lambda f: f
     def after_request(self, f): return f
 

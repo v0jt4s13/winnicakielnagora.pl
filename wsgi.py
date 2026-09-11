@@ -414,6 +414,23 @@ def panel_api(akcja: str):
         return _json({"ok": True, "pozycji": len(dane["wydarzenia"]),
                       "kopia": wydarzenia.opis_kopii(), "wersja": nowa_wersja})
 
+    if akcja == "smtp-wczytaj" and request.method == "GET":
+        # Tylko status — samych danych logowania panel nigdy nie odczytuje z powrotem.
+        return _json({"skonfigurowano": kontakt.smtp_skonfigurowane()})
+
+    if akcja == "smtp-zapisz" and request.method == "POST":
+        zadanie = request.get_json(silent=True)
+        if not isinstance(zadanie, dict):
+            return _json({"ok": False, "komunikat": "Nieczytelne żądanie"}, 400)
+        try:
+            kontakt.zapisz_smtp_dane(zadanie.get("user", ""), zadanie.get("password", ""))
+        except kontakt.NiepoprawneDane as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 400)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat":
+                          f"Nie udało się zapisać do {kontakt.SMTP_DANE}: {blad}."}, 500)
+        return _json({"ok": True, "skonfigurowano": kontakt.smtp_skonfigurowane()})
+
     return _json({"ok": False, "komunikat": "Nieznana akcja"}, 404)
 
 
