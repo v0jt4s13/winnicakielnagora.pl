@@ -1052,3 +1052,78 @@ body.cart-open #cart-panel {
   font-size: 0.75rem;
   font-weight: 500;
 }
+
+/* Wariant do porównania (#o-nas) — baner statystyk na tle --primary, jak nagłówek.
+   Klasy Tailwinda z wklejonego wzorca (rounded-2xl, emerald-*, md:grid-cols-3, gap-6,
+   w-14…) nie ma w bundlu (patrz .ai/standards/frontend/styling.md) — stąd własny komponent. */
+.stat-banner {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 2.5rem 1.5rem;
+}
+
+.stat-banner__grid {
+  max-width: 64rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.stat-banner__card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: hsl(var(--primary-foreground) / 0.08);
+  border: 1px solid hsl(var(--primary-foreground) / 0.15);
+  transition: border-color 0.2s ease;
+}
+
+.stat-banner__card:hover {
+  border-color: hsl(var(--ring) / 0.6);
+}
+
+.stat-banner__icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: hsl(var(--primary-foreground) / 0.12);
+  border: 1px solid hsl(var(--primary-foreground) / 0.2);
+  color: hsl(var(--ring));
+}
+
+.stat-banner__icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.stat-banner__value {
+  font-family: "Playfair Display", serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.stat-banner__label {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--primary-foreground) / 0.7);
+}
+
+@media (min-width: 768px) {
+  .stat-banner { padding: 2.5rem 3rem; }
+  .stat-banner__grid { grid-template-columns: repeat(3, 1fr); }
+}
