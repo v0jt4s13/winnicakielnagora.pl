@@ -216,7 +216,7 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
    - [x] Inject standards
    - [x] Markup sekcji w index.html
    - [ ] Obsługa w main.js (funkcja initX + rejestracja w DOMContentLoaded)    ← in progress
-   - [ ] Style w custom.css sprawdzone we wszystkich czterech motywach
+   - [ ] Style w custom.css sprawdzone we wszystkich pięciu motywach
    ```
 
 ### After Completing Implementation
@@ -278,8 +278,8 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
   (`CENNIK_SCIEZKA`, `WYDARZENIA_SCIEZKA`), a kopie w repo są wersjami startowymi.
   Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw w `localStorage`
   pod kluczem `winery-style`.
-- **Motywy**: cztery zestawy (`classic`, `modern`, `rustic`, `dark`), po 29 zmiennych CSS
-  każdy, w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
+- **Motywy**: pięć zestawów (`classic`, `modern`, `rustic`, `light`, `dark`), po 31 zmiennych
+  CSS każdy, w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
   `dark` jest jedynym ciemnym i jedynym, który witryna włącza sama — po zmroku,
   przez `initTimeTheme()`.
 - **Ceny**: `data-price` na karcie produktu to **brutto**; netto i VAT 23% liczy
@@ -312,8 +312,8 @@ Wzorzec (patrz `plan-startu.html`):
 - stan zastosowany **przed pierwszym malowaniem** (mały skrypt w `<head>`), żeby nie migało,
 - `body` zawsze z jawnym tłem z tokenu (nie przezroczyste).
 
-Sama witryna (`index.html`) ma **własny** system czterech motywów (`themeStyles` w `main.js`,
-`classic/modern/rustic/dark`) — to osobny mechanizm, nie mieszać jednego z drugim.
+Sama witryna (`index.html`) ma **własny** system pięciu motywów (`themeStyles` w `main.js`,
+`classic/modern/rustic/light/dark`) — to osobny mechanizm, nie mieszać jednego z drugim.
 
 ### Standardy szczegółowe
 
@@ -373,8 +373,8 @@ builda, zanim zgłosisz zmianę jako gotową:
 
 1. `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000
 2. Obejrzyj sekcję, której dotyczyła zmiana (kotwice w tabeli **Where to Look**)
-3. **Przełącz wszystkie cztery motywy** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
-   musi wyglądać poprawnie w `classic`, `modern`, `rustic` i `dark`
+3. **Przełącz wszystkie pięć motywów** (menu stylu w nagłówku) — każda zmiana kolorów lub CSS
+   musi wyglądać poprawnie w `classic`, `modern`, `rustic`, `light` i `dark`
 4. Przy zmianach w sklepie: sprawdź filtry (kategoria, zakres cen, „tylko promocje") oraz
    koszyk (dodanie, +/−, podsumowanie netto / VAT / razem)
 5. Konsola przeglądarki bez błędów
@@ -471,9 +471,9 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   wersja tej reguły mówiła o atrybucie `data-price-net` na statycznych kartach w
   `index.html` — ten mechanizm zniknął przy przejściu na karty generowane z `data/wina.json`
   (SPEC-006).
-- **Cztery motywy po 29 zmiennych CSS.** `setTheme` ustawia je jako style inline na
+- **Pięć motywów po 31 zmiennych CSS.** `setTheme` ustawia je jako style inline na
   `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
-  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich czterech obiektach
+  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich pięciu obiektach
   `themeStyles`. Szczegóły: `.ai/standards/frontend/theming.md`.
 - **Motyw zależny od pory dnia nie może żyć w inicjalizatorze hero.** Podstrony `wina/*.html`
   nie mają `#hero-image`, ale nadal muszą dostać nocny `dark`. Logikę ogólnowitrynową trzymaj

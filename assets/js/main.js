@@ -110,6 +110,43 @@ const themeStyles = {
       "--age-gate-accent-foreground": "25 20% 15%"
     }
   },
+  light: {
+    name: "Forest Green",
+    colorScheme: "light",
+    vars: {
+      "--background": "148 18% 97%",
+      "--foreground": "150 12% 14%",
+      "--border": "146 14% 87%",
+      "--card": "150 20% 95%",
+      "--card-foreground": "150 12% 14%",
+      "--card-border": "148 15% 90%",
+      "--sidebar": "146 18% 92%",
+      "--sidebar-foreground": "150 12% 14%",
+      "--sidebar-border": "148 15% 88%",
+      "--sidebar-primary": "150 74% 17%",
+      "--sidebar-primary-foreground": "42 45% 95%",
+      "--sidebar-accent": "148 18% 86%",
+      "--sidebar-accent-foreground": "150 12% 14%",
+      "--sidebar-ring": "40 70% 48%",
+      "--popover": "150 22% 93%",
+      "--popover-foreground": "150 12% 14%",
+      "--popover-border": "148 15% 88%",
+      "--primary": "150 74% 17%",
+      "--primary-foreground": "42 45% 95%",
+      "--secondary": "148 20% 88%",
+      "--secondary-foreground": "150 12% 14%",
+      "--muted": "148 16% 91%",
+      "--muted-foreground": "150 8% 40%",
+      "--accent": "146 20% 86%",
+      "--accent-foreground": "150 12% 14%",
+      "--destructive": "0 84% 45%",
+      "--destructive-foreground": "0 0% 98%",
+      "--input": "0 0% 65%",
+      "--ring": "40 70% 48%",
+      "--age-gate-accent": "40 70% 48%",
+      "--age-gate-accent-foreground": "150 74% 17%"
+    }
+  },
   dark: {
     name: "Dark",
     colorScheme: "dark",

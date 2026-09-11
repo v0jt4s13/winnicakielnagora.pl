@@ -1,13 +1,13 @@
 # Motywy (`themeStyles`)
 
-Witryna ma cztery motywy: `classic`, `modern`, `rustic`, `dark`. Każdy to obiekt
+Witryna ma pięć motywów: `classic`, `modern`, `rustic`, `light`, `dark`. Każdy to obiekt
 w `themeStyles` na górze `assets/js/main.js` z polem `colorScheme` oraz **tym samym kompletem
-29 zmiennych CSS** (HSL bez `hsl()`). `dark` jest jedynym motywem ciemnym i jedynym, który
+31 zmiennych CSS** (HSL bez `hsl()`). `dark` jest jedynym motywem ciemnym i jedynym, który
 witryna potrafi włączyć sama — po zmroku, przez `initTimeTheme()`.
 
 ## Reguła nadrzędna
 
-**Nowa zmienna CSS musi trafić do wszystkich czterech motywów jednocześnie.**
+**Nowa zmienna CSS musi trafić do wszystkich pięciu motywów jednocześnie.**
 
 `setTheme` ustawia zmienne jako style inline na `document.documentElement` i **nigdy ich nie
 czyści**:
@@ -22,9 +22,9 @@ motywu — bez błędu w konsoli, za to z rozjechanymi kolorami.
 ## Sprawdzenie parytetu
 
 ```bash
-for t in classic modern rustic dark; do
+for t in classic modern rustic light dark; do
   awk "/^  $t: \{/,/^  \},?\$/" assets/js/main.js | grep -c '"--'
-done   # cztery razy ta sama liczba
+done   # pięć razy ta sama liczba
 ```
 
 ## Reguły
@@ -44,7 +44,7 @@ done   # cztery razy ta sama liczba
 - Reguła czasowa motywu należy do osobnego `initTimeTheme()`, niezależnego od
   `initHeroImage()`. Podstrony odmian ładują `main.js`, ale nie mają `#hero-image`, więc
   inicjalizator obrazu nie może odpowiadać za wygląd całej witryny.
-- Każda zmiana kolorów lub CSS wymaga obejrzenia strony we **wszystkich czterech** motywach.
+- Każda zmiana kolorów lub CSS wymaga obejrzenia strony we **wszystkich pięciu** motywach.
 - Każdy motyw z `themeStyles` ma mieć pozycję w menu stylu (`.style-option[data-style]`
   w `index.html`) — inaczej da się go włączyć tylko automatycznie albo przez `localStorage`.
 
