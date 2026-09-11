@@ -61,7 +61,7 @@ const Produkty = {
    */
   renderProductCard(wino, stawkaVat, opcje = {}) {
     const {
-      linkOdmiany = true, przyciskKoszyka = true,
+      linkOdmiany = true, przyciskKoszyka = true, pokazNetto = true,
       bazaZdjec = this.BAZA_ZDJEC, bazaOdmian = this.BAZA_ODMIAN,
     } = opcje;
     const ceny = this.policzCeny(wino, stawkaVat);
@@ -84,6 +84,9 @@ const Produkty = {
     const przycisk = przyciskKoszyka
       ? `<button class="btn-primary flex items-center gap-2" data-add-to-cart><svg class="w-4 h-4"><use href="#icon-cart"></use></svg>Dodaj</button>`
       : "";
+    const netto = pokazNetto
+      ? `<span class="text-xs text-muted-foreground">netto: ${this.formatujCene(ceny.netto)}</span>`
+      : "";
 
     return `
                 <article class="product-card rounded-md border border-card-border overflow-hidden hover-elevate" data-id="${this.escape(wino.id)}" data-category="${this.escape(wino.kategoria)}" data-price="${ceny.brutto.toFixed(2)}" data-promo="${ceny.promocja}" data-name="${nazwa}" data-image="${this.escape(zdjecie)}">
@@ -101,7 +104,7 @@ const Produkty = {
                     <div class="flex flex-col">
                       ${cenaPrzed}
                       <div class="flex items-baseline gap-2"><span class="text-2xl font-bold ${kolorCeny}">${this.formatujCene(ceny.brutto)}</span></div>
-                      <span class="text-xs text-muted-foreground">netto: ${this.formatujCene(ceny.netto)}</span>
+                      ${netto}
                     </div>
                     ${przycisk}
                   </div>

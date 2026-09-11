@@ -919,6 +919,7 @@ function renderSklep() {
       bazaZdjec: `${KORZEN}attached_assets/photos/`,
       bazaOdmian: `${KORZEN}wina/`,
       przyciskKoszyka: KOSZYK_WLACZONY,
+      pokazNetto: KOSZYK_WLACZONY,
     }))
     .join("");
   return true;
