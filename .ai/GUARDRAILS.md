@@ -18,9 +18,8 @@ Naruszenie = natychmiastowy revert, bez dyskusji.
 3. **NEVER** edytuj `assets/css/style.css` — to zbudowany artefakt Tailwinda bez źródeł w repo.
    Ręczna edycja jest nie do odtworzenia i nie do przeglądu (plik ma jedną linię).
 
-> Klasyczne reguły o PII w bazie i o SQL injection **nie mają tu zastosowania** — projekt nie ma
-> bazy, backendu ani formularza, który cokolwiek wysyła. Jeśli kiedyś powstaną (zadanie rozmiaru
-> **L**), dopisz je tutaj, zanim powstanie pierwszy endpoint.
+> Projekt nie ma bazy ani lokalnego magazynu zgłoszeń. Formularz kontaktowy wysyła dane wyłącznie
+> do skonfigurowanego odbiorcy SMTP; nie loguj treści, danych kontaktowych ani sekretów.
 
 ### BLOCK — do not merge without fix
 
@@ -69,9 +68,9 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
    do strony — żaden z nich nie definiuje danych.
 2. `assets/css/custom.css` → **NIGDY** nie duplikuje klas z bundla Tailwinda; dopisuje tylko to,
    czego w bundlu nie ma.
-3. `wsgi.py` → poza panelem redakcyjnym **NIGDY** nie dostaje logiki biznesowej ani zapisu
-   na dysk. Panel jest jedynym wyjątkiem i wymaga hasła; wszystko inne jest zadaniem rozmiaru
-   **L** i wymaga decyzji Właściciela.
+3. `wsgi.py` → poza panelem redakcyjnym nie dostaje logiki zapisu na dysk. Cienkie trasy
+   `/api/contact*` są dozwolone, ale walidacja i wysyłka mieszkają w `kontakt.py`; wiadomości
+   nie są zapisywane lokalnie. Panel jest jedynym miejscem zapisu na dysk.
 4. `tools/` → skrypty uruchamiane ręcznie (optymalizacja zdjęć, testy, lokalny panel).
    **NIGDY** nie mogą być importowane przez `wsgi.py` — kod wspólny z produkcją mieszka
    w `cennik.py` w katalogu głównym. Z `tools/` serwer produkcyjny oddaje wyłącznie trzy pliki
@@ -111,8 +110,8 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 
 ## Allowed exceptions
 
-1. **`alert()` w `initCart` i `initContactForm`** — świadome zaślepki demo, dopóki nie ma backendu.
-   Nie rozszerzamy wzorca na nowy kod i pamiętamy, że blokują automatyzację przeglądarki.
+1. **`alert()` w `initCart`** - świadoma zaślepka demo. Formularz kontaktowy używa komunikatów
+   inline i prawdziwego endpointu; nie rozszerzamy wzorca na nowy kod.
 2. **Koszyk w pamięci (`Map`), znikający po odświeżeniu** — świadomy stan demo, nie błąd.
 3. **Panel redakcyjny zapisuje pliki** — lokalnie bez logowania (nasłuch tylko na `127.0.0.1`),
    na produkcji za HTTP Basic Auth. To jedyne miejsce w projekcie, które cokolwiek zapisuje
@@ -136,7 +135,8 @@ Zmiana jest gotowa dopiero, gdy:
       `node tools/test-produkty.js` (ceny i render karty),
       `python3 tools/test-routing.py` (routing i pliki publiczne),
       `python3 tools/test-panel-auth.py` (dostęp do panelu na produkcji),
-      `python3 tools/test-cennik-sciezka.py` (ścieżka żywego cennika)
+      `python3 tools/test-cennik-sciezka.py` (ścieżka żywego cennika),
+      `python3 tools/test-contact.py` (walidacja formularza i wyzwania)
 
 > Nie ma lintera ani type-checkera. Testy pokrywają logikę, ale wygląd sprawdza wyłącznie
 > podgląd w przeglądarce.
@@ -208,9 +208,8 @@ Zmiana jest gotowa dopiero, gdy:
   biblioteki UI — to nadal wymaga decyzji Właściciela.
 - **Status**: zatwierdzone przez Właściciela 2026-09-02.
 
-### Koszyk i formularz jako zaślepki
+### Koszyk jako zaślepka
 
-- **Wybór**: koszyk w pamięci, formularz i płatność kończą się `alert()`.
-- **Dlaczego**: nie ma backendu, który przyjąłby zamówienie ani wiadomość.
-- **Konsekwencja**: to nie są błędy do naprawienia „przy okazji". Uczynienie ich prawdziwymi
-  to zadanie **L** — patrz `TODO.md` #7.
+- **Wybór**: koszyk w pamięci, a płatność kończy się `alert()`.
+- **Dlaczego**: sprzedaż online nadal nie ma backendu ani płatności.
+- **Konsekwencja**: koszyk i płatności pozostają poza zakresem formularza kontaktowego.

@@ -8,16 +8,14 @@ Ostatnia aktualizacja: **2026-09-07**.
 
 ## Sklep i koszyk
 
-### 7. Koszyk i formularz są zaślepkami
+### 7. Koszyk i płatności są zaślepkami
 
 - Koszyk to `Map` w pamięci — znika po odświeżeniu strony.
-- Formularz kontaktowy robi `preventDefault()` + `alert()`, nie wysyła nic; przycisk płatności
-  też kończy się `alert()`.
-- **Pytanie**: czy i kiedy dokładamy backend (wysyłka maila, trwały koszyk, płatności)? To
-  zadanie rozmiaru **L** — dokłada projektowi zależność, której świadomie nie ma
-  (`.ai/GUARDRAILS.md` → Architectural decisions).
-- **Uwaga dla agentów**: `alert()` zawiesza automatyzację przeglądarki — tych przycisków nie
-  klikaj przez Chrome MCP.
+- Formularz kontaktowy ma osobny backend SMTP i nie jest już częścią tego zadania.
+- **Pytanie**: czy i kiedy dokładamy trwały koszyk oraz płatności? To zadanie rozmiaru **L**
+  i wymaga osobnej decyzji Właściciela.
+- **Uwaga dla agentów**: przycisk płatności kończy się `alert()`, który zawiesza automatyzację
+  przeglądarki - nie klikaj go przez Chrome MCP.
 
 ### 9 (reszta). Dane do faktury
 
