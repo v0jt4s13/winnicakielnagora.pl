@@ -11,6 +11,7 @@ from flask import Flask, Response, request, send_from_directory
 
 import cennik
 import galeria
+import kontakt
 import wydarzenia
 
 BASE = Path(__file__).parent
@@ -18,6 +19,7 @@ STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po b
 STATIC_ROOT = next((p for p in STATIC_CANDIDATES if p.exists()), BASE)
 
 app = Flask(__name__, static_folder=None)  # statyki wydajemy sami, przez serve()
+app.config["MAX_CONTENT_LENGTH"] = kontakt.MAX_CIAZAR_ZADANIA
 
 
 # Witryna bywa serwowana pod podsciezka (dev stoi pod /winnicakielnagora.pl/). Jesli proxy
@@ -274,6 +276,39 @@ def zywe_wydarzenia():
         # Uszkodzony plik nie moze wywalic sekcji na stronie glownej — main.js dostanie
         # pusta liste i zostawi statyczna tresc sekcji wydarzen.
         return _json({"wydarzenia": []}, 500)
+
+
+@app.route("/api/contact/challenge")
+def formularz_wyzwanie():
+    try:
+        return _json(kontakt.nowe_wyzwanie())
+    except kontakt.BrakKonfiguracji:
+        return _json({"ok": False, "komunikat": "Formularz jest chwilowo niedostepny."}, 503)
+
+
+@app.route("/api/contact", methods=["POST"])
+def formularz_kontaktowy():
+    if request.content_length and request.content_length > kontakt.MAX_CIAZAR_ZADANIA:
+        return _json({"ok": False, "komunikat": "Zgloszenie jest za duze."}, 413)
+    dane = request.get_json(silent=True)
+    if not isinstance(dane, dict):
+        return _json({"ok": False, "komunikat": "Nieczytelne zgloszenie."}, 400)
+    try:
+        kontakt.sprawdz_wyzwanie(dane.get("challenge_token"), dane.get("selected_icon"))
+        dane = kontakt.waliduj(dane)
+    except kontakt.SpamRequest:
+        return _json({"ok": False, "komunikat": "Nie udalo sie wyslac wiadomosci."}, 400)
+    except kontakt.NiepoprawneWyzwanie as blad:
+        return _json({"ok": False, "kod": "challenge", "komunikat": str(blad)}, 400)
+    except kontakt.NiepoprawneDane as blad:
+        return _json({"ok": False, "komunikat": str(blad)}, 400)
+    try:
+        kontakt.wyslij(dane)
+    except kontakt.BrakKonfiguracji:
+        return _json({"ok": False, "komunikat": "Formularz jest chwilowo niedostepny."}, 503)
+    except kontakt.BladWysylki:
+        return _json({"ok": False, "komunikat": "Nie udalo sie wyslac wiadomosci. Sprobuj ponownie."}, 502)
+    return _json({"ok": True})
 
 
 @app.route("/tools/panel/api/<akcja>", methods=["GET", "POST"])

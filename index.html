@@ -731,6 +731,22 @@
                     <label for="message" class="font-medium">Wiadomość</label>
                     <textarea id="message" name="message" rows="5" required placeholder="Twoja wiadomość..." class="mt-2 w-full rounded-md border border-input px-3 py-3 bg-background"></textarea>
                   </div>
+                  <div class="contact-challenge" aria-labelledby="contact-challenge-label">
+                    <p id="contact-challenge-label" class="font-medium">Potwierdź, że jesteś człowiekiem</p>
+                    <p class="text-muted-foreground text-sm mt-1">Wybierz ikonę identyczną z ikoną wzorcową.</p>
+                    <div class="contact-challenge__target" aria-label="Ikona wzorcowa">
+                      <span class="text-sm text-muted-foreground">Ikona wzorcowa:</span>
+                      <svg id="contact-challenge-target" class="contact-challenge__target-icon" aria-hidden="true"><use href="#icon-square"></use></svg>
+                    </div>
+                    <div id="contact-challenge-options" class="contact-challenge__options" role="group" aria-label="Wybór ikony"></div>
+                    <p id="contact-challenge-message" class="contact-form__message" role="status" aria-live="polite" hidden></p>
+                  </div>
+                  <label class="contact-form__trap" aria-hidden="true">
+                    Nie wypełniaj tego pola
+                    <input name="website" tabindex="-1" autocomplete="off">
+                  </label>
+                  <p id="contact-form-status" class="contact-form__message" role="status" aria-live="polite" hidden></p>
+                  <p class="text-muted-foreground text-xs">Wysyłając wiadomość, zgadzasz się na kontakt w sprawie swojego zapytania. Nie zapisujemy formularza na stronie.</p>
                   <button type="submit" class="btn-primary w-full">Wyślij wiadomość</button>
                 </form>
               </div>

@@ -1213,10 +1213,113 @@ async function initNoclegiWydarzenie() {
 
 function initContactForm() {
   const form = qs("#contact-form");
-  form?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    alert("Dziękujemy za wiadomość! Skontaktujemy się wkrótce.");
-    form.reset();
+  const options = qs("#contact-challenge-options");
+  const target = qs("#contact-challenge-target use");
+  const challengeMessage = qs("#contact-challenge-message");
+  const formStatus = qs("#contact-form-status");
+  if (!form || !options || !target) return;
+
+  const labels = {
+    wine: "kieliszek wina",
+    sprout: "pęd rośliny",
+    square: "kwadrat",
+    users: "dwie osoby",
+    "map-pin": "pinezka mapy",
+    clock: "zegar",
+    mail: "koperta"
+  };
+  let challenge = null;
+  let selectedIcon = null;
+
+  function setMessage(element, text, error = false) {
+    if (!element) return;
+    element.textContent = text;
+    element.hidden = !text;
+    element.classList.toggle("contact-form__message--error", error);
+    element.classList.toggle("contact-form__message--success", !error && Boolean(text));
+  }
+
+  function renderChallenge(data) {
+    challenge = data;
+    selectedIcon = null;
+    target.setAttribute("href", `#icon-${data.target}`);
+    options.replaceChildren();
+    data.options.forEach((icon) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "contact-challenge__option";
+      button.dataset.icon = icon;
+      button.setAttribute("aria-label", labels[icon] || "ikona");
+      button.setAttribute("aria-pressed", "false");
+      button.innerHTML = `<svg aria-hidden="true"><use href="#icon-${icon}"></use></svg>`;
+      button.addEventListener("click", () => {
+        selectedIcon = icon;
+        options.querySelectorAll("button").forEach((other) =>
+          other.setAttribute("aria-pressed", String(other === button))
+        );
+        setMessage(challengeMessage, "");
+      });
+      options.append(button);
+    });
+  }
+
+  async function loadChallenge() {
+    setMessage(challengeMessage, "Ładowanie zadania...");
+    try {
+      const response = await fetch(`${KORZEN}api/contact/challenge`, {
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      });
+      const data = await response.json();
+      if (!response.ok || !data.token || !data.target || !Array.isArray(data.options)) {
+        throw new Error("challenge");
+      }
+      renderChallenge(data);
+      setMessage(challengeMessage, "");
+    } catch (_) {
+      challenge = null;
+      options.replaceChildren();
+      setMessage(challengeMessage, "Nie udało się przygotować zabezpieczenia. Odśwież stronę.", true);
+    }
+  }
+
+  loadChallenge();
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!challenge || !selectedIcon) {
+      setMessage(challengeMessage, "Wybierz ikonę przed wysłaniem wiadomości.", true);
+      return;
+    }
+
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    setMessage(formStatus, "Wysyłanie wiadomości...");
+    const dane = Object.fromEntries(new FormData(form).entries());
+    dane.challenge_token = challenge.token;
+    dane.selected_icon = selectedIcon;
+
+    try {
+      const response = await fetch(`${KORZEN}api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(dane)
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) {
+        const error = new Error(result.komunikat || "Nie udało się wysłać wiadomości.");
+        error.code = result.kod;
+        throw error;
+      }
+      form.reset();
+      setMessage(formStatus, "Dziękujemy za wiadomość. Skontaktujemy się wkrótce.");
+      await loadChallenge();
+    } catch (error) {
+      setMessage(formStatus, error.message || "Nie udało się wysłać wiadomości. Spróbuj ponownie.", true);
+      if (error.code === "challenge") await loadChallenge();
+    } finally {
+      submit.disabled = false;
+    }
   });
 }
 

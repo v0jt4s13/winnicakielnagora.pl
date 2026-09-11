@@ -19,6 +19,7 @@ PROJEKT = Path(__file__).resolve().parent.parent
 class _App:
     def __init__(self, *_, **__):
         self.wsgi_app = lambda environ, start_response: None
+        self.config = {}
 
     def route(self, *_, **__):
         return lambda funkcja: funkcja

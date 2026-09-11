@@ -62,7 +62,7 @@ spacjach i zamienia na `Environment=` w unicie systemd, więc **żadna wartość
 spacji**).
 
 ```bash
-EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=WKLEJ_HASH'
+EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=WKLEJ_HASH CONTACT_CAPTCHA_SECRET=WKLEJ_DLUGI_SEKRET CONTACT_SMTP_HOST=smtp.example CONTACT_SMTP_PORT=587 CONTACT_SMTP_USER=WKLEJ_UZYTKOWNIKA CONTACT_SMTP_PASSWORD=WKLEJ_HASLO CONTACT_SMTP_SSL=0 CONTACT_FROM=kontakt@example CONTACT_TO=odbiorca@example'
 ```
 
 > **Wartości nie mogą zawierać spacji.** Skrypt dzieli `EXTRA_SYSTEMD_ENV` po spacjach, więc
@@ -94,6 +94,12 @@ Uwagi:
 - Hash generuje `python3 tools/panel/haslo.py`. **Hasła nie zapisuj nigdzie** — do konfiguracji
   trafia wyłącznie hash.
 - Bez `PANEL_UZYTKOWNIK` i `PANEL_HASLO_HASH` panel na produkcji nie istnieje (404). To celowe.
+- Formularz kontaktowy wymaga `CONTACT_CAPTCHA_SECRET` (minimum 32 znaki) oraz konfiguracji SMTP:
+  `CONTACT_SMTP_HOST`, `CONTACT_SMTP_PORT`, `CONTACT_SMTP_USER`, `CONTACT_SMTP_PASSWORD`,
+  `CONTACT_SMTP_SSL`, `CONTACT_FROM` i `CONTACT_TO`. Sekret i hasło nie mogą trafić do repozytorium.
+  Wartości SMTP nie mogą zawierać spacji, bo `EXTRA_SYSTEMD_ENV` jest dzielone po spacjach.
+- Połączenie SMTP zawsze używa TLS: `CONTACT_SMTP_SSL=1` dla SMTPS, w przeciwnym razie STARTTLS.
+  Formularz nie zapisuje wiadomości lokalnie; treść trafia wyłącznie do skonfigurowanego odbiorcy.
 
 > **`restart` nie wystarczy po zmianie `.env`.** `production_manager.sh` przepisuje unit
 > systemd (a więc linie `Environment=`) wyłącznie w `setup` i `update`. Samo
@@ -112,6 +118,11 @@ sudo ./production_manager.sh logs winnicakielnagora 200
 ```
 
 Projekt nie ma kroku budowania — `BUILD_CMD` ma zostać zakomentowany.
+
+Przed pierwszym uruchomieniem formularza trzeba potwierdzić, że domena jest dostępna przez HTTPS,
+ustawić limity żądań dla `/api/contact` w reverse proxy oraz wykonać test z małą wiadomością.
+Sam test wyboru ikony jest tylko miękkim utrudnieniem dla botów - nie zastępuje limitowania ruchu
+ani zewnętrznego CAPTCHA.
 
 ### 4. Sprawdzić, czy działa TEN kod
 
@@ -313,4 +324,3 @@ PYTHONDONTWRITEBYTECODE=1
 ```
 
 Wtedy proces w ogóle nie tworzy `__pycache__`, kosztem paru milisekund przy starcie.
-

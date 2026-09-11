@@ -1,7 +1,7 @@
 # AGENTS.md — winnicakielnagora.pl
 
-Statyczna witryna winnicy (jeden `index.html` + `assets/`), serwowana przez 16-liniowy
-Flask. Projekt pracuje w **t-shirt size workflow**, ale framework jest tu świadomie
+Witryna winnicy (jeden `index.html` + `assets/`) z małym API formularza kontaktowego,
+serwowana przez Flask. Projekt pracuje w **t-shirt size workflow**, ale framework jest tu świadomie
 odchudzony — sekcje, które zakładają warstwy API/DB/UI, zostały wycięte lub przepisane
 pod realia trzech plików. Zmiany oznaczone są w tekście.
 
@@ -234,7 +234,8 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 ```
 index.html                # CAŁA witryna — jeden plik, wszystkie sekcje
 404.html                  # projektowa strona błędu; <base> podmienia wsgi.py wg przedrostka wdrożenia
-wsgi.py                   # Flask: statyki, /data/*.json, API panelu, kadr hero wybierany serwerowo
+wsgi.py                   # Flask: statyki, API cennika/wydarzen/kontaktu, panel, kadr hero
+kontakt.py               # walidacja wyzwania i wysylka formularza przez SMTP
 cennik.py                 # dane cennika — odczyt, walidacja, zapis atomowy (CENNIK_SCIEZKA)
 wydarzenia.py             # dane wydarzeń — jw. + filtr widoczności (WYDARZENIA_SCIEZKA)
 data/                     # wersje STARTOWE wina.json i wydarzenia.json; żywe pliki leżą poza repo
@@ -258,7 +259,8 @@ AGENTS.md                 # ten plik; CLAUDE.md to jednolinijkowy stub `@AGENTS.
 ```
 
 Projekt jest jednomodułowy: **nie ma podziału na warstwy, pakiety ani aplikacje**.
-Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
+Logika strony mieści się w `index.html` + `assets/js/main.js`, a walidacja i wysyłka
+formularza kontaktowego w `kontakt.py`.
 
 ## Tech Stack
 
@@ -269,7 +271,8 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
   Style dopisywane ręcznie idą do `assets/css/custom.css`. Motywy = zmienne CSS (HSL)
   podmieniane w JS na `document.documentElement`.
 - **Fonty**: Google Fonts (Playfair Display + Lato) z CDN — jedyna zewnętrzna zależność runtime.
-- **Serwer**: Python 3.11 + Flask (`wsgi.py`) wyłącznie do serwowania plików statycznych.
+- **Serwer**: Python 3.11 + Flask (`wsgi.py`) do serwowania plików statycznych i obsługi
+  `/api/contact` oraz `/api/contact/challenge`.
   Produkcja: gunicorn `wsgi:app` na `127.0.0.1:8004`, domena `ops02.jdblayer.com`,
   katalog `/opt/apps/app_winnicakielnagora.pl`, wdrożenie przez `projects_manager`.
 - **Baza danych**: brak silnika bazodanowego. Dane redagowane panelem żyją w dwóch plikach
@@ -284,15 +287,16 @@ Cała logika strony mieści się w `index.html` + `assets/js/main.js`.
   przez `initTimeTheme()`.
 - **Ceny**: `data-price` na karcie produktu to **brutto**; netto i VAT 23% liczy
   `renderCart` (`subtotal / 1.23`). Nie ma nigdzie osobnego źródła cen.
-- **Testy**: brak. **Linter / formatter**: brak. **Krok budowania**: brak.
+- **Testy**: skrypty `tools/test-*.py`, w tym `tools/test-contact.py`. **Linter / formatter**:
+  brak. **Krok budowania**: brak.
 
 ## Commands
 
 | Action | Command |
 |---|---|
-| Dev | `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000 (zero zależności, obsługuje projektowe `404.html`; Flask/gunicorn nie są zainstalowane lokalnie). Wariant produkcyjny: `python3 -m flask --app wsgi run --port 8004` |
+| Dev | `python3 tools/dev-server.py --port 5000` w katalogu repo → http://localhost:5000 (zero zależności, obsługuje `404.html` i API kontaktu; wysyłka wymaga zmiennych SMTP). Wariant produkcyjny: `python3 -m flask --app wsgi run --port 8004` |
 | Build | **brak** — `assets/css/style.css` jest w repo jako gotowy artefakt; nic się nie kompiluje |
-| Test | **brak** — jedyna weryfikacja to podgląd strony w przeglądarce; opisz w odpowiedzi, którą sekcję i co sprawdzić |
+| Test | `python3 tools/test-contact.py` oraz pozostałe `tools/test-*.py`; wygląd nadal sprawdza się w przeglądarce |
 | Lint / Format | **brak** — trzymaj się formatowania sąsiedniego kodu (2 spacje wcięcia w HTML/JS/CSS) |
 
 ## Coding Standards
@@ -360,7 +364,7 @@ Standards are a living document — every implementation either confirms standar
 |---|---|---|
 | **S** | zmiana treści lub atrybutu, bez nowego zachowania | poprawka tekstu, podmiana zdjęcia, zmiana ceny produktu, nowy punkt listy |
 | **M** | nowa sekcja strony albo zmiana zachowania w `main.js` | sekcja `#degustacje`, nowy filtr w sklepie, zmiana logiki koszyka |
-| **L** | funkcja wymagająca czegoś, czego projekt nie ma (backend, baza, build, integracja) | realna wysyłka formularza, płatności, trwały koszyk, przebudowa Tailwinda ze źródeł |
+| **L** | funkcja wymagająca nowego backendu lub zewnętrznej integracji | SMTP, płatności, trwały koszyk, przebudowa Tailwinda ze źródeł |
 
 **L prawie zawsze oznacza rozmowę z Właścicielem przed napisaniem kodu** — dokłada projektowi
 zależność, której świadomie nie ma (patrz `.ai/GUARDRAILS.md` → Architectural decisions).
@@ -491,12 +495,11 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   Pilnuje tego `tools/test-routing.py`. Wpisy przyszłe i zakończone **nie opuszczają serwera**,
   więc `main.js` nie ma żadnej logiki dat.
 - **`alert()` blokuje automatyzację przeglądarki.** „Przejdź do płatności" (`initCart`)
-  i wysyłka formularza (`initContactForm`) wołają `alert()` — kliknięcie ich przez Chrome MCP
-  zawiesza sesję. Te dwa przyciski testuj ręcznie.
+  nadal woła `alert()` - formularz kontaktowy używa komunikatów inline.
 - **Koszyk nie jest trwały** — `Map` w pamięci, znika po odświeżeniu strony. To świadomy stan
   demo; nie „naprawiaj" go bez ustalenia z Właścicielem.
-- **Formularz kontaktowy nic nie wysyła** — `preventDefault()` + `alert()`. Nie ma backendu,
-  który przyjąłby POST.
+- **Formularz kontaktowy wysyła dane przez `/api/contact`** - SMTP i sekret wyzwania są
+  wyłącznie w zmiennych środowiskowych; wiadomości nie są zapisywane lokalnie.
 - **`wsgi.py` zwraca `index.html` dla każdej nieznanej ścieżki** — status 200, nigdy 404.
   Literówka w linku nigdy się sama nie ujawni; linki sprawdzaj wzrokowo.
 - **`wsgi.py` preferuje `dist/public`, jeśli ten katalog istnieje**, a wdrożenie nie ma kroku
@@ -521,7 +524,7 @@ treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa 
 | What | Where |
 |------|-------|
 | Serwowanie plików | `wsgi.py` — catch-all `serve()` z białą listą `PLIKI_PUBLICZNE` / `KATALOGI_PUBLICZNE`; nieznany adres to **404**, nie strona główna |
-| Endpointy | `wsgi.py` — `/zdrowie`, `/data/wina.json`, `/data/wydarzenia.json` (tylko wpisy aktywne dziś), `/tools/panel/api/<akcja>` za hasłem |
+| Endpointy | `wsgi.py` — `/zdrowie`, `/data/wina.json`, `/data/wydarzenia.json` (tylko wpisy aktywne dziś), `/api/contact`, `/api/contact/challenge`, `/tools/panel/api/<akcja>` za hasłem |
 | Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `kontakt` |
 | Dane produktów (zamiast bazy) | `data/wina.json` — jedyne źródło asortymentu i cen; `index.html` NIE zawiera kart, renderuje je `renderSklep()` w `main.js`. Reguły: `.ai/standards/content/wina-json.md` |
 | Wydarzenia | `data/wydarzenia.json` + `wydarzenia.py` (walidacja, `aktywne()`); render `initWydarzenia()` w `main.js`, kontener `#lista-wydarzen` w sekcji `#wydarzenia` |

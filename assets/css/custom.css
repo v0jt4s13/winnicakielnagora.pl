@@ -1042,6 +1042,88 @@ body.cart-open #cart-panel {
   .noclegi-form .btn-primary { flex: 0 0 auto; }
 }
 
+/* Formularz kontaktowy: wyzwanie ikon i komunikaty bez alert(). */
+.contact-challenge {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: hsl(var(--background));
+}
+.contact-challenge__target {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.contact-challenge__target-icon,
+.contact-challenge__option svg {
+  width: 2rem;
+  height: 2rem;
+}
+.contact-challenge__target-icon {
+  color: hsl(var(--primary));
+}
+.contact-challenge__options {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.contact-challenge__option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  color: hsl(var(--foreground));
+  background: hsl(var(--card));
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.contact-challenge__option:hover,
+.contact-challenge__option[aria-pressed="true"] {
+  border-color: hsl(var(--ring));
+  background: hsl(var(--primary) / 0.12);
+}
+.contact-challenge__option:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+.contact-challenge__option[aria-pressed="true"] {
+  color: hsl(var(--primary));
+  transform: translateY(-1px);
+}
+.contact-form__message {
+  margin-top: 0.25rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}
+.contact-form__message--error {
+  color: hsl(var(--destructive));
+}
+.contact-form__message--success {
+  color: hsl(var(--primary));
+}
+.contact-form__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  .contact-challenge__options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contact-challenge__option {
+    transition: none;
+  }
+}
+
 /* Rodzaj wina w karcie produktu */
 .rodzaj-badge {
   display: inline-block;
