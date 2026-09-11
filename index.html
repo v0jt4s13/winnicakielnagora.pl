@@ -135,6 +135,15 @@
       <path d="M5 12h14"></path>
       <path d="M12 5v14"></path>
     </symbol>
+    <symbol id="icon-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+    </symbol>
+    <symbol id="icon-sprout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 20h10"></path>
+      <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
+      <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"></path>
+      <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"></path>
+    </symbol>
   </svg>
 
   <div id="age-gate" class="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title" aria-describedby="age-gate-description">
@@ -264,7 +273,8 @@
                 <p>Pierwsze krzewy zasadziliśmy w 2020 roku, a winnicę założyliśmy formalnie w 2024. Gospodarujemy na jednym hektarze i uprawiamy siedem odmian odpornych, dobranych pod nasz klimat: cztery białe oraz trzy na wina czerwone i różowe.</p>
                 <p>Z naszych winogron powstają wina białe, czerwone i różowe, a także <a href="./wina/soki.html" class="underline hover:text-ring">soki — w 100% naturalne, bez żadnych dodatków</a>.</p>
               </div>
-              <div class="grid grid-cols-3 gap-8 mt-12">
+
+              <div id="info-panel-onas-v1" class="grid grid-cols-3 gap-8 mt-12">
                 <div>
                   <div class="text-3xl font-bold text-primary mb-2">2020</div>
                   <div class="text-sm text-muted-foreground">Pierwsze nasadzenia</div>
@@ -282,6 +292,33 @@
             <div class="rounded-md border border-card-border overflow-hidden">
               <div class="aspect-video">
                 <img src="./attached_assets/photos/winnica-budynek-01.jpg" alt="Budynek winnicy Kielna Góra z tarasem" loading="lazy" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+
+          <!-- Wariant do porównania z blokiem statystyk wyżej — do usunięcia po wyborze wersji. -->
+          <div id="info-panel-onas-v2" class="stat-banner mt-12" data-reveal>
+            <div class="stat-banner__grid">
+              <div class="stat-banner__card">
+                <div class="stat-banner__icon"><svg><use href="#icon-calendar"></use></svg></div>
+                <div>
+                  <div class="stat-banner__value">2020</div>
+                  <div class="stat-banner__label">Pierwsze nasadzenia</div>
+                </div>
+              </div>
+              <div class="stat-banner__card">
+                <div class="stat-banner__icon"><svg><use href="#icon-square"></use></svg></div>
+                <div>
+                  <div class="stat-banner__value">1</div>
+                  <div class="stat-banner__label">Hektar winnicy</div>
+                </div>
+              </div>
+              <div class="stat-banner__card">
+                <div class="stat-banner__icon"><svg><use href="#icon-sprout"></use></svg></div>
+                <div>
+                  <div class="stat-banner__value">7</div>
+                  <div class="stat-banner__label">Uprawianych odmian</div>
+                </div>
               </div>
             </div>
           </div>
