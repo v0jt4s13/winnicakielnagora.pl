@@ -9,6 +9,14 @@ git clone git@github.com:v0jt4s13/winnicakielnagora.pl.git
 python3 tools/dev-server.py --port 5000
 # → http://localhost:5000
 
+# Dev server  (docker)
+# → http://localhost:5000
+docker run --rm -it -p 5000:5000 -v "$PWD":/app -w /app python:3.11-slim python tools/dev-server.py --host 0.0.0.0 --port 5000
+
+# Dev server - panel  (docker)
+# → http://localhost:8765
+docker run --rm -it --network host -v "$PWD":/app -w /app  --user "$(id -u):$(id -g)" python:3.11-slim python tools/panel/serwer.py --port 8765
+
 # Testy
 python3 tools/test-contact.py
 python3 tools/test-cennik-sciezka.py
@@ -127,7 +135,7 @@ git stash
 git pull
 git stash pop
 ```
- 
+
 
 # Kompletny proces dodawania dostępu SSH oraz uprawnień administratora (sudo) dla nowego użytkownika `testuser`.
 
@@ -135,7 +143,7 @@ git stash pop
 ### Generowanie pary kluczy SSH na własnym komputerze (jeśli klucze nie zostały jeszcze utworzone):
 `ssh-keygen -t ed25519 -C "testuser@serwer"`
 
-### Weryfikacja: 
+### Weryfikacja:
 `ls -la ~/.ssh/id_ed25519.pub` - Plik powinien istnieć.
 Zawartość pliku należy przekazać administratorowi serwera. Nigdy nie udostępniaj klucza prywatnego (id_ed25519).
 
@@ -146,14 +154,14 @@ sudo useradd -m -s /bin/bash testuser
 sudo passwd testuser
 ```
 
-### Werryfikacja: 
+### Werryfikacja:
 `id testuser`
 
 ### Przyznanie uprawnień sudo:
 `sudo usermod -aG sudo testuser`
  (Uwaga: Na systemach z rodziny RedHat/Rocky Linux zamiast grupy sudo używa się grupy wheel: sudo usermod -aG wheel testuser)
 
-### Weryfikacja: 
+### Weryfikacja:
 `groups testuser` - na liście grup użytkownika musi widnieć sudo (lub wheel).
 
 ### Konfiguracja klucza SSH dla użytkownika testuser:
@@ -165,14 +173,14 @@ sudo chmod 600 /home/testuser/.ssh/authorized_keys
 sudo chown -R testuser:testuser /home/testuser/.ssh
 ```
 
-### Weryfikacja: 
+### Weryfikacja:
 `sudo ls -la /home/testuser/.ssh` - upewnij się, że właścicielem katalogu oraz pliku authorized_keys jest testuser:testuser, a uprawnienia to odpowiednio drwx------ (700) i -rw------- (600).
 
 ## KROK 3: Test połączenia i uprawnień (Wykonuje: Użytkownik testuser)
 ### Logowanie na serwer przez SSH:
 `ssh testuser@IP_SERWERA`
 
-### Weryfikacja: 
+### Weryfikacja:
 Powinieneś zalogować się do powłoki serwera bez pytania o hasło (jeśli klucz SSH został poprawnie ustawiony).
 
 ### Test uprawnień sudo:
