@@ -24,3 +24,44 @@ python3 tools/test-wydarzenia.py
 # Panel redakcyjny (lokalnie, bez hasła)
 python3 tools/panel/serwer.py
 ```
+
+## Problem: `git push` → "No anonymous write access" / "Authentication failed"
+
+Ten błąd oznacza dwie osobne rzeczy naraz, obie trzeba naprawić:
+
+1. **Konto na GitHubie nie ma uprawnień do repo.** Właściciel repo (`v0jt4s13`) musi dodać
+   Twoje konto jako współpracownika: Settings repo → Collaborators and teams → Add people.
+   Bez tego push się nie uda nawet przy poprawnym uwierzytelnieniu.
+2. **Remote wskazuje na HTTPS zamiast SSH** — mimo klonowania przez `git@github.com:...`,
+   `git push` w błędzie próbuje `https://github.com/...`. Sprawdź i popraw:
+
+```bash
+# Sprawdź aktualny adres remote
+git remote -v
+
+# Jeśli pokazuje https:// zamiast git@github.com:, zmień na SSH
+git remote set-url origin git@github.com:v0jt4s13/winnicakielnagora.pl.git
+
+# Sprawdź, czy masz klucz SSH dodany do konta GitHub
+ssh -T git@github.com
+```
+
+Jeśli `ssh -T git@github.com` zwraca błąd (brak klucza / Permission denied):
+
+```bash
+# Wygeneruj nowy klucz SSH (jeśli jeszcze nie masz)
+ssh-keygen -t ed25519 -C "twoj-email@example.com"
+
+# Wyświetl klucz publiczny i dodaj go w GitHub → Settings → SSH and GPG keys → New SSH key
+cat ~/.ssh/id_ed25519.pub
+```
+
+Jeśli mimo wszystko chcesz zostać przy HTTPS zamiast SSH — GitHub nie akceptuje już haseł
+konta, trzeba użyć Personal Access Token jako hasła przy pierwszym `git push`:
+
+```bash
+git remote set-url origin https://github.com/v0jt4s13/winnicakielnagora.pl.git
+# przy pierwszym push: login = nazwa użytkownika GitHub, hasło = Personal Access Token
+# (GitHub → Settings → Developer settings → Personal access tokens)
+```
+ 
