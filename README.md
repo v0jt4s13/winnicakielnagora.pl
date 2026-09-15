@@ -9,9 +9,6 @@ git clone git@github.com:v0jt4s13/winnicakielnagora.pl.git
 python3 tools/dev-server.py --port 5000
 # → http://localhost:5000
 
-# Wariant produkcyjny (Flask/gunicorn)
-python3 -m flask --app wsgi run --port 8004
-
 # Testy
 python3 tools/test-contact.py
 python3 tools/test-cennik-sciezka.py
