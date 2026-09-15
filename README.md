@@ -23,6 +23,9 @@ python3 tools/test-wydarzenia.py
 
 # Panel redakcyjny (lokalnie, bez hasła)
 python3 tools/panel/serwer.py
+
+# nadawanie uzytkownika i hasla dostepu do panelu
+python3 tools/panel/haslo.py
 ```
 
 ## Problem: `git push` → "No anonymous write access" / "Authentication failed"
