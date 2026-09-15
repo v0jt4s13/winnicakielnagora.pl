@@ -64,4 +64,67 @@ git remote set-url origin https://github.com/v0jt4s13/winnicakielnagora.pl.git
 # przy pierwszym push: login = nazwa użytkownika GitHub, hasło = Personal Access Token
 # (GitHub → Settings → Developer settings → Personal access tokens)
 ```
+
+## Praca grupowa (git)
+
+Ustaw raz na maszynę — przy rozjechanych gałęziach `git pull` ma dociągać zmiany
+przez rebase (czysta historia, bez commitów „Merge branch..."):
+
+```bash
+git config --global pull.rebase true
+```
+
+Codzienny cykl pracy:
+
+```bash
+# Przed rozpoczęciem pracy — dociągnij najnowsze zmiany
+git pull
+
+# Sprawdź co się zmieniło i co masz do commitu
+git status
+git diff
+
+# Dodaj i zacommituj swoje zmiany
+git add <plik>
+git commit -m "opis zmiany"
+
+# Wypchnij na GitHub
+git push
+```
+
+Jeśli `git push` odrzuci z powodu nowych commitów na zdalnym:
+
+```bash
+git pull --rebase origin master
+git push
+```
+
+Jeśli rebase napotka konflikt (dwie osoby zmieniły to samo miejsce w pliku):
+
+```bash
+# Git zatrzyma się i pokaże plik z konfliktem — otwórz go, usuń znaczniki
+# <<<<<<< / ======= / >>>>>>> i zostaw właściwą wersję, potem:
+git add <plik>
+git rebase --continue
+
+# Żeby się wycofać z rebase'a i wrócić do stanu sprzed pull:
+git rebase --abort
+```
+
+Praca nad większą zmianą — osobna gałąź zamiast commitowania prosto na `master`:
+
+```bash
+git checkout -b nazwa-galezi
+# ... zmiany, commity ...
+git push -u origin nazwa-galezi
+# potem Pull Request na GitHubie do master
+```
+
+Odłożenie niedokończonych zmian, żeby zrobić `git pull` na czystym drzewie:
+
+```bash
+git stash
+git pull
+git stash pop
+```
  
