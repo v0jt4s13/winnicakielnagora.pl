@@ -57,6 +57,11 @@
       <form id="formularz" class="formularz" autocomplete="off">
         <label>Nazwa
           <input name="nazwa" type="text" required>
+          <small>Bez rocznika — rok wpisuje się osobno, w polu „Rocznik" niżej.</small>
+        </label>
+        <label>Rocznik
+          <input name="rocznik" type="number" min="1900" max="2100" step="1">
+          <small>Zostaw puste dla soków.</small>
         </label>
         <label>Identyfikator
           <input name="id" type="text" required>
@@ -72,10 +77,6 @@
         <label>Rodzaj
           <select name="rodzaj"></select>
           <small>Typologia wina. Zostaw puste dla soków i innych pozycji bez rodzaju.</small>
-        </label>
-        <label>Rocznik
-          <input name="rocznik" type="number" min="1900" max="2100" step="1">
-          <small>Zostaw puste dla soków.</small>
         </label>
         <label>Alkohol (%)
           <input name="alkohol" type="number" min="0" max="25" step="0.1">
