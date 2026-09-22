@@ -1,0 +1,32 @@
+{
+  "gallery": [
+    {
+      "path": "assets/o_nas_galeria/dornfelder-kiscie-01-sm.jpg",
+      "title": "Test tytulu",
+      "alt": "dornfelder-kiscie-01-sm.jpg",
+      "order": 1,
+      "active": true
+    },
+    {
+      "path": "assets/o_nas_galeria/souvignier-gris-kiscie-02-sm.jpg",
+      "title": "",
+      "alt": "souvignier-gris-kiscie-02-sm.jpg",
+      "order": 2,
+      "active": true
+    },
+    {
+      "path": "assets/o_nas_galeria/swenson-red-kiscie-02-sm.jpg",
+      "title": "",
+      "alt": "swenson-red-kiscie-02-sm.jpg",
+      "order": 3,
+      "active": true
+    },
+    {
+      "path": "assets/o_nas_galeria/st-pepin-kiscie-01.jpg",
+      "title": "",
+      "alt": "st-pepin-kiscie-01.jpg",
+      "order": 4,
+      "active": true
+    }
+  ]
+}

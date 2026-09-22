@@ -281,8 +281,8 @@ formularza kontaktowego w `kontakt.py`.
   (`CENNIK_SCIEZKA`, `WYDARZENIA_SCIEZKA`), a kopie w repo są wersjami startowymi.
   Koszyk żyje w pamięci (`Map` w `main.js`), wybrany motyw w `localStorage`
   pod kluczem `winery-style`.
-- **Motywy**: pięć zestawów (`classic`, `modern`, `rustic`, `light`, `dark`), po 31 zmiennych
-  CSS każdy, w obiekcie `themeStyles` na górze `main.js`. Muszą pozostać w parytecie.
+- **Motywy**: dwa zestawy (`classic`, `dark`), po 31 zmiennych CSS każdy, w obiekcie `themeStyles`
+  na górze `main.js` (decyzja: kst, 2026-09-18 — usunięto nieużywane motywy `modern`, `rustic`, `light`).
   `dark` jest jedynym ciemnym i jedynym, który witryna włącza sama — po zmroku,
   przez `initTimeTheme()`.
 - **Ceny**: `data-price` na karcie produktu to **brutto**; netto i VAT 23% liczy
@@ -475,10 +475,11 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   wersja tej reguły mówiła o atrybucie `data-price-net` na statycznych kartach w
   `index.html` — ten mechanizm zniknął przy przejściu na karty generowane z `data/wina.json`
   (SPEC-006).
-- **Pięć motywów po 31 zmiennych CSS.** `setTheme` ustawia je jako style inline na
+- **Dwa motywy po 31 zmiennych CSS** (`classic`, `dark`). `setTheme` ustawia je jako style inline na
   `documentElement` i nigdy ich nie czyści — zmienna dodana tylko do jednego motywu zostawi
-  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis we wszystkich pięciu obiektach
-  `themeStyles`. Szczegóły: `.ai/standards/frontend/theming.md`.
+  po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis w obydwu obiektach
+  `themeStyles` (decyzja: kst, 2026-09-18 — usunięto motywy `modern`, `rustic`, `light`).
+  Szczegóły: `.ai/standards/frontend/theming.md`.
 - **Motyw zależny od pory dnia nie może żyć w inicjalizatorze hero.** Podstrony `wina/*.html`
   nie mają `#hero-image`, ale nadal muszą dostać nocny `dark`. Logikę ogólnowitrynową trzymaj
   w osobnym `initTimeTheme()`, a `initHeroImage()` niech odpowiada wyłącznie za obraz.

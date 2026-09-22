@@ -228,9 +228,9 @@ html.age-gate-pending .age-gate {
 .hero-logo {
   width: min(100%, 26rem);
   /* padding: 0.5rem 0.75rem; */
-  border-radius: 0.75rem;
+  /*border-radius: 0.75rem;*/
   /* background: hsl(var(--primary-foreground) / 0.92); */
-  box-shadow: var(--shadow-md);
+  /*box-shadow: var(--shadow-md);*/
 }
 
 .hero-logo img {

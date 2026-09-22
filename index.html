@@ -49,6 +49,8 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin href="assets/fonts/playfair-display-700-latin.woff2">
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="stylesheet" href="./assets/css/custom.css">
+  <link rel="stylesheet" href="./assets/css/gallery-swiper.css">
+  <link rel="stylesheet" href="./assets/css/glightbox.min.css">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"Winnica Kielna Góra","alternateName":"winnicakielnagora.pl","url":"https://winnicakielnagora.pl/","inLanguage":"pl-PL","description":"Rodzinna winnica w Kielnarowej pod Rzeszowem. Siedem odmian odpornych, wina białe, czerwone i różowe oraz soki 100% z winogron."}
   </script>
@@ -144,6 +146,16 @@
       <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"></path>
       <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"></path>
     </symbol>
+    <symbol id="icon-magnifying-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.35-4.35"></path>
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 477.175 477.175">
+      <path d="M145.188,238.575l215.5-215.5c5.3-5.3,5.3-13.8,0-19.1s-13.8-5.3-19.1,0l-225.1,225.1c-5.3,5.3-5.3,13.8,0,19.1l225.1,225c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1L145.188,238.575z" fill="currentColor"></path>
+    </symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 477.175 477.175">
+      <path d="M360.731,229.075l-225.1-225.1c-5.3-5.3-13.8-5.3-19.1,0s-5.3,13.8,0,19.1l215.5,215.5l-215.5,215.5c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4c3.4,0,6.9-1.3,9.5-4l225.1-225.1C365.931,242.875,365.931,234.275,360.731,229.075z" fill="currentColor"></path>
+    </symbol>
   </svg>
 
   <div id="age-gate" class="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title" aria-describedby="age-gate-description">
@@ -200,27 +212,6 @@
                   </div>
                   <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
                 </button>
-                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="modern">
-                  <div>
-                    <div class="font-medium">Modern Minimal</div>
-                    <div class="text-xs text-muted-foreground">Minimalistyczny z czystymi liniami</div>
-                  </div>
-                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
-                </button>
-                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="rustic">
-                  <div>
-                    <div class="font-medium">Rustic Natural</div>
-                    <div class="text-xs text-muted-foreground">Naturalny z ciepłymi tonami</div>
-                  </div>
-                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
-                </button>
-                <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="light">
-                  <div>
-                    <div class="font-medium">Forest Green</div>
-                    <div class="text-xs text-muted-foreground">Głęboka zieleń winnicy z akcentami złota</div>
-                  </div>
-                  <svg class="hidden w-4 h-4 text-primary"><use href="#icon-check"></use></svg>
-                </button>
                 <button class="style-option w-full text-left px-3 py-2 hover:bg-secondary flex items-center justify-between" data-style="dark">
                   <div>
                     <div class="font-medium">Dark</div>
@@ -272,57 +263,30 @@
 
       <section id="o-nas" class="py-20 bg-secondary/20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="grid md:grid-cols-2 gap-12 items-center" data-reveal>
-            <div>
-              <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">O Naszej Winnicy</h2>
-              <div class="space-y-5 text-muted-foreground">
-                <p>Winnica Kielna Góra to niewielkie, rodzinne gospodarstwo w Kielnarowej, około 10 km od centrum Rzeszowa. Leży na stoku o południowym nachyleniu — takim, jaki winorośl lubi najbardziej.</p>
-                <p>Pierwsze krzewy zasadziliśmy w 2020 roku, a winnicę założyliśmy formalnie w 2024. Gospodarujemy na jednym hektarze i uprawiamy siedem odmian odpornych, dobranych pod nasz klimat: cztery białe oraz trzy na wina czerwone i różowe.</p>
-                <p>Z naszych winogron powstają wina białe, czerwone i różowe, a także <a href="./wina/soki.html" class="underline hover:text-ring">soki — w 100% naturalne, bez żadnych dodatków</a>.</p>
-              </div>
-            </div>
-            <div class="rounded-md border border-card-border overflow-hidden">
-              <div class="aspect-video">
-                <img src="./attached_assets/photos/winnica-budynek-01.jpg" alt="Budynek winnicy Kielna Góra z tarasem" loading="lazy" class="w-full h-full object-cover">
-              </div>
+          <div class="mb-12" data-reveal>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-8">O Naszej Winnicy</h2>
+            <div class="space-y-5 text-muted-foreground">
+              <p>Winnica Kielna Góra to niewielkie, rodzinne gospodarstwo w Kielnarowej, około 10 km od centrum Rzeszowa. Leży na stoku o południowym nachyleniu — takim, jaki winorośl lubi najbardziej.</p>
+              <p>Pierwsze krzewy zasadziliśmy w 2020 roku, a winnicę założyliśmy formalnie w 2024. Gospodarujemy na jednym hektarze i uprawiamy siedem odmian odpornych, dobranych pod nasz klimat: cztery białe oraz trzy na wina czerwone i różowe.</p>
+              <p>Z naszych winogron powstają wina białe, czerwone i różowe, a także <a href="./wina/soki.html" class="underline hover:text-ring">soki — w 100% naturalne, bez żadnych dodatków</a>.</p>
             </div>
           </div>
-
-          <div id="page-stats-bar" class="page-stats-bar mt-12" data-reveal>
-            <div class="page-stats-bar__grid">
-              <div class="page-stats-bar__item">
-                <div class="page-stats-bar__value">2020</div>
-                <div class="page-stats-bar__label">Pierwsze nasadzenia</div>
+          <div class="gallery-swiper-wrapper" data-reveal>
+            <div class="gallery-swiper-container">
+              <button class="gallery-swiper__nav gallery-swiper__prev" id="gallery-prev" aria-label="Poprzednie zdjęcie"><svg class="w-full h-full" viewBox="0 0 24 24"><use href="#icon-chevron-left"></use></svg></button>
+              <div class="gallery-swiper" id="gallery-swiper">
+                <!-- Generated from /data/o_nas_galeria.json by JavaScript -->
+                <div class="gallery-swiper__cta flex items-center justify-center scroll-snap-start scroll-snap-stop bg-secondary p-8 md:p-12 text-center min-h-full" aria-hidden="true" style="display: none;">
+                  <div class="max-w-xs">
+                    <h3 class="text-2xl font-serif font-bold mb-6">Odkryj nasze wina</h3>
+                    <p class="text-muted-foreground mb-6">Pełny asortyment win z naszej winnicy</p>
+                    <a href="/#sklep" class="btn-primary inline-block">Przejdź do sklepu</a>
+                  </div>
+                </div>
               </div>
-              <div class="page-stats-bar__item">
-                <div class="page-stats-bar__value">1</div>
-                <div class="page-stats-bar__label">Hektar winnicy</div>
-              </div>
-              <div class="page-stats-bar__item">
-                <div class="page-stats-bar__value">7</div>
-                <div class="page-stats-bar__label">Uprawianych odmian</div>
-              </div>
+              <button class="gallery-swiper__nav gallery-swiper__next" id="gallery-next" aria-label="Następne zdjęcie"><svg class="w-full h-full" viewBox="0 0 24 24"><use href="#icon-chevron-right"></use></svg></button>
             </div>
-            <svg class="page-stats-bar__vine" viewBox="0 0 1200 190" aria-hidden="true" focusable="false">
-              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M -20 120 C 6.7 125.8 90 158.3 140 155 C 190 151.7 226.7 101.7 280 100 C 333.3 98.3 403.3 150 460 145 C 516.7 140 563.3 70.8 620 70 C 676.7 69.2 743.3 135.8 800 140 C 856.7 144.2 890 96.7 960 95 C 1030 93.3 1176.7 124.2 1220 130"></path>
-                <g transform="translate(280,100)">
-                  <path d="M0,0 C2,-8 4,-14 6,-18"></path>
-                  <g transform="translate(6,-18) rotate(-35)"><path d="M0,0 C-6,-6 -7,-16 0,-22 C7,-16 6,-6 0,0 Z"></path><path d="M0,0 L0,-20"></path></g>
-                  <g transform="translate(6,-18) rotate(20)"><path d="M0,0 C-5,-5 -6,-13 0,-18 C6,-13 5,-5 0,0 Z"></path><path d="M0,0 L0,-16"></path></g>
-                </g>
-                <g transform="translate(620,70)">
-                  <path d="M0,0 C2,-8 4,-14 6,-18"></path>
-                  <g transform="translate(6,-18) rotate(-35)"><path d="M0,0 C-6,-6 -7,-16 0,-22 C7,-16 6,-6 0,0 Z"></path><path d="M0,0 L0,-20"></path></g>
-                  <g transform="translate(6,-18) rotate(20)"><path d="M0,0 C-5,-5 -6,-13 0,-18 C6,-13 5,-5 0,0 Z"></path><path d="M0,0 L0,-16"></path></g>
-                </g>
-                <g transform="translate(960,95)">
-                  <path d="M0,0 C2,-8 4,-14 6,-18"></path>
-                  <g transform="translate(6,-18) rotate(-35)"><path d="M0,0 C-6,-6 -7,-16 0,-22 C7,-16 6,-6 0,0 Z"></path><path d="M0,0 L0,-20"></path></g>
-                  <g transform="translate(6,-18) rotate(20)"><path d="M0,0 C-5,-5 -6,-13 0,-18 C6,-13 5,-5 0,0 Z"></path><path d="M0,0 L0,-16"></path></g>
-                </g>
-              </g>
-            </svg>
+            <div class="gallery-swiper__dots" id="gallery-swiper-dots"></div>
           </div>
         </div>
       </section>
@@ -837,6 +801,7 @@
   </aside>
 
   <script src="./assets/js/produkty.js" defer></script>
+  <script src="./assets/js/glightbox.min.js" defer></script>
   <script src="./assets/js/main.js" defer></script>
 </body>
 </html>

@@ -26,7 +26,8 @@ Naruszenie = natychmiastowy revert, bez dyskusji.
 Naruszenie = poprawa przed scaleniem.
 
 1. **NEVER** dodawaj zmiennej CSS tylko do jednego motywu — każda nowa zmienna musi trafić do
-   `classic`, `modern` **i** `rustic` w `themeStyles` (`assets/js/main.js`). `setTheme` ustawia
+   `classic` **i** `dark` w `themeStyles` (`assets/js/main.js`; zmiana: kst, 2026-09-18 —
+   motywy `modern`, `rustic`, `light` usunięte, zostały tylko 2). `setTheme` ustawia
    style inline i ich nie czyści, więc brak zmiennej w jednym motywie zostawia po przełączeniu
    wartość z poprzedniego. Patrz `.ai/standards/frontend/theming.md`.
 2. **NEVER** koduj kolorów na sztywno w `assets/css/custom.css` — zawsze `hsl(var(--nazwa))`,
@@ -92,7 +93,7 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 
 ## Consistency rules
 
-1. Dodajesz zmienną CSS → **ZAWSZE** do wszystkich trzech motywów w `themeStyles`.
+1. Dodajesz zmienną CSS → **ZAWSZE** do obu motywów (`classic`, `dark`) w `themeStyles`.
 2. Zmieniasz cenę → **ZAWSZE** tylko `cena_brutto` w `data/wina.json`. Netto, kwota rabatu
    i cena sprzed rabatu są wyliczane; nie zapisuj ich nigdzie.
 3. Dodajesz pozycję do `data/wina.json` → **ZAWSZE** unikalne `id`, `kategoria` z listy
@@ -184,6 +185,13 @@ Zmiana jest gotowa dopiero, gdy:
   - żywy cennik mieszka poza katalogiem wdrożenia (`CENNIK_SCIEZKA`), a `data/wina.json`
     w repozytorium jest **wersją startową**, nie produkcyjną. Zmiany zrobione panelem na
     produkcji nie są w gicie — to świadomy koszt, nie usterka (`TODO.md` #26).
+
+### Motywy: dwa zamiast pięciu
+
+- **Wybór**: dwa zestawy motywów (`classic`, `dark`), usunięto (`modern`, `rustic`, `light`).
+  Decyzja: kst, 2026-09-18 — nikt się w przełączanie motywów nie bawi.
+- **Dlaczego**: mniej kodu do utrzymania, mniej zmiennych CSS do sprawdzania w każdym plikcie,
+  czystsze UI — menu stylu widzi tylko 2 pozycje zamiast 5.
 
 ### Front-end bez frameworka i bez modułów, w dwóch plikach
 

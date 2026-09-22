@@ -36,117 +36,6 @@ const themeStyles = {
       "--age-gate-accent-foreground": "0 100% 27%"
     }
   },
-  modern: {
-    name: "Modern Minimal",
-    colorScheme: "light",
-    vars: {
-      "--background": "0 0% 98%",
-      "--foreground": "0 0% 10%",
-      "--border": "0 0% 88%",
-      "--card": "0 0% 100%",
-      "--card-foreground": "0 0% 10%",
-      "--card-border": "0 0% 92%",
-      "--sidebar": "0 0% 96%",
-      "--sidebar-foreground": "0 0% 10%",
-      "--sidebar-border": "0 0% 90%",
-      "--sidebar-primary": "0 0% 15%",
-      "--sidebar-primary-foreground": "0 0% 98%",
-      "--sidebar-accent": "0 0% 92%",
-      "--sidebar-accent-foreground": "0 0% 10%",
-      "--sidebar-ring": "0 0% 30%",
-      "--popover": "0 0% 98%",
-      "--popover-foreground": "0 0% 10%",
-      "--popover-border": "0 0% 88%",
-      "--primary": "0 0% 15%",
-      "--primary-foreground": "0 0% 98%",
-      "--secondary": "0 0% 92%",
-      "--secondary-foreground": "0 0% 10%",
-      "--muted": "0 0% 94%",
-      "--muted-foreground": "0 0% 40%",
-      "--accent": "0 0% 90%",
-      "--accent-foreground": "0 0% 10%",
-      "--destructive": "0 84% 45%",
-      "--destructive-foreground": "0 0% 98%",
-      "--input": "0 0% 65%",
-      "--ring": "0 0% 30%",
-      "--age-gate-accent": "0 0% 30%",
-      "--age-gate-accent-foreground": "0 0% 98%"
-    }
-  },
-  rustic: {
-    name: "Rustic Natural",
-    colorScheme: "light",
-    vars: {
-      "--background": "32 25% 96%",
-      "--foreground": "25 20% 15%",
-      "--border": "30 15% 82%",
-      "--card": "35 30% 92%",
-      "--card-foreground": "25 20% 15%",
-      "--card-border": "32 18% 86%",
-      "--sidebar": "30 25% 88%",
-      "--sidebar-foreground": "25 20% 15%",
-      "--sidebar-border": "30 20% 80%",
-      "--sidebar-primary": "25 45% 35%",
-      "--sidebar-primary-foreground": "35 30% 95%",
-      "--sidebar-accent": "32 22% 84%",
-      "--sidebar-accent-foreground": "25 20% 15%",
-      "--sidebar-ring": "35 60% 45%",
-      "--popover": "32 28% 90%",
-      "--popover-foreground": "25 20% 15%",
-      "--popover-border": "30 18% 84%",
-      "--primary": "25 45% 35%",
-      "--primary-foreground": "35 30% 95%",
-      "--secondary": "32 25% 85%",
-      "--secondary-foreground": "25 20% 15%",
-      "--muted": "32 20% 88%",
-      "--muted-foreground": "25 15% 40%",
-      "--accent": "35 30% 82%",
-      "--accent-foreground": "25 20% 15%",
-      "--destructive": "0 84% 45%",
-      "--destructive-foreground": "0 0% 98%",
-      "--input": "0 0% 65%",
-      "--ring": "35 60% 45%",
-      "--age-gate-accent": "35 60% 45%",
-      "--age-gate-accent-foreground": "25 20% 15%"
-    }
-  },
-  light: {
-    name: "Forest Green",
-    colorScheme: "light",
-    vars: {
-      "--background": "148 18% 97%",
-      "--foreground": "150 12% 14%",
-      "--border": "146 14% 87%",
-      "--card": "150 20% 95%",
-      "--card-foreground": "150 12% 14%",
-      "--card-border": "148 15% 90%",
-      "--sidebar": "146 18% 92%",
-      "--sidebar-foreground": "150 12% 14%",
-      "--sidebar-border": "148 15% 88%",
-      "--sidebar-primary": "150 74% 17%",
-      "--sidebar-primary-foreground": "42 45% 95%",
-      "--sidebar-accent": "148 18% 86%",
-      "--sidebar-accent-foreground": "150 12% 14%",
-      "--sidebar-ring": "40 70% 48%",
-      "--popover": "150 22% 93%",
-      "--popover-foreground": "150 12% 14%",
-      "--popover-border": "148 15% 88%",
-      "--primary": "150 74% 17%",
-      "--primary-foreground": "42 45% 95%",
-      "--secondary": "148 20% 88%",
-      "--secondary-foreground": "150 12% 14%",
-      "--muted": "148 16% 91%",
-      "--muted-foreground": "150 8% 40%",
-      "--accent": "146 20% 86%",
-      "--accent-foreground": "150 12% 14%",
-      "--destructive": "0 84% 45%",
-      "--destructive-foreground": "0 0% 98%",
-      "--input": "0 0% 65%",
-      "--ring": "40 70% 48%",
-      "--age-gate-accent": "40 70% 48%",
-      "--age-gate-accent-foreground": "150 74% 17%"
-    }
-  },
   dark: {
     name: "Dark",
     colorScheme: "dark",
@@ -1362,6 +1251,174 @@ function initNoclegi() {
   });
 }
 
+async function loadGalleryFromJSON() {
+  const carousel = qs("#gallery-swiper");
+  if (!carousel) return;
+
+  try {
+    const response = await fetch("./data/o_nas_galeria.json");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const items = Array.isArray(data.gallery) ? data.gallery.filter(item => item.active === true).sort((a, b) => a.order - b.order) : [];
+
+    if (items.length === 0) {
+      console.warn("Gallery: no active items found");
+      return;
+    }
+
+    // Generate HTML for gallery items
+    const html = items
+      .map(item => `
+        <a class="gallery-swiper__link" href="./${item.path}" data-glightbox="gallery" data-title="${qs0(item.title)}">
+          <img class="gallery-swiper__slide" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
+        </a>
+      `)
+      .join("");
+
+    // Remove CTA box temporarily
+    const ctaBox = carousel.querySelector(".gallery-swiper__cta");
+    let ctaBoxHTML = null;
+    if (ctaBox) {
+      ctaBoxHTML = ctaBox.outerHTML;
+      ctaBox.remove();
+    }
+
+    // Insert gallery items
+    carousel.insertAdjacentHTML("beforeend", html);
+
+    // Add CTA box back at the end
+    if (ctaBoxHTML) {
+      carousel.insertAdjacentHTML("beforeend", ctaBoxHTML);
+      // Show the box now that elements are ready
+      const newCtaBox = carousel.querySelector(".gallery-swiper__cta");
+      if (newCtaBox) newCtaBox.style.display = "";
+    }
+  } catch (err) {
+    console.error("Failed to load gallery:", err);
+  }
+}
+
+function qs0(str) {
+  return (str || "").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function initGallerySwiperDots() {
+  const carousel = qs("#gallery-swiper");
+  const dotsContainer = qs("#gallery-swiper-dots");
+  if (!carousel || !dotsContainer) return;
+
+  // Setup navigation buttons
+  const prevBtn = qs("#gallery-prev");
+  const nextBtn = qs("#gallery-next");
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener("click", () => {
+      const slideWidth = carousel.children[0].offsetWidth;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+      carousel.scrollLeft -= slideWidth + gap;
+    });
+    nextBtn.addEventListener("click", () => {
+      const slideWidth = carousel.children[0].offsetWidth;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+      carousel.scrollLeft += slideWidth + gap;
+    });
+  }
+
+  const itemCount = carousel.children.length;
+  const isLastItemCta = carousel.children[itemCount - 1]?.classList.contains("gallery-swiper__cta");
+
+  for (let i = 0; i < itemCount; i++) {
+    const dot = document.createElement("button");
+    dot.className = "gallery-swiper__dot" + (i === 0 ? " active" : "");
+    dot.dataset.slide = i;
+
+    if (isLastItemCta && i === itemCount - 1) {
+      dot.classList.add("gallery-swiper__dot--cta", "md:hidden");
+      dot.setAttribute("aria-label", "Przejdź do sklepu");
+    } else {
+      dot.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
+    }
+
+    dotsContainer.appendChild(dot);
+  }
+
+  const dots = qsa(".gallery-swiper__dot");
+
+  const updateActiveDot = () => {
+    const slideWidth = carousel.children[0].offsetWidth;
+    const scrollPos = carousel.scrollLeft;
+    const currentIndex = Math.round((scrollPos - parseFloat(getComputedStyle(carousel).paddingLeft)) / (slideWidth + parseFloat(getComputedStyle(carousel).gap)));
+
+    dots.forEach(dot => dot.classList.remove("active"));
+    if (dots[currentIndex]) dots[currentIndex].classList.add("active");
+  };
+
+  dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => {
+      if (index >= carousel.children.length) return;
+
+      let targetScroll = 0;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+
+      for (let i = 0; i < index; i++) {
+        targetScroll += carousel.children[i].offsetWidth + gap;
+      }
+
+      carousel.scrollLeft = targetScroll;
+    });
+  });
+
+  const updateNavButtonsVisibility = () => {
+    const prevBtn = qs("#gallery-prev");
+    const nextBtn = qs("#gallery-next");
+    const canScroll = carousel.scrollWidth > carousel.clientWidth;
+    const isAtStart = carousel.scrollLeft === 0;
+    const isAtEnd = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1;
+
+    if (prevBtn) prevBtn.style.opacity = (canScroll && !isAtStart) ? "1" : "0";
+    if (nextBtn) nextBtn.style.opacity = (canScroll && !isAtEnd) ? "1" : "0";
+  };
+
+  carousel.addEventListener("scroll", () => {
+    updateActiveDot();
+    updateNavButtonsVisibility();
+  });
+
+  updateNavButtonsVisibility();
+  window.addEventListener("resize", updateNavButtonsVisibility);
+}
+
+function initGalleryGlightbox() {
+  if (typeof GLightbox === "undefined") return;
+
+  const glightbox = GLightbox({ selector: "[data-glightbox]" });
+
+  const syncCarouselToGallery = () => {
+    const carouselNow = qs("#gallery-swiper");
+    if (!carouselNow) return;
+
+    const slideIndex = glightbox.index || 0;
+    const slideWidth = carouselNow.children[0].offsetWidth;
+    const gap = parseFloat(getComputedStyle(carouselNow).gap);
+    const padding = parseFloat(getComputedStyle(carouselNow).paddingLeft);
+    carouselNow.scrollLeft = slideIndex * (slideWidth + gap) + padding;
+
+    const dots = qsa(".gallery-swiper__dot");
+    dots.forEach(dot => dot.classList.remove("active"));
+    if (dots[slideIndex]) dots[slideIndex].classList.add("active");
+  };
+
+  glightbox.on("close", syncCarouselToGallery);
+
+  let lastSyncIndex = -1;
+  const syncInterval = setInterval(() => {
+    const isOpen = document.body.classList.contains("glightbox-open");
+    if (isOpen && (glightbox.index !== lastSyncIndex)) {
+      lastSyncIndex = glightbox.index;
+      syncCarouselToGallery();
+    }
+  }, 50);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   initAgeGate();
   initStyleSwitcher();
@@ -1383,4 +1440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (KOSZYK_WLACZONY) initCart();
   }
   initWineOffer();
+  await loadGalleryFromJSON();
+  initGallerySwiperDots();
+  initGalleryGlightbox();
 });

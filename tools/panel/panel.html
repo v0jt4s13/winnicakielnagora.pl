@@ -154,6 +154,43 @@
       </div>
     </section>
 
+    <section class="sekcja">
+      <div class="naglowek-sekcji">
+        <h2>
+          <button type="button" class="przelacznik-sekcji" aria-expanded="false" aria-controls="cialo-o-nas-galeria">
+            <span class="strzalka" aria-hidden="true"></span>O nas - galeria
+          </button>
+          <span id="licznik-o-nas" class="licznik"></span>
+        </h2>
+        <div class="akcje-sekcji">
+          <span class="sciezka" id="sciezka-o-nas">data/o_nas_galeria.json</span>
+          <button type="button" id="odrzuc-o-nas" class="przycisk">Odrzuć zmiany</button>
+          <button type="button" id="zapisz-o-nas" class="przycisk glowny">Zapisz</button>
+          <button type="button" id="dodaj-do-o-nas" class="przycisk">+ Dodaj do O nas</button>
+        </div>
+      </div>
+      <div class="cialo-sekcji" id="cialo-o-nas-galeria" hidden>
+        <p class="podpowiedz">
+          Zaznacz zdjęcia w sekcji „Galeria zdjęć" poniżej i kliknij „+ Dodaj do O nas"
+        </p>
+        <ul id="lista-o-nas" class="lista"></ul>
+        <p id="pusto-o-nas" class="pusto" hidden>Galeria jest pusta. Dodaj pierwsze zdjęcie.</p>
+      </div>
+    </section>
+
+    <div id="o-nas-galeria-modal" class="galeria-modal" hidden role="dialog" aria-modal="true" aria-labelledby="o-nas-galeria-modal-tytul">
+      <div class="galeria-modal-tlo" data-o-nas-galeria-zamknij></div>
+      <div class="galeria-modal-tresc">
+        <div class="galeria-modal-naglowek">
+          <h2 id="o-nas-galeria-modal-tytul">Podgląd zdjęcia</h2>
+          <button type="button" id="zamknij-o-nas-galeria" class="przycisk">Zamknij</button>
+        </div>
+        <div style="aspect-ratio: 8/9; width: 100%; max-width: 400px; margin: 0 auto; padding: 0 1rem;">
+          <img id="o-nas-galeria-modal-obraz" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+        </div>
+      </div>
+    </div>
+
     <section class="sekcja" id="sekcja-galerii">
       <div class="naglowek-sekcji">
         <h2>
@@ -394,6 +431,8 @@
       </div>
     </section>
   </main>
+
+  <div id="toast-container" class="toast-container"></div>
 
   <script src="../../assets/js/produkty.js"></script>
   <script src="panel.js"></script>

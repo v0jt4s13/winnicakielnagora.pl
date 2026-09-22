@@ -39,6 +39,12 @@ let galeriaWydarzeniaStan_zaznaczone = new Set();
 let galeriaWydarzeniaStan_strona = 0;
 const GALERIA_Wydarzenia_NA_STRONE = 16;
 
+// O nas galeria — trzeci niezalezny plik danych
+let oNasGaleria = null;
+let oNasGaleriaBase = null;
+let wersjaONasGaleria = null;
+let zmienioneONasGaleria = false;
+
 // --- komunikaty -----------------------------------------------------------
 
 function pokazKomunikat(tresc, rodzaj = "") {
@@ -50,6 +56,30 @@ function pokazKomunikat(tresc, rodzaj = "") {
 
 function ukryjKomunikat() {
   qs("#komunikat").hidden = true;
+}
+
+// --- Toast na dole strony --- (dostępny dla wszystkich sekcji)
+function pokazToast(tresc, typ = "info", czasTrwania = 5000) {
+  const container = qs("#toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${typ}`;
+  toast.innerHTML = `
+    <span class="toast-text">${Produkty.escape(tresc)}</span>
+    <button type="button" class="toast-close" aria-label="Zamknij">×</button>
+  `;
+
+  const closeBtn = toast.querySelector(".toast-close");
+  const usunToast = () => {
+    toast.style.animation = "toast-fade-out 0.3s ease";
+    setTimeout(() => toast.remove(), 300);
+  };
+
+  closeBtn.addEventListener("click", usunToast);
+  container.appendChild(toast);
+
+  if (czasTrwania > 0) {
+    setTimeout(usunToast, czasTrwania);
+  }
 }
 
 /** Jeden wskaznik na caly panel: przyciski zapisu naleza do sekcji, ale ostrzezenie
@@ -844,8 +874,22 @@ qs("#zamknij-galerie").addEventListener("click", zamknijPodgladGalerii);
 qs("#galeria-modal").addEventListener("click", (e) => {
   if (e.target.closest("[data-galeria-zamknij]")) zamknijPodgladGalerii();
 });
+
+function zamknijPodgladONasGalerii() {
+  qs("#o-nas-galeria-modal").hidden = true;
+  qs("#o-nas-galeria-modal-obraz").removeAttribute("src");
+}
+
+qs("#zamknij-o-nas-galeria").addEventListener("click", zamknijPodgladONasGalerii);
+qs("#o-nas-galeria-modal").addEventListener("click", (e) => {
+  if (e.target.closest("[data-o-nas-galeria-zamknij]")) zamknijPodgladONasGalerii();
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !qs("#galeria-modal").hidden) zamknijPodgladGalerii();
+  if (e.key === "Escape") {
+    if (!qs("#galeria-modal").hidden) zamknijPodgladGalerii();
+    if (!qs("#o-nas-galeria-modal").hidden) zamknijPodgladONasGalerii();
+  }
 });
 
 
@@ -1240,13 +1284,336 @@ function initZwijanieSekcji() {
 
 initZwijanieSekcji();
 
+// --- O nas - galeria -------------------------------------------------------
+
+async function wczytajONasGaleria() {
+  try {
+    const odp = await fetch("api/o-nas-galeria-wczytaj");
+    const dane = await odp.json();
+    if (!odp.ok) throw new Error(dane.komunikat || `HTTP ${odp.status}`);
+    oNasGaleria = Array.isArray(dane.gallery) ? dane.gallery : [];
+    oNasGaleriaBase = JSON.parse(JSON.stringify(oNasGaleria));
+    wersjaONasGaleria = dane.version;
+    qs("#sciezka-o-nas").textContent = dane.gallery !== undefined ? "data/o_nas_galeria.json" : "—";
+    renderListeONasGaleria();
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się wczytać galerii O nas: ${Produkty.escape(blad.message)}`, "blad");
+  }
+}
+
+function renderListeONasGaleria() {
+  const lista = qs("#lista-o-nas");
+  qs("#licznik-o-nas").textContent = oNasGaleria.length ? `(${oNasGaleria.length})` : "";
+  qs("#pusto-o-nas").hidden = oNasGaleria.length > 0;
+
+  lista.innerHTML = oNasGaleria
+    .map((item, i) => {
+      return `
+      <li data-index="${i}" class="galeria-karta-edycji">
+        <div style="display: flex; gap: 1rem; align-items: flex-start; width: 100%;">
+          <div style="flex: 0 0 120px; min-width: 120px; position: relative; cursor: pointer;">
+            <img src="../../${Produkty.escape(item.path)}" alt="${Produkty.escape(item.alt)}"
+                 style="width: 100%; height: auto; border-radius: 4px; object-fit: cover;" loading="lazy">
+            <svg style="position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px; background: rgba(255,255,255,0.6); border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 4px; box-sizing: border-box; color: black;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+          </div>
+          <div style="flex: 1; min-width: 200px;">
+            <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Tytuł</label>
+            <input type="text" data-title="${i}" placeholder="Tytuł (opcjonalnie)" value="${Produkty.escape(item.title)}"
+                   style="width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--ramka); border-radius: 6px; background: var(--karta); color: var(--tekst); font: inherit; margin-bottom: 0.8rem; box-sizing: border-box;">
+            <label style="display: block; font-weight: 500; margin-bottom: 0.3rem; font-size: 0.9rem;">Alt text <span style="color: red;">*</span></label>
+            <input type="text" data-alt="${i}" placeholder="Alt text" value="${Produkty.escape(item.alt)}" required
+                   style="width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--ramka); border-radius: 6px; background: var(--karta); color: var(--tekst); font: inherit; margin-bottom: 0.8rem; box-sizing: border-box;">
+            <small style="color: var(--przygaszony);">Lokalizacja: ${Produkty.escape(item.path)}</small><br>
+          </div>
+          <div style="flex: 0 0 auto; display: flex; gap: 1rem; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; margin: 0; white-space: nowrap;">
+              <input type="checkbox" data-active="${i}" ${item.active ? "checked" : ""} style="cursor: pointer;">
+              <small>Aktywne</small>
+            </label>
+            <div style="display: flex; gap: 0.3rem; align-items: center;">
+              <button type="button" class="przycisk" data-move-up="${i}" style="padding: 0.4rem 0.6rem; font-size: 0.9rem;" ${i === 0 ? "disabled" : ""}>↑</button>
+              <span style="font-size: 0.9rem; color: var(--przygaszony);">${item.order}</span>
+              <button type="button" class="przycisk" data-move-down="${i}" style="padding: 0.4rem 0.6rem; font-size: 0.9rem;" ${i === oNasGaleria.length - 1 ? "disabled" : ""}>↓</button>
+            </div>
+            <button type="button" class="przycisk niebezpieczny" data-usun="${i}" style="padding: 0.4rem 0.8rem; font-size: 0.9rem;">Usuń</button>
+          </div>
+        </div>
+      </li>
+    `;
+    })
+    .join("");
+}
+
+function oznaczZmianeONas(zmiana = true) {
+  zmienioneONasGaleria = zmiana;
+  qs("#zapisz-o-nas").disabled = !zmiana;
+  qs("#odrzuc-o-nas").disabled = !zmiana;
+}
+
+function normalizeOrderONas() {
+  oNasGaleria.forEach((item, i) => {
+    item.order = i + 1;
+  });
+}
+
+async function zapiszONas() {
+  const bledy = walidujONasGaleria(oNasGaleria);
+  if (bledy.length > 0) {
+    pokazToast(`Błędy w galerii O nas: ${bledy.map(e => e.message).join(", ")}`, "blad");
+
+    // Wyróżnij pola alt z błędami
+    document.querySelectorAll('input[data-alt]').forEach(inp => {
+      inp.style.borderColor = "";
+    });
+    bledy.forEach(blad => {
+      if (blad.message.includes("alt")) {
+        const match = blad.message.match(/Item (\d+):/);
+        if (match) {
+          const i = match[1];
+          const inp = qs(`input[data-alt="${i}"]`);
+          if (inp) inp.style.borderColor = "var(--blad)";
+        }
+      }
+    });
+    return;
+  }
+
+  qs("#zapisz-o-nas").disabled = true;
+  const payload = {
+    dane: { gallery: oNasGaleria },
+    wersja: wersjaONasGaleria,
+    bazowe_dane: { gallery: oNasGaleriaBase }
+  };
+  try {
+    const odp = await fetch("api/o-nas-galeria-zapisz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) {
+      if (wynik.konflikt) {
+        pokazToast(`Konflikt zapisu: Ktoś inny zmienił galerię. ${wynik.komunikat}`, "blad");
+        await wczytajONasGaleria();
+      } else if (wynik.bledy && Array.isArray(wynik.bledy)) {
+        pokazToast(`Błędy: ${wynik.bledy.map(e => e.message).join(", ")}`, "blad");
+      } else {
+        throw new Error(wynik.komunikat || `HTTP ${odp.status}`);
+      }
+      return;
+    }
+    wersjaONasGaleria = wynik.wersja;
+    oNasGaleriaBase = JSON.parse(JSON.stringify(oNasGaleria));
+    oznaczZmianeONas(false);
+    pokazToast(`✓ Zapisano galerię O nas (${wynik.items} zdjęć).`, "sukces");
+    await wczytajONasGaleria();
+  } catch (blad) {
+    pokazToast(`Nie udało się zapisać: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    qs("#zapisz-o-nas").disabled = false;
+  }
+}
+
+function walidujONasGaleria(dane) {
+  const bledy = [];
+  if (!Array.isArray(dane)) {
+    bledy.push({ message: "Galeria musi być tablicą" });
+    return bledy;
+  }
+  const seenOrder = new Set();
+  dane.forEach((item, i) => {
+    if (!item.path || typeof item.path !== "string") bledy.push({ message: `Pozycja ${i}: ścieżka nie może być pusta` });
+    if (typeof item.title !== "string") bledy.push({ message: `Pozycja ${i}: tytuł musi być tekstem` });
+    if (!item.alt || typeof item.alt !== "string") bledy.push({ message: `Pozycja ${i}: alt text nie może być pusty` });
+    if (typeof item.order !== "number" || item.order < 1)
+      bledy.push({ message: `Pozycja ${i}: nieprawidłowa kolejność` });
+    else if (seenOrder.has(item.order))
+      bledy.push({ message: `Pozycja ${i}: duplikat kolejności ${item.order}` });
+    else seenOrder.add(item.order);
+    if (typeof item.active !== "boolean")
+      bledy.push({ message: `Pozycja ${i}: aktywne musi być prawda lub fałsz` });
+  });
+  return bledy;
+}
+
+// --- O nas galeria: dodawanie z zaznaczonych w galerii głównej ---
+
+function potwierdzDodajDoONas() {
+  if (galeriaZaznaczone.size === 0) {
+    pokazToast("Zaznacz co najmniej jedno zdjęcie w sekcji Galeria zdjęć.", "ostrzezenie");
+    return;
+}
+
+  const zaznaczoneSciezki = [...galeriaZaznaczone];
+
+  fetch("/tools/panel/api/o-nas-galeria-dodaj-z-galerii", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ zdjecia: zaznaczoneSciezki })
+  })
+    .then(r => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then(dane => {
+      if (!dane.ok) throw new Error(dane.komunikat || "Błąd kopiowania");
+
+      const maxOrder = oNasGaleria.length > 0 ? Math.max(...oNasGaleria.map(item => item.order)) : 0;
+      let nextOrder = maxOrder + 1;
+      let dodane = 0;
+      let bledu = 0;
+
+      dane.wyniki.forEach(wynik => {
+        if (wynik.error) {
+          bledu++;
+          return;
+        }
+        const plik = galeriaStan.pliki.find(p => p.sciezka === wynik.source);
+        if (plik && !oNasGaleria.find(item => item.path === wynik.destination)) {
+          oNasGaleria.push({
+            path: wynik.destination,
+            title: "",
+            alt: plik.nazwa,
+            order: nextOrder++,
+            active: false
+          });
+          dodane++;
+        }
+      });
+
+      galeriaZaznaczone.clear();
+      renderGaleria();
+      oNasGaleria.sort((a, b) => a.order - b.order);
+      normalizeOrderONas();
+      oznaczZmianeONas();
+      renderListeONasGaleria();
+
+      let komunikat = `✓ Dodano ${dodane} zdjęć.`;
+      if (bledu > 0) komunikat += ` (${bledu} błędów)`;
+      pokazToast(komunikat, "sukces");
+
+      zapiszONas();
+    })
+    .catch(blad => {
+      pokazToast(`Błąd kopiowania: ${blad.message}`, "blad");
+    });
+}
+
 window.addEventListener("beforeunload", (e) => {
-  if (!zmienione && !zmienioneWydarzenia) return;
+  if (!zmienione && !zmienioneWydarzenia && !zmienioneONasGaleria) return;
   e.preventDefault();
   e.returnValue = "";
 });
 
+// --- event listenery dla O nas karuzeli ---
+
+qs("#lista-o-nas").addEventListener("change", (e) => {
+  const checkbox = e.target.closest("[data-active]");
+  if (checkbox) {
+    const i = Number(checkbox.dataset.active);
+    if (oNasGaleria[i]) {
+      oNasGaleria[i].active = checkbox.checked;
+      oznaczZmianeONas();
+    }
+    return;
+  }
+
+  const titleInput = e.target.closest("[data-title]");
+  if (titleInput) {
+    const i = Number(titleInput.dataset.title);
+    if (oNasGaleria[i]) {
+      oNasGaleria[i].title = titleInput.value;
+      oznaczZmianeONas();
+    }
+    return;
+  }
+
+  const altInput = e.target.closest("[data-alt]");
+  if (altInput) {
+    const i = Number(altInput.dataset.alt);
+    if (oNasGaleria[i]) {
+      oNasGaleria[i].alt = altInput.value;
+      oznaczZmianeONas();
+    }
+  }
+});
+
+// Wyczyść wyróżnienie błędu gdy user edytuje pole alt
+qs("#lista-o-nas").addEventListener("input", (e) => {
+  if (e.target.matches('input[data-alt]')) {
+    e.target.style.borderColor = "";
+  }
+});
+
+qs("#lista-o-nas").addEventListener("click", (e) => {
+  // Preview image
+  const img = e.target.closest("img");
+  if (img && img.closest("[data-index]")) {
+    const modal = qs("#o-nas-galeria-modal");
+    const modalImg = qs("#o-nas-galeria-modal-obraz");
+    if (modal && modalImg) {
+      modalImg.src = img.src;
+      modalImg.alt = img.alt;
+      modal.hidden = false;
+    }
+    return;
+  }
+
+  // Move up
+  let btn = e.target.closest("[data-move-up]");
+  if (btn) {
+    const i = Number(btn.dataset.moveUp);
+    if (i > 0) {
+      [oNasGaleria[i], oNasGaleria[i - 1]] = [oNasGaleria[i - 1], oNasGaleria[i]];
+      normalizeOrderONas();
+      oznaczZmianeONas();
+      renderListeONasGaleria();
+    }
+    return;
+  }
+
+  // Move down
+  btn = e.target.closest("[data-move-down]");
+  if (btn) {
+    const i = Number(btn.dataset.moveDown);
+    if (i < oNasGaleria.length - 1) {
+      [oNasGaleria[i], oNasGaleria[i + 1]] = [oNasGaleria[i + 1], oNasGaleria[i]];
+      normalizeOrderONas();
+      oznaczZmianeONas();
+      renderListeONasGaleria();
+    }
+    return;
+  }
+
+  // Delete
+  btn = e.target.closest("[data-usun]");
+  if (!btn) return;
+  const i = Number(btn.dataset.usun);
+  if (oNasGaleria[i]) {
+    oNasGaleria.splice(i, 1);
+    normalizeOrderONas();
+    oznaczZmianeONas();
+    renderListeONasGaleria();
+  }
+});
+
+const btnZapiszONas = qs("#zapisz-o-nas");
+if (btnZapiszONas) {
+  btnZapiszONas.addEventListener("click", zapiszONas);
+} else {
+  console.error("[DEBUG] ERROR: #zapisz-o-nas button not found!");
+}
+
+qs("#odrzuc-o-nas").addEventListener("click", async () => {
+  oNasGaleria = JSON.parse(JSON.stringify(oNasGaleriaBase));
+  oznaczZmianeONas(false);
+  renderListeONasGaleria();
+  pokazToast("Zmiany w galerii odrzucone.", "info");
+});
+
+qs("#dodaj-do-o-nas").addEventListener("click", potwierdzDodajDoONas);
+
 // Sekwencyjnie, nie rownolegle: formularz wydarzenia buduje <select> ze zdjeciami
 // z listy, ktora przychodzi razem z cennikiem.
-wczytaj().then(wczytajWydarzenia).then(wczytajGalerie);
+wczytaj().then(wczytajWydarzenia).then(wczytajGalerie).then(wczytajONasGaleria);
 wczytajStatusSmtp();
