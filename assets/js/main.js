@@ -1251,6 +1251,174 @@ function initNoclegi() {
   });
 }
 
+async function loadGalleryFromJSON() {
+  const carousel = qs("#gallery-swiper");
+  if (!carousel) return;
+
+  try {
+    const response = await fetch("./data/o_nas_galeria.json");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const items = Array.isArray(data.gallery) ? data.gallery.filter(item => item.active === true).sort((a, b) => a.order - b.order) : [];
+
+    if (items.length === 0) {
+      console.warn("Gallery: no active items found");
+      return;
+    }
+
+    // Generate HTML for gallery items
+    const html = items
+      .map(item => `
+        <a class="gallery-swiper__link" href="./${item.path}" data-glightbox="gallery" data-title="${qs0(item.title)}">
+          <img class="gallery-swiper__slide" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
+        </a>
+      `)
+      .join("");
+
+    // Remove CTA box temporarily
+    const ctaBox = carousel.querySelector(".gallery-swiper__cta");
+    let ctaBoxHTML = null;
+    if (ctaBox) {
+      ctaBoxHTML = ctaBox.outerHTML;
+      ctaBox.remove();
+    }
+
+    // Insert gallery items
+    carousel.insertAdjacentHTML("beforeend", html);
+
+    // Add CTA box back at the end
+    if (ctaBoxHTML) {
+      carousel.insertAdjacentHTML("beforeend", ctaBoxHTML);
+      // Show the box now that elements are ready
+      const newCtaBox = carousel.querySelector(".gallery-swiper__cta");
+      if (newCtaBox) newCtaBox.style.display = "";
+    }
+  } catch (err) {
+    console.error("Failed to load gallery:", err);
+  }
+}
+
+function qs0(str) {
+  return (str || "").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function initGallerySwiperDots() {
+  const carousel = qs("#gallery-swiper");
+  const dotsContainer = qs("#gallery-swiper-dots");
+  if (!carousel || !dotsContainer) return;
+
+  // Setup navigation buttons
+  const prevBtn = qs("#gallery-prev");
+  const nextBtn = qs("#gallery-next");
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener("click", () => {
+      const slideWidth = carousel.children[0].offsetWidth;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+      carousel.scrollLeft -= slideWidth + gap;
+    });
+    nextBtn.addEventListener("click", () => {
+      const slideWidth = carousel.children[0].offsetWidth;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+      carousel.scrollLeft += slideWidth + gap;
+    });
+  }
+
+  const itemCount = carousel.children.length;
+  const isLastItemCta = carousel.children[itemCount - 1]?.classList.contains("gallery-swiper__cta");
+
+  for (let i = 0; i < itemCount; i++) {
+    const dot = document.createElement("button");
+    dot.className = "gallery-swiper__dot" + (i === 0 ? " active" : "");
+    dot.dataset.slide = i;
+
+    if (isLastItemCta && i === itemCount - 1) {
+      dot.classList.add("gallery-swiper__dot--cta", "md:hidden");
+      dot.setAttribute("aria-label", "Przejdź do sklepu");
+    } else {
+      dot.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
+    }
+
+    dotsContainer.appendChild(dot);
+  }
+
+  const dots = qsa(".gallery-swiper__dot");
+
+  const updateActiveDot = () => {
+    const slideWidth = carousel.children[0].offsetWidth;
+    const scrollPos = carousel.scrollLeft;
+    const currentIndex = Math.round((scrollPos - parseFloat(getComputedStyle(carousel).paddingLeft)) / (slideWidth + parseFloat(getComputedStyle(carousel).gap)));
+
+    dots.forEach(dot => dot.classList.remove("active"));
+    if (dots[currentIndex]) dots[currentIndex].classList.add("active");
+  };
+
+  dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => {
+      if (index >= carousel.children.length) return;
+
+      let targetScroll = 0;
+      const gap = parseFloat(getComputedStyle(carousel).gap) || 0;
+
+      for (let i = 0; i < index; i++) {
+        targetScroll += carousel.children[i].offsetWidth + gap;
+      }
+
+      carousel.scrollLeft = targetScroll;
+    });
+  });
+
+  const updateNavButtonsVisibility = () => {
+    const prevBtn = qs("#gallery-prev");
+    const nextBtn = qs("#gallery-next");
+    const canScroll = carousel.scrollWidth > carousel.clientWidth;
+    const isAtStart = carousel.scrollLeft === 0;
+    const isAtEnd = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1;
+
+    if (prevBtn) prevBtn.style.opacity = (canScroll && !isAtStart) ? "1" : "0";
+    if (nextBtn) nextBtn.style.opacity = (canScroll && !isAtEnd) ? "1" : "0";
+  };
+
+  carousel.addEventListener("scroll", () => {
+    updateActiveDot();
+    updateNavButtonsVisibility();
+  });
+
+  updateNavButtonsVisibility();
+  window.addEventListener("resize", updateNavButtonsVisibility);
+}
+
+function initGalleryGlightbox() {
+  if (typeof GLightbox === "undefined") return;
+
+  const glightbox = GLightbox({ selector: "[data-glightbox]" });
+
+  const syncCarouselToGallery = () => {
+    const carouselNow = qs("#gallery-swiper");
+    if (!carouselNow) return;
+
+    const slideIndex = glightbox.index || 0;
+    const slideWidth = carouselNow.children[0].offsetWidth;
+    const gap = parseFloat(getComputedStyle(carouselNow).gap);
+    const padding = parseFloat(getComputedStyle(carouselNow).paddingLeft);
+    carouselNow.scrollLeft = slideIndex * (slideWidth + gap) + padding;
+
+    const dots = qsa(".gallery-swiper__dot");
+    dots.forEach(dot => dot.classList.remove("active"));
+    if (dots[slideIndex]) dots[slideIndex].classList.add("active");
+  };
+
+  glightbox.on("close", syncCarouselToGallery);
+
+  let lastSyncIndex = -1;
+  const syncInterval = setInterval(() => {
+    const isOpen = document.body.classList.contains("glightbox-open");
+    if (isOpen && (glightbox.index !== lastSyncIndex)) {
+      lastSyncIndex = glightbox.index;
+      syncCarouselToGallery();
+    }
+  }, 50);
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   initAgeGate();
   initStyleSwitcher();
@@ -1272,4 +1440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (KOSZYK_WLACZONY) initCart();
   }
   initWineOffer();
+  await loadGalleryFromJSON();
+  initGallerySwiperDots();
+  initGalleryGlightbox();
 });

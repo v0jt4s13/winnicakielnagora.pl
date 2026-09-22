@@ -13,6 +13,7 @@ import cennik
 import galeria
 import kontakt
 import wydarzenia
+import o_nas_galeria
 
 BASE = Path(__file__).parent
 STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po buildzie, inaczej katalog repo
@@ -278,6 +279,16 @@ def zywe_wydarzenia():
         return _json({"wydarzenia": []}, 500)
 
 
+@app.route("/data/o_nas_galeria.json")
+def zywa_galeria_onas():
+    """Gallery for 'O nas' section."""
+    o_nas_galeria.ensure_file()
+    try:
+        return _json(o_nas_galeria.load())
+    except json.JSONDecodeError:
+        return _json({"gallery": []}, 500)
+
+
 @app.route("/api/contact/challenge")
 def formularz_wyzwanie():
     try:
@@ -413,6 +424,66 @@ def panel_api(akcja: str):
                           "do niego prawo zapisu."}, 500)
         return _json({"ok": True, "pozycji": len(dane["wydarzenia"]),
                       "kopia": wydarzenia.opis_kopii(), "wersja": nowa_wersja})
+
+    if akcja == "o-nas-galeria-wczytaj" and request.method == "GET":
+        try:
+            o_nas_galeria.ensure_file()
+            return _json(o_nas_galeria.initial_state())
+        except json.JSONDecodeError as blad:
+            return _json({"ok": False, "komunikat": f"data/o_nas_galeria.json has syntax error: {blad}"}, 500)
+
+    if akcja == "o-nas-galeria-dodaj-z-galerii" and request.method == "POST":
+        zadanie = request.get_json(silent=True)
+        if not isinstance(zadanie, dict):
+            return _json({"ok": False, "komunikat": "Invalid request"}, 400)
+        zdjecia = zadanie.get("zdjecia", [])
+        if not isinstance(zdjecia, list):
+            return _json({"ok": False, "komunikat": "Invalid format"}, 400)
+
+        wyniki = []
+        for source_path in zdjecia:
+            if not isinstance(source_path, str):
+                continue
+            try:
+                nowa_sciezka = o_nas_galeria.copy_image_with_suffix(source_path)
+                wyniki.append({"source": source_path, "destination": nowa_sciezka})
+            except (FileNotFoundError, OSError) as blad:
+                wyniki.append({"source": source_path, "error": str(blad)})
+
+        return _json({"ok": True, "wyniki": wyniki})
+
+    if akcja == "o-nas-galeria-zapisz" and request.method == "POST":
+        zadanie = request.get_json(silent=True)
+        if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+            return _json({"ok": False, "komunikat":
+                          "Invalid request — refresh panel and try again."}, 400)
+        dane = zadanie["dane"]
+        bledy = o_nas_galeria.validate(dane)
+        if bledy:
+            return _json({"ok": False, "bledy": bledy}, 400)
+
+        # Delete images that were removed from gallery
+        bazowe_dane = zadanie.get("bazowe_dane", {})
+        if isinstance(bazowe_dane, dict):
+            stare_sciezki = {item.get("path") for item in bazowe_dane.get("gallery", []) if item.get("path")}
+            nowe_sciezki = {item.get("path") for item in dane.get("gallery", []) if item.get("path")}
+            usunietych = stare_sciezki - nowe_sciezki
+            for sciezka_do_usuniecia in usunietych:
+                o_nas_galeria.delete_image(sciezka_do_usuniecia)
+
+        try:
+            nowa_wersja = o_nas_galeria.save_safely(
+                dane, zadanie.get("wersja"), bazowe_dane)
+        except o_nas_galeria.SaveConflict as konflikt:
+            return _json({"ok": False, "konflikt": True,
+                          "komunikat": "Someone else saved this file. Your changes were NOT saved.",
+                          "roznice": konflikt.diffs}, 409)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat":
+                          f"Failed to save to {o_nas_galeria.GALLERY}: {blad}. "
+                          "Check if the directory exists and if the app user has write access."}, 500)
+        return _json({"ok": True, "items": len(dane.get("gallery", [])),
+                      "backup": o_nas_galeria.backup_info(), "wersja": nowa_wersja})
 
     if akcja == "smtp-wczytaj" and request.method == "GET":
         # Tylko status — samych danych logowania panel nigdy nie odczytuje z powrotem.

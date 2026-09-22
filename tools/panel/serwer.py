@@ -28,12 +28,14 @@ sys.path.insert(0, str(PROJEKT))
 import cennik  # noqa: E402  (import po ustaleniu sciezki projektu)
 import galeria  # noqa: E402
 import wydarzenia  # noqa: E402
+import o_nas_galeria  # noqa: E402
 
 PANEL = PROJEKT / "tools" / "panel"
 CENNIK = cennik.CENNIK
 KOPIA = cennik.KOPIA
 ZDJECIA = cennik.ZDJECIA
 ZASOBY = galeria.ZASOBY
+O_NAS_GALERIA_ZASOBY = o_nas_galeria.ASSETS
 
 ADRES = "127.0.0.1"
 MAX_ZADANIE = 2 * 1024 * 1024  # cennik to kilkadziesiat kB; wiecej znaczy blad albo naduzycie
@@ -48,6 +50,7 @@ KATALOGI = {
     "/photos/": ZDJECIA,
     "/attached_assets/photos/": ZDJECIA,
     "/attached_assets/": ZASOBY,
+    "/assets/o_nas_galeria/": O_NAS_GALERIA_ZASOBY,
     "/": PANEL,
 }
 
@@ -208,13 +211,15 @@ class Panel(BaseHTTPRequestHandler):
             kandydat = ZDJECIA / sciezka[len("/attached_assets/photos/"):]
         elif sciezka.startswith("/attached_assets/"):
             kandydat = ZASOBY / sciezka[len("/attached_assets/"):]
+        elif sciezka.startswith("/assets/o_nas_galeria/"):
+            kandydat = O_NAS_GALERIA_ZASOBY / sciezka[len("/assets/o_nas_galeria/"):]
         else:
             kandydat = PANEL / sciezka.lstrip("/")
 
         # resolve() rozwija dowiazania symboliczne PRZED sprawdzeniem — samo
         # obciecie ".." nie wystarcza.
         kandydat = kandydat.resolve()
-        dozwolone = [p.resolve() for p in (PANEL, ZASOBY)]
+        dozwolone = [p.resolve() for p in (PANEL, ZASOBY, O_NAS_GALERIA_ZASOBY)]
         dozwolone += [p.resolve() for p in POJEDYNCZE_PLIKI.values()]
         pasuje = any(kandydat == p or (p.is_dir() and kandydat.is_relative_to(p))
                      for p in dozwolone)
@@ -252,6 +257,17 @@ class Panel(BaseHTTPRequestHandler):
         if sciezka == "/api/galeria-wczytaj":
             return self._json(200, galeria.stan())
 
+        if sciezka == "/api/o-nas-galeria-wczytaj":
+            try:
+                o_nas_galeria.ensure_file()
+            except OSError as blad:
+                return self._json(500, {"ok": False, "komunikat": str(blad)})
+            try:
+                return self._json(200, o_nas_galeria.initial_state())
+            except json.JSONDecodeError as blad:
+                return self._json(500, {"ok": False,
+                                        "komunikat": f"data/o_nas_galeria.json has syntax error: {blad}"})
+
         plik = self._plik_dozwolony(sciezka)
         if not plik:
             return self._json(404, {"ok": False, "komunikat": "Nie ma takiego pliku"})
@@ -262,7 +278,8 @@ class Panel(BaseHTTPRequestHandler):
             return self._json(403, {"ok": False, "komunikat": "Panel działa tylko lokalnie"})
         sciezka = self._bez_prefiksu(self.path.split("?")[0])
         if sciezka not in ("/api/zapisz", "/api/opisz", "/api/wydarzenia-zapisz",
-                           "/api/galeria-przenies", "/api/galeria-warianty"):
+                           "/api/galeria-przenies", "/api/galeria-warianty",
+                           "/api/o-nas-galeria-zapisz", "/api/o-nas-galeria-dodaj-z-galerii"):
             return self._json(404, {"ok": False, "komunikat": "Nieznany adres"})
         if not self._origin_ok():
             return self._json(403, {"ok": False, "komunikat": "Niedozwolone źródło żądania"})
@@ -304,6 +321,53 @@ class Panel(BaseHTTPRequestHandler):
             if komunikat:
                 return self._json(kod, {"ok": False, "komunikat": komunikat})
             return self._json(200, {"ok": True, **wynik})
+
+        if sciezka == "/api/o-nas-galeria-dodaj-z-galerii":
+            zdjecia = dane.get("zdjecia", [])
+            if not isinstance(zdjecia, list):
+                return self._json(400, {"ok": False, "komunikat": "Invalid format"})
+
+            wyniki = []
+            for source_path in zdjecia:
+                if not isinstance(source_path, str):
+                    continue
+                try:
+                    nowa_sciezka = o_nas_galeria.copy_image_with_suffix(source_path)
+                    wyniki.append({"source": source_path, "destination": nowa_sciezka})
+                except (FileNotFoundError, OSError) as blad:
+                    wyniki.append({"source": source_path, "error": str(blad)})
+
+            return self._json(200, {"ok": True, "wyniki": wyniki})
+
+        if sciezka == "/api/o-nas-galeria-zapisz":
+            if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
+                return self._json(400, {"ok": False, "komunikat": "Invalid request"})
+            dane = zadanie["dane"]
+            bledy = o_nas_galeria.validate(dane)
+            if bledy:
+                return self._json(400, {"ok": False, "bledy": bledy})
+
+            # Delete images that were removed from gallery
+            bazowe_dane = zadanie.get("bazowe_dane", {})
+            if isinstance(bazowe_dane, dict):
+                stare_sciezki = {item.get("path") for item in bazowe_dane.get("gallery", []) if item.get("path")}
+                nowe_sciezki = {item.get("path") for item in dane.get("gallery", []) if item.get("path")}
+                usunietych = stare_sciezki - nowe_sciezki
+                for sciezka_do_usuniecia in usunietych:
+                    o_nas_galeria.delete_image(sciezka_do_usuniecia)
+
+            try:
+                nowa_wersja = o_nas_galeria.save_safely(
+                    dane, zadanie.get("wersja"), bazowe_dane)
+            except o_nas_galeria.SaveConflict as konflikt:
+                return self._json(409, {"ok": False, "konflikt": True,
+                                        "komunikat": "Someone else saved this file. Your changes were NOT saved.",
+                                        "roznice": konflikt.diffs})
+            except OSError as blad:
+                return self._json(500, {"ok": False,
+                                        "komunikat": f"Failed to save: {blad}"})
+            return self._json(200, {"ok": True, "items": len(dane.get("gallery", [])),
+                                    "backup": o_nas_galeria.backup_info(), "wersja": nowa_wersja})
 
         if sciezka == "/api/wydarzenia-zapisz":
             if not isinstance(zadanie, dict) or not isinstance(zadanie.get("dane"), dict):
