@@ -1446,7 +1446,7 @@ function potwierdzDodajDoONas() {
 
   const zaznaczoneSciezki = [...galeriaZaznaczone];
 
-  fetch("/tools/panel/api/o-nas-galeria-dodaj-z-galerii", {
+  fetch("api/o-nas-galeria-dodaj-z-galerii", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ zdjecia: zaznaczoneSciezki })
