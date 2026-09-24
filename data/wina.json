@@ -16,11 +16,14 @@
   "wina": [
     {
       "id": "dornfelder-2022",
-      "nazwa": "Dornfelder - 2022",
-      "odmiana_slug": "dornfelder",
+      "nazwa": "Dornfelder",
+      "odmiany_slug": [
+        "dornfelder",
+        "monarch"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
-      "cena_brutto": 157,
+      "cena_brutto": 59,
       "rabat_procent": 20,
       "dostepne": true,
       "opis": "Dornfelder to szczep winogron o ciemnej skórce, znany z produkcji ciemnych, aksamitnych win z nutami śliwek i wiśni, doskonałych do starzenia w beczkach dębowych.",
@@ -31,8 +34,10 @@
     },
     {
       "id": "monarch-2022",
-      "nazwa": "Monarch 2022",
-      "odmiana_slug": "monarch",
+      "nazwa": "Monarch",
+      "odmiany_slug": [
+        "monarch"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
       "cena_brutto": 113,
@@ -47,8 +52,10 @@
     },
     {
       "id": "seyval-blanc-2022",
-      "nazwa": "Seyval blanc 2022",
-      "odmiana_slug": "seyval-blanc",
+      "nazwa": "Seyval Blanc",
+      "odmiany_slug": [
+        "seyval-blanc"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 111,
@@ -63,8 +70,10 @@
     },
     {
       "id": "souvignier-gris-2022",
-      "nazwa": "Souvignier gris 2022",
-      "odmiana_slug": "souvignier-gris",
+      "nazwa": "Souvignier Gris",
+      "odmiany_slug": [
+        "souvignier-gris"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 111,
@@ -78,8 +87,10 @@
     },
     {
       "id": "st-pepin-2022",
-      "nazwa": "St. Pepin 2022",
-      "odmiana_slug": "st-pepin",
+      "nazwa": "St. Pepin",
+      "odmiany_slug": [
+        "st-pepin"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 99,
@@ -94,8 +105,10 @@
     },
     {
       "id": "swenson-red-2023",
-      "nazwa": "Swenson Red 2023",
-      "odmiana_slug": "swenson-red",
+      "nazwa": "Swenson Red",
+      "odmiany_slug": [
+        "swenson-red"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
       "cena_brutto": 221,
@@ -110,8 +123,10 @@
     },
     {
       "id": "vidal-blanc-2024",
-      "nazwa": "Vidal Blanc 2024",
-      "odmiana_slug": "vidal-blanc",
+      "nazwa": "Vidal Blanc",
+      "odmiany_slug": [
+        "vidal-blanc"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 222,
@@ -127,13 +142,15 @@
     {
       "id": "sok-winogronowy-750ml",
       "nazwa": "Sok winogronowy 750ML",
-      "odmiana_slug": "soki",
+      "odmiany_slug": [
+        "soki"
+      ],
       "kategoria": "Soki",
-      "pojemnosc_ml": 750,
+      "pojemnosc_ml": 3000,
       "cena_brutto": 15,
       "rabat_procent": 20,
       "dostepne": true,
-      "opis": "Sok winogronowy 750ML to naturalny napój tłoczony na zimno, bogaty w witaminy i przeciwutleniacze, wspierający układ krążenia i odporność.",
+      "opis": "Sok winogronowy 3L to naturalny napój tłoczony na zimno, bogaty w witaminy i przeciwutleniacze, wspierający układ krążenia i odporność.",
       "zdjecie": "winnica-butelka-biale-01",
       "rocznik": 2026,
       "alkohol": 0

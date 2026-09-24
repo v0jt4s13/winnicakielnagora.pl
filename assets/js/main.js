@@ -851,6 +851,39 @@ function renderSklep() {
   return true;
 }
 
+/**
+ * Chowa/pokazuje „więcej" na opisie karty — tylko gdy 3 linie realnie ucinają tekst.
+ * `-webkit-line-clamp` w Chrome/Safari nie podbija `scrollHeight` klampowanego boxu
+ * (mimo realnego ucięcia scrollHeight == clientHeight), więc naturalną wysokość mierzymy
+ * z chwilowo zdjętym klampem (`.opis-karta--rozwinieta`), a nie na samym boxie z klampem.
+ */
+function aktualizujOpisyKart() {
+  qsa(".opis-karta").forEach((p) => {
+    p.classList.remove("opis-karta--obcieta", "opis-karta--rozwinieta");
+    p.classList.add("opis-karta--rozwinieta");
+    const pelna = p.scrollHeight;
+    p.classList.remove("opis-karta--rozwinieta");
+    const obcieta = p.clientHeight;
+    if (pelna > obcieta + 1) p.classList.add("opis-karta--obcieta");
+  });
+}
+
+/**
+ * Klik na „więcej" rozwija opis karty do pełnej treści (deleguje zdarzenie — karty są dynamiczne).
+ * Przycisk jest siostrzanym elementem .opis-karta (osobny pasek pod tekstem), nie jej dzieckiem —
+ * stąd previousElementSibling zamiast closest().
+ */
+function initOpisWiecej() {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-opis-wiecej]");
+    if (!btn) return;
+    const opis = btn.previousElementSibling;
+    if (!opis || !opis.classList.contains("opis-karta")) return;
+    opis.classList.remove("opis-karta--obcieta");
+    opis.classList.add("opis-karta--rozwinieta");
+  });
+}
+
 /** Blok „Wina z tej odmiany" na stronach odmian. Treść strony działa bez tego. */
 async function initWineOffer() {
   const wrap = qs("#oferta-odmiany");
@@ -859,7 +892,7 @@ async function initWineOffer() {
   // cennika. Podstrony odmian nadal pokazują ceny, więc dociągamy go tutaj.
   if (!cennik) cennik = await wczytajCennik();
   const slug = wrap.dataset.odmiana;
-  const pasujace = (cennik?.wina || []).filter((wino) => wino.odmiana_slug === slug);
+  const pasujace = (cennik?.wina || []).filter((wino) => Array.isArray(wino.odmiany_slug) && wino.odmiany_slug.includes(slug));
 
   if (pasujace.length === 0) return; // zostaje statyczny tekst zastępczy z HTML-a
 
@@ -1433,10 +1466,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   initWydarzenia();
   initNoclegiWydarzenie();
+  initOpisWiecej();
   if (SKLEP_WLACZONY) {
     cennik = await wczytajCennik();
     renderKategorie();
-    if (renderSklep()) initFilters();
+    if (renderSklep()) {
+      initFilters();
+      aktualizujOpisyKart();
+    }
     if (KOSZYK_WLACZONY) initCart();
   }
   initWineOffer();

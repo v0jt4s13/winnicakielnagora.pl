@@ -117,6 +117,37 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .lista .niedostepna { color: var(--przygaszony); }
 .lista .promocja { color: var(--ostrzezenie); }
 
+/* Lista win (#lista): kolumny tej samej szerokości w każdej pozycji, jak w tabeli —
+   grid zamiast flex, bo flex liczy szerokość każdego <li> niezależnie od pozostałych.
+   #lista, nie .lista: pozostałe listy w panelu (o-nas, wydarzenia, zdjęcia wydarzenia)
+   mają inną liczbę i rodzaj kolumn i muszą zostać przy współdzielonym układzie flex. */
+#lista li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 90px 40px 90px 40px 80px;
+  align-items: center;
+}
+#lista .nazwa {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#lista .meta.id {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#lista .cena { text-align: right; }
+#lista .promocja--brak { visibility: hidden; }
+
+@media (max-width: 700px) {
+  #lista li {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #lista .nazwa { white-space: normal; }
+}
+
 .formularz {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -141,6 +172,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .formularz .pole-checkbox input { width: auto; }
 .pole-radio { display: flex; align-items: center; gap: 0.5rem; color: var(--tekst); margin-bottom: 0.6rem; }
 .pole-radio input { width: auto; }
+.formularz .pole-grupa { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; color: var(--przygaszony); }
+.formularz .pole-grupa-lista { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+.formularz .pole-grupa-lista label { flex-direction: row; align-items: center; gap: 0.4rem; color: var(--tekst); }
+.formularz .pole-grupa-lista input { width: auto; }
 .formularz .blad-pola { color: var(--blad); font-size: 0.75rem; }
 .formularz .niepoprawne input,
 .formularz .niepoprawne select,
@@ -148,8 +183,32 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .pole-z-przyciskiem { display: flex; gap: 0.5rem; }
 .pole-z-przyciskiem input { flex: 1 1 auto; min-width: 0; }
 
+/* Karta w podglądzie czyta zmienne motywu (hsl(var(--primary)) itd.) ze style.css/custom.css,
+   ale te zmienne panel nigdy nie ustawia — na stronie robi to setTheme() w main.js, którego
+   tu nie ładujemy. Bez tego karta miała niezdefiniowane kolory. Wartości = motyw "classic"
+   z themeStyles w assets/js/main.js — jeśli tamten motyw się zmieni, zaktualizuj i tu. */
+#podglad-karty {
+  --background: 50 5% 98%;
+  --foreground: 0 0% 18%;
+  --border: 39 10% 88%;
+  --card: 39 15% 96%;
+  --card-foreground: 0 0% 18%;
+  --card-border: 39 12% 92%;
+  --primary: 0 100% 27%;
+  --primary-foreground: 39 77% 95%;
+  --secondary: 39 25% 86%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 39 20% 90%;
+  --muted-foreground: 0 0% 35%;
+  --accent: 39 25% 88%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --input: 0 0% 65%;
+  --ring: 43 74% 49%;
+}
+
 .podglad { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--ramka); }
-.podglad h3 { margin: 0 0 0.8rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--przygaszony); }
 .podglad-ramka { max-width: 320px; }
 
 .znaczniki { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; padding: 0; }

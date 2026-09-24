@@ -157,12 +157,13 @@ function renderLista() {
         : '<span class="kropka dostepna">● dostępne</span>';
       const promo = ceny.promocja
         ? `<span class="kropka promocja">-${wino.rabat_procent}%</span>`
-        : "";
+        : `<span class="kropka promocja promocja--brak"></span>`;
       return `
         <li data-indeks="${i}" class="${i === wybrany ? "wybrana" : ""}">
           <span class="nazwa">${Produkty.escape(wino.nazwa || "(bez nazwy)")}</span>
           <span class="meta id">${Produkty.escape(wino.id || "—")}</span>
-          <span class="meta">${Produkty.escape(wino.kategoria || "—")}</span>
+          <span class="meta kategoria">${Produkty.escape(wino.kategoria || "—")}</span>
+          <span class="meta rocznik">${Produkty.escape(wino.rocznik || "—")}</span>
           <span class="meta cena">${Produkty.formatujCene(ceny.brutto)}</span>
           ${promo}
           ${znacznik}
@@ -214,7 +215,10 @@ function renderFormularz() {
   qs("#tytul-formularza").textContent = wino.nazwa || "Nowa pozycja";
 
   const f = qs("#formularz");
-  f.elements.odmiana_slug.innerHTML = opcje(odmiany, wino.odmiana_slug);
+  const wybraneOdmiany = Array.isArray(wino.odmiany_slug) ? wino.odmiany_slug : [];
+  qs("#odmiany-lista").innerHTML = odmiany
+    .map((slug) => `<label><input type="checkbox" name="odmiany_slug" value="${Produkty.escape(slug)}"${wybraneOdmiany.includes(slug) ? " checked" : ""}> ${Produkty.escape(Produkty.humanizujSlug(slug))}</label>`)
+    .join("");
   f.elements.kategoria.innerHTML = opcje(cennik.kategorie || [], wino.kategoria);
   f.elements.rodzaj.innerHTML = opcje(cennik.rodzaje || [], wino.rodzaj);
   f.elements.zdjecie.innerHTML = opcje(zdjecia, wino.zdjecie);
@@ -236,6 +240,23 @@ function renderPodglad() {
     linkOdmiany: false,
     bazaZdjec: "../../attached_assets/photos/",
   });
+  aktualizujOpisKarty();
+}
+
+/**
+ * Pokazuje „więcej" na opisie, gdy tekst realnie nie mieści się w 3 liniach — kopia
+ * aktualizujOpisyKart() z assets/js/main.js. Panel nie ładuje main.js (ma własny
+ * panel.js), więc bez tego przycisk zawsze zostawałby ukryty w podglądzie.
+ */
+function aktualizujOpisKarty() {
+  qsa(".opis-karta").forEach((p) => {
+    p.classList.remove("opis-karta--obcieta", "opis-karta--rozwinieta");
+    p.classList.add("opis-karta--rozwinieta");
+    const pelna = p.scrollHeight;
+    p.classList.remove("opis-karta--rozwinieta");
+    const obcieta = p.clientHeight;
+    if (pelna > obcieta + 1) p.classList.add("opis-karta--obcieta");
+  });
 }
 
 /** Przepisuje formularz do modelu. Puste pola opcjonalne znikają z JSON-a. */
@@ -243,9 +264,10 @@ function zbierzFormularz() {
   const f = qs("#formularz");
   const wino = cennik.wina[wybrany];
 
-  ["nazwa", "id", "opis", "odmiana_slug", "kategoria", "zdjecie"].forEach((pole) => {
+  ["nazwa", "id", "opis", "kategoria", "zdjecie"].forEach((pole) => {
     wino[pole] = f.elements[pole].value.trim();
   });
+  wino.odmiany_slug = qsa("#odmiany-lista input:checked").map((c) => c.value);
   POLA_LICZBOWE.forEach((pole) => {
     const surowa = f.elements[pole].value.trim();
     if (surowa === "" && POLA_OPCJONALNE.includes(pole)) delete wino[pole];
@@ -271,7 +293,6 @@ function bledyPozycji(wino, indeks) {
     dodaj("id", "Ten identyfikator już występuje");
   if (!wino.nazwa) dodaj("nazwa", "Pole wymagane");
   if (!wino.opis) dodaj("opis", "Pole wymagane");
-  if (!wino.odmiana_slug) dodaj("odmiana_slug", "Wybierz stronę odmiany");
   if (!(cennik.kategorie || []).includes(wino.kategoria)) dodaj("kategoria", "Wybierz kategorię");
   if (wino.rodzaj && !(cennik.rodzaje || []).includes(wino.rodzaj))
     dodaj("rodzaj", "Nieznany rodzaj");
@@ -286,13 +307,13 @@ function bledyPozycji(wino, indeks) {
 }
 
 function pokazBledyPola(bledy) {
-  qsa("#formularz label").forEach((label) => {
+  qsa("#formularz label, #formularz .pole-grupa").forEach((label) => {
     label.classList.remove("niepoprawne");
     label.querySelector(".blad-pola")?.remove();
   });
   bledy.forEach(({ pole, komunikat }) => {
     const kontrolka = qs("#formularz").elements[pole];
-    const label = kontrolka?.closest("label");
+    const label = kontrolka?.closest?.("label") || qs(`#formularz [data-pole="${pole}"]`);
     if (!label) return;
     label.classList.add("niepoprawne");
     const info = document.createElement("span");
@@ -409,7 +430,7 @@ qs("#lista").addEventListener("click", (e) => {
 
 qs("#dodaj").addEventListener("click", () => {
   cennik.wina.push({
-    id: "", nazwa: "", odmiana_slug: "", kategoria: cennik.kategorie?.[0] || "",
+    id: "", nazwa: "", odmiany_slug: [], kategoria: cennik.kategorie?.[0] || "",
     pojemnosc_ml: 750, cena_brutto: 0, rabat_procent: 0, dostepne: true,
     opis: "", zdjecie: "",
   });
@@ -594,7 +615,7 @@ qs("#przygotuj").addEventListener("click", async () => {
         tekst,
         kontekst: {
           nazwa: wino.nazwa, kategoria: wino.kategoria,
-          rocznik: wino.rocznik, odmiana_slug: wino.odmiana_slug,
+          rocznik: wino.rocznik, odmiany_slug: wino.odmiany_slug,
         },
       }),
     });

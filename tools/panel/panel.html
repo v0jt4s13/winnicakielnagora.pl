@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel redakcyjny — Winnica Kielna Góra</title>
-  <!-- style.css jest tu tylko po to, zeby podglad karty wygladal jak w sklepie.
+  <!-- style.css i produkt.css sa tu tylko po to, zeby podglad karty wygladal jak w sklepie.
        Panel ma wlasny, neutralny wyglad w panel.css. -->
   <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/produkt.css">
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
@@ -57,25 +58,27 @@
       <form id="formularz" class="formularz" autocomplete="off">
         <label>Nazwa
           <input name="nazwa" type="text" required>
+          <small>Bez rocznika — rok wpisuje się osobno, w polu „Rocznik" niżej.</small>
+        </label>
+        <label>Rocznik
+          <input name="rocznik" type="number" min="1900" max="2100" step="1">
+          <small>Zostaw puste dla soków.</small>
         </label>
         <label>Identyfikator
           <input name="id" type="text" required>
           <small>Klucz w koszyku. Małe litery, cyfry i myślnik.</small>
         </label>
-        <label>Odmiana
-          <select name="odmiana_slug" required></select>
-          <small>Strona, do której linkuje karta w sklepie.</small>
-        </label>
+        <div class="pole-grupa" data-pole="odmiany_slug">
+          <span class="pole-grupa-tytul">Szczepy (odmiany)</span>
+          <div class="pole-grupa-lista" id="odmiany-lista"></div>
+          <small>Strony odmian, do których linkują chipy szczepu na karcie. Bez zaznaczenia karta nie pokaże szczepu.</small>
+        </div>
         <label>Kategoria
           <select name="kategoria" required></select>
         </label>
         <label>Rodzaj
           <select name="rodzaj"></select>
           <small>Typologia wina. Zostaw puste dla soków i innych pozycji bez rodzaju.</small>
-        </label>
-        <label>Rocznik
-          <input name="rocznik" type="number" min="1900" max="2100" step="1">
-          <small>Zostaw puste dla soków.</small>
         </label>
         <label>Alkohol (%)
           <input name="alkohol" type="number" min="0" max="25" step="0.1">

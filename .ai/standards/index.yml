@@ -6,6 +6,8 @@
 backend:
   edycja-wspolbiezna:
     description: Zapis do wina.json/wydarzenia.json przez zapisz_bezpiecznie() — sprawdzenie wersji pliku, odrzucenie konfliktu zamiast cichego nadpisania
+  panel-fetch-sciezki:
+    description: fetch() w panel.js zawsze względny (nie od "/") — bezwzględna ścieżka pomija prefiks nginx na produkcji i daje 404 mimo działającego endpointu (lokalnie dzialalo tez /tools/panel/api/o-nas-galeria-dodaj-z-galerii > na produkcji tylko jak jest api/o-nas-galeria-dodaj-z-galerii)
 
 content:
   html-editing:

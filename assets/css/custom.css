@@ -1,12 +1,23 @@
 
 @media (min-width: 768px) {
-    .md\:text-lg {
-        font-size: 1.425rem;
-        line-height: 1.85rem;
-    }
-    .age-gate__logo {
-      float: inline-start;
-    }
+  .md\:text-lg {
+      font-size: 1.425rem;
+      line-height: 1.85rem;
+  }
+  .age-gate__logo {
+    float: inline-start;
+  }
+  /* md:grid-cols-3 nie ma w Tailwind */
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  /* lg:grid-cols-3 nie ma w Tailwind */
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 375px) {
@@ -390,7 +401,9 @@ html.age-gate-pending .age-gate {
   border-radius: 0.5rem;
   background: hsl(var(--primary) / 1);
   color: hsl(var(--primary-foreground) / 1);
-  font-weight: 600;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
   box-shadow: var(--shadow-sm);
 }

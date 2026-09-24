@@ -21,13 +21,22 @@ i rozjechała się po cichu — ten standard istnieje właśnie po to.
 
 ## Wymagane pola pozycji
 
-`id` (unikalny, klucz koszyka) · `nazwa` · `odmiana_slug` · `kategoria` · `pojemnosc_ml` ·
+`id` (unikalny, klucz koszyka) · `nazwa` · `kategoria` · `pojemnosc_ml` ·
 `cena_brutto` · `rabat_procent` · `dostepne` · `opis` · `zdjecie`.
-Opcjonalne: `rocznik`, `alkohol` (pomijane dla soków), `zdjecie_sklep`.
+Opcjonalne: `rocznik`, `alkohol` (pomijane dla soków), `zdjecie_sklep`, `rodzaj`, `odmiany_slug`.
+
+Karta pokazuje pod nazwą podpis z `Produkty.opisPodtytul()`: rocznik, alkohol, pojemność —
+np. `2024 • 12.0% alk. • 750 ml`. Pojemność od 1000 ml jest podawana w litrach z przecinkiem
+(`1000` → „1 l", `1500` → „1,5 l"), poniżej w ml.
 
 - `kategoria` musi być jedną z wartości tablicy `kategorie` w tym samym pliku — filtr sklepu
   buduje z niej swoje opcje, więc nowa kategoria nie wymaga zmian w HTML.
-- `odmiana_slug` musi wskazywać istniejący plik `wina/<slug>.html`.
+- `odmiany_slug` to **lista** (`["monarch", "seyval-blanc"]`), pole opcjonalne. Każdy element musi
+  wskazywać istniejący plik `wina/<slug>.html`, bez powtórzeń. Na karcie sklepu każdy element to
+  osobny **chip szczepu** linkujący do tej strony (tytuł karty nie jest linkiem). Brak pola albo
+  `[]` = karta bez wiersza „Szczep:". Dla kategorii „Soki" wiersz jest ukrywany zawsze, ale sok
+  ma `["soki"]`, żeby był widoczny w bloku ofert na `wina/soki.html`. Stary klucz `odmiana_slug`
+  (string) jest odrzucany jako „Nieznane pole".
 - `zdjecie` to slug z `attached_assets/photos/` **bez** rozszerzenia i bez `-sm`; wariant
   miniatury dokłada kod.
 - `zdjecie_sklep` to opcjonalna ścieżka względna do obrazu pod `attached_assets/`, używana
