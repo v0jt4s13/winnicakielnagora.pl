@@ -68,10 +68,11 @@
           <input name="id" type="text" required>
           <small>Klucz w koszyku. Małe litery, cyfry i myślnik.</small>
         </label>
-        <label>Odmiana
-          <select name="odmiana_slug" required></select>
-          <small>Strona, do której linkuje karta w sklepie.</small>
-        </label>
+        <div class="pole-grupa" data-pole="odmiany_slug">
+          <span class="pole-grupa-tytul">Szczepy (odmiany)</span>
+          <div class="pole-grupa-lista" id="odmiany-lista"></div>
+          <small>Strony odmian, do których linkują chipy szczepu na karcie. Bez zaznaczenia karta nie pokaże szczepu.</small>
+        </div>
         <label>Kategoria
           <select name="kategoria" required></select>
         </label>

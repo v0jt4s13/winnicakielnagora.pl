@@ -892,7 +892,7 @@ async function initWineOffer() {
   // cennika. Podstrony odmian nadal pokazują ceny, więc dociągamy go tutaj.
   if (!cennik) cennik = await wczytajCennik();
   const slug = wrap.dataset.odmiana;
-  const pasujace = (cennik?.wina || []).filter((wino) => wino.odmiana_slug === slug);
+  const pasujace = (cennik?.wina || []).filter((wino) => Array.isArray(wino.odmiany_slug) && wino.odmiany_slug.includes(slug));
 
   if (pasujace.length === 0) return; // zostaje statyczny tekst zastępczy z HTML-a
 

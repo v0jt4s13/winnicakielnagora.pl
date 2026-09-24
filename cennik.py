@@ -51,9 +51,9 @@ SZKIELET = {"waluta": "PLN", "stawka_vat": 0.23, "kategorie": [], "rodzaje": [],
 # Wlasciciel i grupa moga czytac, reszta nie. Grupa to zwykle www-data.
 PRAWA_PLIKU = 0o640
 
-POLA_WYMAGANE = ("id", "nazwa", "odmiana_slug", "kategoria", "pojemnosc_ml",
+POLA_WYMAGANE = ("id", "nazwa", "kategoria", "pojemnosc_ml",
                  "cena_brutto", "rabat_procent", "dostepne", "opis", "zdjecie")
-POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep", "rodzaj")
+POLA_OPCJONALNE = ("rocznik", "alkohol", "zdjecie_sklep", "rodzaj", "odmiany_slug")
 # Wartosc startowa dla plikow sprzed wprowadzenia edytowalnej listy "rodzaje" — patrz
 # `wczytaj()`. Od tej chwili zrodlem prawdy jest pole w danych, tak jak dla "kategorie".
 RODZAJE_WIN = ("musujące", "wytrawne", "półsłodkie")
@@ -175,8 +175,16 @@ def waliduj(dane) -> list[dict]:
         rodzaj = wino.get("rodzaj")
         if rodzaj and rodzaj not in rodzaje:
             bledy.append(_blad(i, "rodzaj", f"Nieznany rodzaj: {rodzaj}"))
-        if dostepne_odmiany and wino.get("odmiana_slug") not in dostepne_odmiany:
-            bledy.append(_blad(i, "odmiana_slug", "Nie ma strony odmiany o tym adresie"))
+        # Opcjonalna lista adresow stron odmian; brak albo [] = karta bez wiersza „Szczep:".
+        odmiany_wina = wino.get("odmiany_slug", [])
+        if not isinstance(odmiany_wina, list) or not all(isinstance(s, str) for s in odmiany_wina):
+            bledy.append(_blad(i, "odmiany_slug", "Podaj listę adresów odmian, np. [\"monarch\"]"))
+        else:
+            if len(set(odmiany_wina)) != len(odmiany_wina):
+                bledy.append(_blad(i, "odmiany_slug", "Odmiany nie mogą się powtarzać"))
+            for slug in odmiany_wina:
+                if dostepne_odmiany and slug not in dostepne_odmiany:
+                    bledy.append(_blad(i, "odmiany_slug", f"Nie ma strony odmiany „{slug}”"))
         if dostepne_zdjecia and wino.get("zdjecie") not in dostepne_zdjecia:
             bledy.append(_blad(i, "zdjecie", "Nie ma takiego zdjęcia"))
         zdjecie_sklep = wino.get("zdjecie_sklep")

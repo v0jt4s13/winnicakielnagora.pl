@@ -79,7 +79,7 @@ Zatrzymanie: Ctrl+C
 ┌──────────────────────────────────────────────────────────────┐
 │  Souvignier Gris                                    [ Usuń ] │
 │  Nazwa      [Souvignier Gris          ]                      │
-│  Odmiana    [souvignier-gris        ▾]  → wina/souvignier-…  │
+│  Szczepy    [☑ souvignier-gris] [☐ monarch] [☐ soki] …       │
 │  Kategoria  [Białe                  ▾]                       │
 │  Rocznik    [2024]   Alkohol [12.0] %   Pojemność [750] ml   │
 │  Cena brutto[  70,00] zł    Rabat [ 0] %                     │
@@ -134,20 +134,16 @@ z nazwy i rocznika (`sok-z-bialych-winogron`), ale można je nadpisać.
 > **Za kulisami**: oba pola są opcjonalne (SPEC-001). Puste = pominięte w JSON, a karta
 > produktu nie pokaże wtedy rocznika i „…% alk." w podpisie.
 
-**Krok 4.** W polu „Odmiana" nie ma pasującej pozycji, bo sok nie pochodzi z jednej odmiany.
-Panel **nie pozwala zapisać** bez `odmiana_slug` i tłumaczy dlaczego.
-
-```
-⚠ Pozycja musi wskazywać odmianę — z niej bierze się link „zobacz opis"
-  na karcie w sklepie. Jeśli sok nie pochodzi z jednej odmiany, utwórz
-  najpierw stronę zbiorczą i wybierz ją tutaj.
-```
+**Krok 4.** Sok nie pochodzi z jednej odmiany, więc w polu „Szczepy (odmiany)" zaznacza
+zbiorczą stronę `soki`. Od 2026-09-24 to pole jest opcjonalne — panel pozwala zapisać
+pozycję bez zaznaczenia (`odmiany_slug: []`), a karta nie pokaże wtedy wiersza „Szczep:".
+(Pierwotnie panel blokował zapis bez odmiany.)
 
 **Zmiana vs. stan obecny**: to jest przypadek, który przy ręcznej edycji JSON-a przeszedłby bez
 echa i zostawił w sklepie kartę z martwym linkiem — `wsgi.py` oddaje na nieznany adres stronę
 główną ze statusem 200 (`TODO.md` #5), więc nikt by tego nie zauważył. **Rozstrzygnięte
-2026-09-02**: powstała zbiorcza strona `wina/soki.html`, więc sok wskazuje `soki`,
-a `odmiana_slug` zostaje polem wymaganym dla każdej pozycji.
+2026-09-02**: powstała zbiorcza strona `wina/soki.html`, więc sok wskazuje `soki`.
+Od 2026-09-24 pole `odmiany_slug` jest listą i nie jest wymagane.
 
 ### Story 3 — Właściciel wkleja notatki, model językowy robi z nich opis
 
@@ -302,7 +298,7 @@ Odpowiedź `400` przy błędach walidacji — zapis **nie następuje w całości
 ```json
 { "tekst": "surowe notatki…",
   "kontekst": { "nazwa": "Souvignier Gris", "kategoria": "Białe", "rocznik": 2024,
-                "odmiana_slug": "souvignier-gris" } }
+                "odmiany_slug": ["souvignier-gris"] } }
 ```
 
 Odpowiedź `200`:
@@ -361,7 +357,7 @@ Serwer jest instancją rozstrzygającą — przeglądarce nie wolno ufać nawet 
 | `id` niepuste, unikalne, `[a-z0-9-]+` | „Identyfikator musi być unikalny; dozwolone małe litery, cyfry i myślnik" |
 | `nazwa`, `opis` niepuste | „Pole wymagane" |
 | `kategoria` ∈ `kategorie` | „Nieznana kategoria" |
-| `odmiana_slug` wskazuje istniejący `wina/<slug>.html` | „Nie ma strony odmiany o tym adresie" |
+| `odmiany_slug` (opcjonalna lista) — każdy element wskazuje istniejący `wina/<slug>.html`, bez powtórzeń | „Nie ma strony odmiany „…"", „Odmiany nie mogą się powtarzać", „Podaj listę adresów odmian" |
 | `zdjecie` istnieje w `attached_assets/photos/<slug>.jpg` | „Nie ma takiego zdjęcia" |
 | `cena_brutto` > 0, najwyżej 2 miejsca po przecinku | „Cena musi być liczbą dodatnią" |
 | `rabat_procent` 0–99 | „Rabat poza zakresem 0–99" |
@@ -433,13 +429,21 @@ python3 tools/panel/serwer.py --port 9000
 
 ## Otwarte decyzje
 
-1. ~~**Soki a `odmiana_slug`**~~ — **rozstrzygnięte 2026-09-02**: powstaje strona zbiorcza
-   `wina/soki.html`, a `odmiana_slug` zostaje polem **wymaganym dla każdej** pozycji. Sok
-   wskazuje `soki`. Brak wyjątków w kodzie, brak martwych linków.
+1. ~~**Soki a odmiana**~~ — **rozstrzygnięte 2026-09-02**: powstaje strona zbiorcza
+   `wina/soki.html`, sok wskazuje `soki`. Od 2026-09-24 pole (`odmiany_slug`) jest opcjonalną
+   listą, a wiersz szczepu na karcie soku jest ukrywany w kodzie po kategorii.
 2. **Czy panel ma edytować `stawka_vat`** — dziś zakładam, że nie: to zmiana raz na kilka lat
    i wymaga też poprawienia etykiety „VAT (23%)" w `index.html` (`TODO.md` #4).
 
 ## Changelog
+
+### 2026-09-24 — wiele szczepów
+Pole `odmiana_slug` (string, wymagane) zastąpione opcjonalną listą `odmiany_slug`. Panel:
+checkboxy „Szczepy (odmiany)" zamiast listy rozwijanej, zapis bez zaznaczenia daje `[]`.
+`cennik.py` waliduje listę (istniejące strony, bez powtórzeń) i odrzuca stary klucz jako
+„Nieznane pole". Kontekst dla `api/opisz` dostaje `odmiany_slug` jako listę; `serwer.py` skleja ją
+przecinkami w prompcie, a pustą listę pomija. Sekcje powyżej zaktualizowane tam, gdzie opisywały kontrakt; szkice ekranów
+i historyczne zapisy decyzji z 2026-09-02 zachowane z adnotacją.
 
 ### 2026-09-02 — zaimplementowane
 Panel działa. Sprawdzone: odczyt i zapis cennika, kopia `.bak`, walidacja odrzucająca

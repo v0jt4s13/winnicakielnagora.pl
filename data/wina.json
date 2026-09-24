@@ -17,7 +17,10 @@
     {
       "id": "dornfelder-2022",
       "nazwa": "Dornfelder",
-      "odmiana_slug": "dornfelder",
+      "odmiany_slug": [
+        "dornfelder",
+        "monarch"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
       "cena_brutto": 59,
@@ -32,7 +35,9 @@
     {
       "id": "monarch-2022",
       "nazwa": "Monarch",
-      "odmiana_slug": "monarch",
+      "odmiany_slug": [
+        "monarch"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
       "cena_brutto": 113,
@@ -48,7 +53,9 @@
     {
       "id": "seyval-blanc-2022",
       "nazwa": "Seyval Blanc",
-      "odmiana_slug": "seyval-blanc",
+      "odmiany_slug": [
+        "seyval-blanc"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 111,
@@ -64,7 +71,9 @@
     {
       "id": "souvignier-gris-2022",
       "nazwa": "Souvignier Gris",
-      "odmiana_slug": "souvignier-gris",
+      "odmiany_slug": [
+        "souvignier-gris"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 111,
@@ -79,7 +88,9 @@
     {
       "id": "st-pepin-2022",
       "nazwa": "St. Pepin",
-      "odmiana_slug": "st-pepin",
+      "odmiany_slug": [
+        "st-pepin"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 99,
@@ -95,7 +106,9 @@
     {
       "id": "swenson-red-2023",
       "nazwa": "Swenson Red",
-      "odmiana_slug": "swenson-red",
+      "odmiany_slug": [
+        "swenson-red"
+      ],
       "kategoria": "Czerwone",
       "pojemnosc_ml": 750,
       "cena_brutto": 221,
@@ -111,7 +124,9 @@
     {
       "id": "vidal-blanc-2024",
       "nazwa": "Vidal Blanc",
-      "odmiana_slug": "vidal-blanc",
+      "odmiany_slug": [
+        "vidal-blanc"
+      ],
       "kategoria": "Białe",
       "pojemnosc_ml": 750,
       "cena_brutto": 222,
@@ -127,7 +142,9 @@
     {
       "id": "sok-winogronowy-750ml",
       "nazwa": "Sok winogronowy 750ML",
-      "odmiana_slug": "soki",
+      "odmiany_slug": [
+        "soki"
+      ],
       "kategoria": "Soki",
       "pojemnosc_ml": 3000,
       "cena_brutto": 15,

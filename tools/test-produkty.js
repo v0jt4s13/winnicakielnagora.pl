@@ -10,7 +10,7 @@ const sprawdz = (opis, warunek) => {
 };
 
 // promocja: brutto 58.50 przy rabacie 10% => przed rabatem 65.00, netto 47.56
-const promo = { id: "monarch-2023", nazwa: "Monarch", odmiana_slug: "monarch", kategoria: "Czerwone",
+const promo = { id: "monarch-2023", nazwa: "Monarch", odmiany_slug: ["monarch"], kategoria: "Czerwone",
   rocznik: 2023, alkohol: 12.5, pojemnosc_ml: 750, cena_brutto: 58.50, rabat_procent: 10,
   dostepne: true, opis: "Wyraziste czerwone.", zdjecie: "monarch-kieliszek-01" };
 const c = Produkty.policzCeny(promo, 0.23);
@@ -27,6 +27,14 @@ sprawdz("data-price z brutto", html.includes('data-price="58.50"'));
 sprawdz("data-promo=true", html.includes('data-promo="true"'));
 sprawdz("brak martwych atrybutow", !html.includes("data-price-net") && !html.includes("data-discount"));
 sprawdz("link do strony odmiany", html.includes('href="./wina/monarch.html"'));
+const dwa = Produkty.renderProductCard({ ...promo, odmiany_slug: ["monarch", "seyval-blanc"] }, 0.23);
+sprawdz("dwa chipy szczepu z linkami",
+  dwa.includes('href="./wina/monarch.html"') && dwa.includes('href="./wina/seyval-blanc.html"') &&
+  dwa.includes(">Seyval Blanc</a>"));
+for (const [nazwa, wino] of [["brak pola", { ...promo, odmiany_slug: undefined }], ["pusta lista", { ...promo, odmiany_slug: [] }]]) {
+  const h = Produkty.renderProductCard(wino, 0.23);
+  sprawdz(`${nazwa}: brak wiersza szczepu`, !h.includes("Szczep:") && !h.includes("chip-link"));
+}
 sprawdz("miniatura -sm", html.includes("monarch-kieliszek-01-sm.jpg"));
 
 const butelka = { ...promo, zdjecie_sklep: "butelki/dziki_owoc-monarch-2024-czerwone-polwytrawne.jpg" };
@@ -42,7 +50,7 @@ sprawdz("bez promocji: cena w text-foreground", html2.includes("text-3xl font-bo
 sprawdz("bez promocji: data-promo=false", html2.includes('data-promo="false"'));
 
 // sok bez rocznika i alkoholu
-const sok = { id: "sok", nazwa: "Sok z białych winogron", odmiana_slug: "soki", kategoria: "Soki",
+const sok = { id: "sok", nazwa: "Sok z białych winogron", odmiany_slug: ["soki"], kategoria: "Soki",
   pojemnosc_ml: 500, cena_brutto: 18, rabat_procent: 0, dostepne: true, opis: "100% soku.",
   zdjecie: "winnica-butelka-biale-01" };
 const html3 = Produkty.renderProductCard(sok, 0.23);

@@ -81,13 +81,15 @@ const Produkty = {
 
     const kategoriaBadge = `<span class="chip">${this.escape(wino.kategoria)}</span>`;
     // Soki nie mają szczepu — ukrywamy cały wiersz „Szczep:", nie tylko chip.
-    const maSzczep = wino.odmiana_slug && wino.kategoria !== "Soki";
-    const szczepNazwa = maSzczep ? this.escape(this.humanizujSlug(wino.odmiana_slug)) : "";
-    const szczepChip = !maSzczep
-      ? ""
-      : linkOdmiany
-        ? `<a href="${bazaOdmian}${this.escape(wino.odmiana_slug)}.html" class="chip chip-link" title="Dowiedz się więcej o szczepie ${szczepNazwa}">${szczepNazwa}</a>`
+    // `odmiany_slug` to opcjonalna lista; brak albo [] = bez wiersza „Szczep:".
+    const slugiOdmian = Array.isArray(wino.odmiany_slug) ? wino.odmiany_slug : [];
+    const maSzczep = slugiOdmian.length > 0 && wino.kategoria !== "Soki";
+    const szczepChip = slugiOdmian.map((slug) => {
+      const szczepNazwa = this.escape(this.humanizujSlug(slug));
+      return linkOdmiany
+        ? `<a href="${bazaOdmian}${this.escape(slug)}.html" class="chip chip-link" title="Dowiedz się więcej o szczepie ${szczepNazwa}">${szczepNazwa}</a>`
         : `<span class="chip">${szczepNazwa}</span>`;
+    }).join("\n");
     const szczepWiersz = maSzczep
       ? `<div class="flex flex-wrap items-center gap-2 mb-4">
                       <span class="chip-etykieta">Szczep:</span>

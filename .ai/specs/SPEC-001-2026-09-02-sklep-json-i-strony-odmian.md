@@ -179,7 +179,7 @@ strony głównej.
 ```
 
 > **Za kulisami**: treść odmiany jest statyczna. Blok „Wina z tej odmiany" wypełnia
-> `initWineOffer()` z `data/wina.json` — filtruje pozycje po `odmiana_slug === "souvignier-gris"`.
+> `initWineOffer()` z `data/wina.json` — filtruje pozycje po `odmiany_slug.includes("souvignier-gris")` (do 2026-09-24: `odmiana_slug ===`).
 > Zanim JSON się wczyta (albo gdy `fetch` padnie), w bloku stoi statyczny tekst zastępczy
 > „Sprawdź dostępność w sklepie" z linkiem — strona **nigdy** nie pokazuje pustego miejsca.
 
@@ -225,7 +225,7 @@ cena sprzed rabatu są dziś przepisywane ręcznie i już raz się rozjechały (
 Po zmianie obie są **wyliczane**: `netto = brutto / 1.23`, `cena sprzed rabatu = brutto / (1 − rabat/100)`.
 
 **Krok 2.** Anna klika chip szczepu na karcie → trafia na stronę odmiany (Story 1, krok 2).
-Karta produktu linkuje do `wina/<odmiana_slug>.html` — przez chip szczepu, nie przez tytuł (zmiana 2026-09-24).
+Karta produktu linkuje do `wina/<slug>.html` (dla każdego elementu `odmiany_slug`) — przez chip szczepu, nie przez tytuł (zmiana 2026-09-24).
 
 ### Story 3 — Właściciel podnosi cenę (edge case, utrzymanie)
 
@@ -336,7 +336,7 @@ const Produkty = {
    w HTML. Cena w HTML nie jest potrzebna robotom, a w JSON-ie jest łatwa do zmiany. Strona
    odmiany działa poprawnie także wtedy, gdy `fetch` się nie powiedzie.
 2. **Strony powstają per odmiana, nie per wino.** Znamy siedem odmian; asortymentu jeszcze nie.
-   Wino w JSON wskazuje odmianę polem `odmiana_slug`, więc jedna strona obsłuży dowolną liczbę
+   Wino w JSON wskazuje odmiany polem `odmiany_slug` (lista; wcześniej jedno `odmiana_slug`), więc jedna strona obsłuży dowolną liczbę
    roczników tej samej odmiany. Gdy pojawi się asortyment, nie trzeba przebudowywać struktury.
 3. **Adresy z rozszerzeniem `.html`** (`/wina/souvignier-gris.html`). Ładniejsze `/wina/souvignier-gris`
    wymagałoby zmiany w `wsgi.py`, bo dziś taka ścieżka wpada w fallback i zwraca stronę główną
@@ -376,7 +376,7 @@ ale ich nie definiuje; ceny brutto są jedynymi zapisanymi — netto i rabat są
     {
       "id": "souvignier-gris-2024",
       "nazwa": "Souvignier Gris",
-      "odmiana_slug": "souvignier-gris",
+      "odmiany_slug": ["souvignier-gris"],
       "kategoria": "Białe",
       "rocznik": 2024,
       "alkohol": 12.0,
@@ -395,7 +395,7 @@ ale ich nie definiuje; ceny brutto są jedynymi zapisanymi — netto i rabat są
 |---|---|---|---|
 | `id` | string | tak | unikalny; klucz w koszyku. Dwa te same `id` zleją się w jedną pozycję |
 | `nazwa` | string | tak | nazwa handlowa na karcie |
-| `odmiana_slug` | string | tak | musi odpowiadać plikowi `wina/<slug>.html` |
+| `odmiany_slug` | string[] | nie | (od 2026-09-24, zastępuje `odmiana_slug`) każdy element musi odpowiadać plikowi `wina/<slug>.html`; brak/`[]` = bez chipów szczepu |
 | `kategoria` | string | tak | jedna z wartości z `kategorie`; patrz uwaga o zgodności niżej |
 | `rocznik` | number | nie | pomijany dla soków |
 | `alkohol` | number | nie | procent; pomijany dla soków |
@@ -444,8 +444,9 @@ Strona powstaje jak pozostałe, mimo że pisany opis winnicy jej nie wymienia.
 
 **Soki** dostają **stronę zbiorczą** `wina/soki.html` — nie pochodzą z jednej odmiany, a karta
 w sklepie musi mieć dokąd linkować. Strona opisuje soki 100% z białych winogron (bez dodatków)
-i wskazuje odmiany, z których powstają. Dzięki temu `odmiana_slug` pozostaje polem wymaganym
-dla **każdej** pozycji cennika — bez wyjątków w kodzie i bez martwych linków.
+i wskazuje odmiany, z których powstają. Dzięki temu sok ma `odmiany_slug: ["soki"]` i pojawia się w bloku ofert tej strony.
+(Do 2026-09-24 pole było wymagane dla każdej pozycji; dziś jest opcjonalne, a wiersz szczepu na
+karcie soku i tak jest ukryty.)
 
 Zdjęcia ogólne: `winnica-panorama-01` (hero), `winnica-budynek-01`, `winnica-rzedy-01`,
 `winnica-butelka-biale-01`, `winnica-butelka-czerwone-01`.
@@ -484,7 +485,7 @@ a na ich miejsce wchodzi pusty kontener `<div id="lista-produktow" class="…">`
 co obecne karty — bundle Tailwinda jest zamknięty i nie da się dołożyć nowej klasy utility.
 
 Zmiany wobec dzisiejszej karty:
-- chip szczepu staje się linkiem do `wina/<odmiana_slug>.html` (tytuł karty bez linku; dla soków wiersz szczepu ukryty),
+- chip szczepu staje się linkiem do `wina/<slug>.html` (tytuł karty bez linku; dla soków wiersz szczepu ukryty),
 - cena netto, cena sprzed rabatu i badge `-N%` są wyliczane,
 - atrybuty `data-price-net` i `data-discount` znikają (były martwe).
 
@@ -590,7 +591,7 @@ dochodzi `frontend/theming`.
 
 ### 2026-09-24 — link na chipie szczepu
 
-Link do strony odmiany przeniesiony z tytułu karty na chip szczepu (`title="Dowiedz się więcej o szczepie …"`, styl `a.chip-link` w `produkt.css`). Soki nie pokazują wiersza „Szczep:". Podpis pod nazwą z `opisPodtytul()` bez słowa „Rocznik"; pojemność od 1000 ml w litrach.
+Link do strony odmiany przeniesiony z tytułu karty na chip szczepu (`title="Dowiedz się więcej o szczepie …"`, styl `a.chip-link` w `produkt.css`). Soki nie pokazują wiersza „Szczep:". Pole `odmiana_slug` (string, wymagane) zastąpione opcjonalną tablicą `odmiany_slug`; panel dostał checkboxy, `initWineOffer` filtruje po `includes`. Podpis pod nazwą z `opisPodtytul()` bez słowa „Rocznik"; pojemność od 1000 ml w litrach.
 
 ### 2026-09-02 — wszystkie blokady zdjęte
 

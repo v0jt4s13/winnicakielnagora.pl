@@ -97,8 +97,7 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 2. Zmieniasz cenę → **ZAWSZE** tylko `cena_brutto` w `data/wina.json`. Netto, kwota rabatu
    i cena sprzed rabatu są wyliczane; nie zapisuj ich nigdzie.
 3. Dodajesz pozycję do `data/wina.json` → **ZAWSZE** unikalne `id`, `kategoria` z listy
-   `kategorie` w tym samym pliku i `odmiana_slug` wskazujący na istniejący plik
-   `wina/<slug>.html`.
+   `kategorie` w tym samym pliku; opcjonalna lista `odmiany_slug` musi wskazywać istniejące pliki `wina/<slug>.html`.
 4. Dodajesz kategorię → **ZAWSZE** do tablicy `kategorie`; filtr w sklepie buduje z niej swoje
    opcje, więc nic nie trzeba zmieniać w HTML.
 5. Dodajesz odmianę → **ZAWSZE** kafelek w `#nasze-wina` **i** strona `wina/<slug>.html`

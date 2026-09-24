@@ -172,6 +172,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .formularz .pole-checkbox input { width: auto; }
 .pole-radio { display: flex; align-items: center; gap: 0.5rem; color: var(--tekst); margin-bottom: 0.6rem; }
 .pole-radio input { width: auto; }
+.formularz .pole-grupa { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; color: var(--przygaszony); }
+.formularz .pole-grupa-lista { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+.formularz .pole-grupa-lista label { flex-direction: row; align-items: center; gap: 0.4rem; color: var(--tekst); }
+.formularz .pole-grupa-lista input { width: auto; }
 .formularz .blad-pola { color: var(--blad); font-size: 0.75rem; }
 .formularz .niepoprawne input,
 .formularz .niepoprawne select,

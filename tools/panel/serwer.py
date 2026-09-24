@@ -118,8 +118,10 @@ def przygotuj_opis(tekst: str, kontekst: dict) -> tuple[dict | None, str | None,
     if len(tekst) > MAX_TEKST:
         return None, f"Tekst ma {len(tekst)} znaków, limit to {MAX_TEKST}. Skróć go i spróbuj ponownie.", 400
 
+    # Listy (np. odmiany_slug) sklejamy przecinkami; pusta lista znika jak puste pole.
     opis_kontekstu = ", ".join(
-        f"{k}: {v}" for k, v in kontekst.items() if v not in (None, "", 0)
+        f"{k}: {', '.join(map(str, v)) if isinstance(v, list) else v}"
+        for k, v in kontekst.items() if v not in (None, "", 0, [])
     ) or "brak dodatkowego kontekstu"
 
     zadanie = {
