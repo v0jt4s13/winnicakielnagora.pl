@@ -1,0 +1,94 @@
+/* Style karty produktu (Produkty.renderProductCard() z assets/js/produkty.js) — wydzielone
+   z custom.css, żeby panel redakcyjny mógł je wczytać bez reszty stylów strony (age-gate,
+   hero, koszyk itd.), a podgląd karty w panelu wyglądał tak samo jak w sklepie.
+   Ładowany w index.html i tools/panel/panel.html — jedna zmiana widoczna w obu miejscach. */
+
+/* Podpis pod tytułem karty produktu: rocznik + alkohol + pojemność — ta sama czcionka
+   co tytuł, przygaszony opacity */
+.podpis-tytulu {
+  opacity: 0.8;
+}
+.bullet-mniejszy {
+  font-size: 0.6em;
+  vertical-align: middle;
+  padding: 0 0.25rem;
+}
+
+/* Opis karty produktu: 3 linie, „więcej" jako osobny pasek pod tekstem (jakby 4. linia,
+   pełna szerokość) — nie nachodzi na tekst, bo nie jest overlayem na 3. linii.
+   .line-clamp-3 nie ma w bundlu Tailwinda (tylko line-clamp-2 jest używany gdzie indziej),
+   więc odcięcie do 3 linii jest tu w całości własne. */
+.opis-karta {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.opis-karta--rozwinieta {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+.opis-wiecej {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  border-radius: 4px;
+  background: hsl(var(--muted-foreground) / 0.1);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
+  line-height: 1.25rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  text-align: center;
+  border: 0;
+  cursor: pointer;
+}
+.opis-karta--obcieta + .opis-wiecej {
+  display: block;
+}
+
+/* Etykieta i kwota netto — ta sama wysokość (.text-xs w tym projekcie jest przedefiniowane
+   na 1.15rem, więc jawny rozmiar zamiast klasy z bundla Tailwinda). */
+.netto-cena {
+  font-size: 0.8rem;
+}
+.netto-etykieta {
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+/* Chip kategorii/rodzaju/szczepu na karcie produktu — ramka, bez wypełnienia tłem. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+a.chip-link {
+  text-decoration: none;
+  cursor: pointer;
+  color: hsl(var(--ring));
+  border-color: hsl(var(--ring));
+  transition: color 0.15s, border-color 0.15s;
+}
+a.chip-link:hover,
+a.chip-link:focus-visible {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+/* Etykieta przed rzędem chipów ("Rodzaj:", "Szczep:") — ta sama wysokość co .chip,
+   bez ramki, żeby dwie linie (rodzaj/kategoria i szczep) wyglądały spójnie. */
+.chip-etykieta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+}

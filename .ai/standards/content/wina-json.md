@@ -25,9 +25,15 @@ i rozjechała się po cichu — ten standard istnieje właśnie po to.
 `cena_brutto` · `rabat_procent` · `dostepne` · `opis` · `zdjecie`.
 Opcjonalne: `rocznik`, `alkohol` (pomijane dla soków), `zdjecie_sklep`.
 
+Karta pokazuje pod nazwą podpis z `Produkty.opisPodtytul()`: rocznik, alkohol, pojemność —
+np. `2024 • 12.0% alk. • 750 ml`. Pojemność od 1000 ml jest podawana w litrach z przecinkiem
+(`1000` → „1 l", `1500` → „1,5 l"), poniżej w ml.
+
 - `kategoria` musi być jedną z wartości tablicy `kategorie` w tym samym pliku — filtr sklepu
   buduje z niej swoje opcje, więc nowa kategoria nie wymaga zmian w HTML.
-- `odmiana_slug` musi wskazywać istniejący plik `wina/<slug>.html`.
+- `odmiana_slug` musi wskazywać istniejący plik `wina/<slug>.html`. Na karcie sklepu prowadzi
+  do niego **chip szczepu** (tytuł karty nie jest linkiem). Dla kategorii „Soki" wiersz
+  „Szczep:" jest ukrywany, choć `odmiana_slug` nadal jest wymagany (strona `wina/soki.html`).
 - `zdjecie` to slug z `attached_assets/photos/` **bez** rozszerzenia i bez `-sm`; wariant
   miniatury dokłada kod.
 - `zdjecie_sklep` to opcjonalna ścieżka względna do obrazu pod `attached_assets/`, używana

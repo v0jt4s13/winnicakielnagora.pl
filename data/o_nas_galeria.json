@@ -1,16 +1,16 @@
 {
   "gallery": [
     {
-      "path": "assets/o_nas_galeria/dornfelder-kiscie-01-sm.jpg",
-      "title": "Test tytulu",
-      "alt": "dornfelder-kiscie-01-sm.jpg",
+      "path": "assets/o_nas_galeria/souvignier-gris-kiscie-02-sm.jpg",
+      "title": "",
+      "alt": "souvignier-gris-kiscie-02-sm.jpg",
       "order": 1,
       "active": true
     },
     {
-      "path": "assets/o_nas_galeria/souvignier-gris-kiscie-02-sm.jpg",
-      "title": "",
-      "alt": "souvignier-gris-kiscie-02-sm.jpg",
+      "path": "assets/o_nas_galeria/dornfelder-kiscie-01-sm.jpg",
+      "title": "Test tytulu",
+      "alt": "dornfelder-kiscie-01-sm.jpg",
       "order": 2,
       "active": true
     },

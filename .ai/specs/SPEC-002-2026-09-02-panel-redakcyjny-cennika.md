@@ -89,7 +89,7 @@ Zatrzymanie: Ctrl+C
 │                                                              │
 │  ┌── Tak zobaczy to klient ──────────────────────────────┐   │
 │  │  [foto]  Souvignier Gris                              │   │
-│  │          Rocznik 2024 • 12.0% alk.                    │   │
+│  │          2024 • 12.0% alk.                            │   │
 │  │          70,00 zł     netto: 56,91 zł      [ Dodaj ]  │   │
 │  └───────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
@@ -132,7 +132,7 @@ z nazwy i rocznika (`sok-z-bialych-winogron`), ale można je nadpisać.
 **Krok 3.** Zostawia puste pola „Rocznik" i „Alkohol" — dla soku nie mają sensu.
 
 > **Za kulisami**: oba pola są opcjonalne (SPEC-001). Puste = pominięte w JSON, a karta
-> produktu nie pokaże wtedy linijki „Rocznik … • …% alk.".
+> produktu nie pokaże wtedy rocznika i „…% alk." w podpisie.
 
 **Krok 4.** W polu „Odmiana" nie ma pasującej pozycji, bo sok nie pochodzi z jednej odmiany.
 Panel **nie pozwala zapisać** bez `odmiana_slug` i tłumaczy dlaczego.

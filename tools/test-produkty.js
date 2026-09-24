@@ -21,8 +21,8 @@ sprawdz("promocja rozpoznana", c.promocja === true);
 const html = Produkty.renderProductCard(promo, 0.23);
 sprawdz("badge -10%", html.includes(">-10%<"));
 sprawdz("przekreslona cena 65.00 zl", html.includes("line-through") && html.includes("65.00 zł"));
-sprawdz("cena promocyjna w text-ring", html.includes('text-2xl font-bold text-ring">58.50 zł'));
-sprawdz("netto wyliczone", html.includes("netto: 47.56 zł"));
+sprawdz("cena promocyjna w text-ring", html.includes('text-3xl font-bold text-ring">58.50 zł'));
+sprawdz("netto wyliczone", html.includes('netto-cena text-muted-foreground"><span class="netto-etykieta">netto:</span> 47.56 zł'));
 sprawdz("data-price z brutto", html.includes('data-price="58.50"'));
 sprawdz("data-promo=true", html.includes('data-promo="true"'));
 sprawdz("brak martwych atrybutow", !html.includes("data-price-net") && !html.includes("data-discount"));
@@ -38,7 +38,7 @@ sprawdz("bezpośrednie zdjęcie butelki",
 const zwykle = { ...promo, id: "x", rabat_procent: 0, cena_brutto: 59 };
 const html2 = Produkty.renderProductCard(zwykle, 0.23);
 sprawdz("bez promocji: brak przekreslenia", !html2.includes("line-through"));
-sprawdz("bez promocji: cena w text-foreground", html2.includes("text-2xl font-bold text-foreground"));
+sprawdz("bez promocji: cena w text-foreground", html2.includes("text-3xl font-bold text-foreground"));
 sprawdz("bez promocji: data-promo=false", html2.includes('data-promo="false"'));
 
 // sok bez rocznika i alkoholu
@@ -48,6 +48,10 @@ const sok = { id: "sok", nazwa: "Sok z białych winogron", odmiana_slug: "soki",
 const html3 = Produkty.renderProductCard(sok, 0.23);
 sprawdz("sok: brak 'Rocznik'", !html3.includes("Rocznik"));
 sprawdz("sok: brak '% alk.'", !html3.includes("alk."));
+sprawdz("sok: brak wiersza szczepu", !html3.includes("Szczep:") && !html3.includes("chip-link"));
+sprawdz("1000 ml jako 1 l", Produkty.opisPodtytul({ pojemnosc_ml: 1000 }).includes("1 l"));
+sprawdz("1500 ml jako 1,5 l", Produkty.opisPodtytul({ pojemnosc_ml: 1500 }).includes("1,5 l"));
+sprawdz("999 ml zostaje w ml", Produkty.opisPodtytul({ pojemnosc_ml: 999 }).includes("999 ml"));
 sprawdz("sok: pojemnosc widoczna", html3.includes("500 ml"));
 
 // ucieczka znakow specjalnych w danych z pliku

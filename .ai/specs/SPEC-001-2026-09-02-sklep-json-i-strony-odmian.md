@@ -224,8 +224,8 @@ w ofercie i w jakiej cenie. Przegląda na telefonie.
 cena sprzed rabatu są dziś przepisywane ręcznie i już raz się rozjechały (`TODO.md` #1).
 Po zmianie obie są **wyliczane**: `netto = brutto / 1.23`, `cena sprzed rabatu = brutto / (1 − rabat/100)`.
 
-**Krok 2.** Anna klika nazwę wina na karcie → trafia na stronę odmiany (Story 1, krok 2).
-Karta produktu linkuje do `wina/<odmiana_slug>.html`.
+**Krok 2.** Anna klika chip szczepu na karcie → trafia na stronę odmiany (Story 1, krok 2).
+Karta produktu linkuje do `wina/<odmiana_slug>.html` — przez chip szczepu, nie przez tytuł (zmiana 2026-09-24).
 
 ### Story 3 — Właściciel podnosi cenę (edge case, utrzymanie)
 
@@ -484,7 +484,7 @@ a na ich miejsce wchodzi pusty kontener `<div id="lista-produktow" class="…">`
 co obecne karty — bundle Tailwinda jest zamknięty i nie da się dołożyć nowej klasy utility.
 
 Zmiany wobec dzisiejszej karty:
-- nazwa wina staje się linkiem do `wina/<odmiana_slug>.html`,
+- chip szczepu staje się linkiem do `wina/<odmiana_slug>.html` (tytuł karty bez linku; dla soków wiersz szczepu ukryty),
 - cena netto, cena sprzed rabatu i badge `-N%` są wyliczane,
 - atrybuty `data-price-net` i `data-discount` znikają (były martwe).
 
@@ -587,6 +587,10 @@ dochodzi `frontend/theming`.
       Właściciela, czyli zamyka B1)
 
 ## Changelog
+
+### 2026-09-24 — link na chipie szczepu
+
+Link do strony odmiany przeniesiony z tytułu karty na chip szczepu (`title="Dowiedz się więcej o szczepie …"`, styl `a.chip-link` w `produkt.css`). Soki nie pokazują wiersza „Szczep:". Podpis pod nazwą z `opisPodtytul()` bez słowa „Rocznik"; pojemność od 1000 ml w litrach.
 
 ### 2026-09-02 — wszystkie blokady zdjęte
 

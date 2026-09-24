@@ -401,7 +401,9 @@ html.age-gate-pending .age-gate {
   border-radius: 0.5rem;
   background: hsl(var(--primary) / 1);
   color: hsl(var(--primary-foreground) / 1);
-  font-weight: 600;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
   box-shadow: var(--shadow-sm);
 }

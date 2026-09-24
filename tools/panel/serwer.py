@@ -45,6 +45,7 @@ MAX_ZADANIE = 2 * 1024 * 1024  # cennik to kilkadziesiat kB; wiecej znaczy blad 
 POJEDYNCZE_PLIKI = {
     "/assets/js/produkty.js": PROJEKT / "assets" / "js" / "produkty.js",
     "/assets/css/style.css": PROJEKT / "assets" / "css" / "style.css",
+    "/assets/css/produkt.css": PROJEKT / "assets" / "css" / "produkt.css",
 }
 KATALOGI = {
     "/photos/": ZDJECIA,

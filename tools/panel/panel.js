@@ -157,12 +157,13 @@ function renderLista() {
         : '<span class="kropka dostepna">● dostępne</span>';
       const promo = ceny.promocja
         ? `<span class="kropka promocja">-${wino.rabat_procent}%</span>`
-        : "";
+        : `<span class="kropka promocja promocja--brak"></span>`;
       return `
         <li data-indeks="${i}" class="${i === wybrany ? "wybrana" : ""}">
           <span class="nazwa">${Produkty.escape(wino.nazwa || "(bez nazwy)")}</span>
           <span class="meta id">${Produkty.escape(wino.id || "—")}</span>
-          <span class="meta">${Produkty.escape(wino.kategoria || "—")}</span>
+          <span class="meta kategoria">${Produkty.escape(wino.kategoria || "—")}</span>
+          <span class="meta rocznik">${Produkty.escape(wino.rocznik || "—")}</span>
           <span class="meta cena">${Produkty.formatujCene(ceny.brutto)}</span>
           ${promo}
           ${znacznik}
@@ -235,6 +236,23 @@ function renderPodglad() {
     przyciskKoszyka: false,
     linkOdmiany: false,
     bazaZdjec: "../../attached_assets/photos/",
+  });
+  aktualizujOpisKarty();
+}
+
+/**
+ * Pokazuje „więcej" na opisie, gdy tekst realnie nie mieści się w 3 liniach — kopia
+ * aktualizujOpisyKart() z assets/js/main.js. Panel nie ładuje main.js (ma własny
+ * panel.js), więc bez tego przycisk zawsze zostawałby ukryty w podglądzie.
+ */
+function aktualizujOpisKarty() {
+  qsa(".opis-karta").forEach((p) => {
+    p.classList.remove("opis-karta--obcieta", "opis-karta--rozwinieta");
+    p.classList.add("opis-karta--rozwinieta");
+    const pelna = p.scrollHeight;
+    p.classList.remove("opis-karta--rozwinieta");
+    const obcieta = p.clientHeight;
+    if (pelna > obcieta + 1) p.classList.add("opis-karta--obcieta");
   });
 }
 
