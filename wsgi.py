@@ -202,7 +202,7 @@ def _haslo_zgodne(uzytkownik: str, haslo: str) -> bool:
 
 def _prosba_o_haslo():
     return Response(
-        "Panel redakcyjny wymaga logowania.", 401,
+        "Panel moderacyjny wymaga logowania.", 401,
         {"WWW-Authenticate": 'Basic realm="Panel cennika", charset="UTF-8"'},
     )
 

@@ -160,6 +160,10 @@ function renderLista() {
         : `<span class="kropka promocja promocja--brak"></span>`;
       return `
         <li data-indeks="${i}" class="${i === wybrany ? "wybrana" : ""}">
+          <span class="kolejnosc">
+            <button type="button" class="przycisk-kolejnosc" data-przesun="-1" title="Wyżej w sklepie" aria-label="Przesuń wyżej"${i === 0 ? " disabled" : ""}>↑</button>
+            <button type="button" class="przycisk-kolejnosc" data-przesun="1" title="Niżej w sklepie" aria-label="Przesuń niżej"${i === wina.length - 1 ? " disabled" : ""}>↓</button>
+          </span>
           <span class="nazwa">${Produkty.escape(wino.nazwa || "(bez nazwy)")}</span>
           <span class="meta id">${Produkty.escape(wino.id || "—")}</span>
           <span class="meta kategoria">${Produkty.escape(wino.kategoria || "—")}</span>
@@ -419,9 +423,27 @@ function proponujId(nazwa, rocznik) {
 
 // --- zdarzenia ------------------------------------------------------------
 
+/** Sklep renderuje pozycje w kolejności tablicy `wina` — zamiana miejsc to cała „kolejność". */
+function przesunPozycje(indeks, krok) {
+  const wina = cennik.wina;
+  const cel = indeks + krok;
+  if (cel < 0 || cel >= wina.length) return;
+  [wina[indeks], wina[cel]] = [wina[cel], wina[indeks]];
+  // Edytowana pozycja zostaje ta sama, zmienia się tylko jej indeks.
+  if (wybrany === indeks) wybrany = cel;
+  else if (wybrany === cel) wybrany = indeks;
+  oznaczZmiane();
+  renderLista();
+}
+
 qs("#lista").addEventListener("click", (e) => {
   const li = e.target.closest("li[data-indeks]");
   if (!li) return;
+  const przesun = e.target.closest("[data-przesun]");
+  if (przesun) {
+    przesunPozycje(Number(li.dataset.indeks), Number(przesun.dataset.przesun));
+    return;
+  }
   wybrany = Number(li.dataset.indeks);
   renderLista();
   renderFormularz();

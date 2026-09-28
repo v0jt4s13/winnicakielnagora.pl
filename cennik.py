@@ -285,6 +285,11 @@ def podsumuj_roznice(stare: dict, nowe: dict, limit: int = 5) -> list[str]:
         zmienione = sorted(p for p in s.keys() | n.keys() if s.get(p) != n.get(p))
         if zmienione:
             opisy.append(f"{n.get('nazwa', id_)}: zmienione pole(a) {', '.join(zmienione)}")
+    # Kolejnosc tablicy `wina` to kolejnosc w sklepie — porownujemy tylko wspolne pozycje,
+    # bo dodanie/usuniecie jest juz opisane wyzej.
+    wspolne = stare_poz.keys() & nowe_poz.keys()
+    if [i for i in stare_poz if i in wspolne] != [i for i in nowe_poz if i in wspolne]:
+        opisy.append("Kolejność pozycji w sklepie: zmieniona")
 
     if len(opisy) > limit:
         opisy = opisy[:limit] + [f"...i {len(opisy) - limit} więcej"]

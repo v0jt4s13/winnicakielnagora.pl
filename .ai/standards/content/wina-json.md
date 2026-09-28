@@ -48,6 +48,8 @@ np. `2024 • 12.0% alk. • 750 ml`. Pojemność od 1000 ml jest podawana w lit
   bezpośrednio na karcie sklepu, np. `butelki/nazwa.jpg`. Dla zgodności panel akceptuje
   także zapis z prefiksem `attached_assets/` lub pojedynczym `/` używanym przez starszy
   panel. Bez tego pola karta korzysta z dotychczasowego wariantu `zdjecie` + `-sm.jpg`.
+- **Kolejność tablicy `wina` = kolejność kart w sklepie.** Nie ma pola `kolejnosc` ani
+  sortowania w `main.js`; panel zmienia kolejność przyciskami ↑/↓ (zamiana sąsiednich pozycji).
 - `dostepne: false` usuwa pozycję ze sklepu, ale **nie** ze strony odmiany — zaindeksowany
   adres ma dalej działać.
 
