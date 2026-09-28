@@ -139,10 +139,24 @@ def _plik(sciezka: str) -> str | None:
         return None
     kandydat = (STATIC_ROOT / sciezka).resolve()
     korzen = STATIC_ROOT.resolve()
-    if not (kandydat.is_file() and kandydat.is_relative_to(korzen)):
+    if not kandydat.is_file():
         return None
-    wzgledna = kandydat.relative_to(korzen)
-    return str(wzgledna) if _publiczna(wzgledna) else None
+    if kandydat.is_relative_to(korzen):
+        wzgledna = kandydat.relative_to(korzen)
+        return str(wzgledna) if _publiczna(wzgledna) else None
+
+    # Jedyny wyjatek: attached_assets/uploads na produkcji jest dowiazaniem do dane/uploads
+    # poza wdrozeniem (SPEC-009), wiec po resolve() lezy poza STATIC_ROOT. Przepuszczamy go
+    # tylko, gdy sciezka LEKSYKALNIE zaczyna sie od attached_assets/uploads/ i plik lezy
+    # w rozwinietym katalogu uploads. Kazde inne dowiazanie wychodzace poza repo — 404.
+    leksykalna = Path(sciezka)
+    uploads = STATIC_ROOT / "attached_assets" / galeria.KATALOG_UPLOADS
+    if (leksykalna.is_absolute()
+            or any(czesc in ("", ".", "..") for czesc in leksykalna.parts)
+            or leksykalna.parts[:2] != ("attached_assets", galeria.KATALOG_UPLOADS)
+            or not kandydat.is_relative_to(uploads.resolve())):
+        return None
+    return str(leksykalna) if _publiczna(leksykalna) else None
 
 
 # --- panel redakcyjny na produkcji ---------------------------------------------

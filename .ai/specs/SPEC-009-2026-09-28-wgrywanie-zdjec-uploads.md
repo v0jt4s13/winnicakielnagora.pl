@@ -105,8 +105,11 @@ def w_zasobach(sciezka_wzgledna: str) -> Path | None:
   nigdy z `resolve()`.
 - `stan()` przechodzi `ZASOBY.rglob` jak dziś **plus** jawnie `UPLOADS.rglob`, gdy `UPLOADS`
   jest dowiązaniem.
-- Serwowanie publiczne bez zmian: `wsgi.py` oddaje `attached_assets/…` przez
-  `send_from_directory`, które idzie za dowiązaniem.
+- Serwowanie publiczne: `wsgi._plik()` po `resolve()` wymagał pliku wewnątrz `STATIC_ROOT`,
+  więc plik za dowiązaniem `uploads` dostawał 404 (błąd pierwszej wersji tego specu, który
+  zakładał „bez zmian”). `_plik()` ma jeden wyjątek: ścieżka leksykalnie
+  `attached_assets/uploads/…`, plik po `resolve()` w rozwiniętym `uploads/`. Inne dowiązania
+  poza repo — nadal 404 (`tools/test-routing.py`, `sprawdz_uploads_dowiazanie`).
 
 ### Moduł i trasy
 
@@ -239,6 +242,12 @@ Zależności w nawiasach — zadanie startuje dopiero, gdy wskazane są odhaczon
   z oknem wyboru plików i potwierdzenia usuwania w UI — do obejrzenia ręcznie.
 
 ## Changelog
+
+### 2026-09-28 (poprawka po wdrożeniu)
+- Pliki w `uploads/` na produkcji dawały 404 mimo udanego wgrania: `wsgi._plik()` odrzucał
+  ścieżki rozwiązane poza `STATIC_ROOT`. Dodany wyjątek dla `attached_assets/uploads/` + test
+  z dowiązaniem w `test-routing.py`. Testy na prawdziwym Flasku wcześniej używały zwykłego
+  katalogu, nie dowiązania — dlatego tego nie złapały.
 
 ### 2026-09-28 (implementacja)
 - Zaimplementowano T2–T10: `galeria.w_zasobach()`/`uploads()`, `wgraj()`, `usun()`,

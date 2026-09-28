@@ -301,6 +301,50 @@ def sprawdz_slowo() -> int:
     return bledy
 
 
+def sprawdz_uploads_dowiazanie() -> int:
+    """Produkcja: attached_assets/uploads -> dane/uploads poza repo (SPEC-009).
+
+    Plik za tym jednym dowiazaniem ma byc publiczny; kazde inne dowiazanie wychodzace poza
+    STATIC_ROOT — nadal 404. Wczesniej _plik() odrzucal takze uploads (404 po udanym wgraniu).
+    """
+    import tempfile
+    bledy = 0
+
+    def sprawdz(opis, warunek):
+        nonlocal bledy
+        print(f"{'OK  ' if warunek else 'BLAD'}  {opis}")
+        if not warunek:
+            bledy += 1
+
+    poprzedni = wsgi.STATIC_ROOT
+    with tempfile.TemporaryDirectory() as tmp:
+        baza = Path(tmp)
+        korzen = baza / "app"
+        (korzen / "attached_assets" / "photos").mkdir(parents=True)
+        dane = baza / "dane" / "uploads"
+        dane.mkdir(parents=True)
+        (dane / "mapa.webp").write_bytes(b"RIFF")
+        (dane / ".ukryty.jpg").write_bytes(b"x")
+        (korzen / "attached_assets" / "uploads").symlink_to(dane, target_is_directory=True)
+        sekret = baza / "sekret"
+        sekret.mkdir()
+        (sekret / "tajne.jpg").write_bytes(b"x")
+        (korzen / "attached_assets" / "photos" / "wyciek").symlink_to(sekret, target_is_directory=True)
+        wsgi.STATIC_ROOT = korzen
+        try:
+            sprawdz("uploads za dowiązaniem: 200",
+                    wynik("attached_assets/uploads/mapa.webp") == ("PLIK:attached_assets/uploads/mapa.webp", 200))
+            sprawdz("obce dowiązanie poza repo: 404",
+                    wynik("attached_assets/photos/wyciek/tajne.jpg")[1] == 404)
+            sprawdz("uploads/../ do obcego dowiązania: 404",
+                    wynik("attached_assets/uploads/../photos/wyciek/tajne.jpg")[1] == 404)
+            sprawdz("ukryty plik w uploads: 404", wynik("attached_assets/uploads/.ukryty.jpg")[1] == 404)
+            sprawdz("nieistniejący plik w uploads: 404", wynik("attached_assets/uploads/brak.jpg")[1] == 404)
+        finally:
+            wsgi.STATIC_ROOT = poprzedni
+    return bledy
+
+
 def main() -> int:
     bledy = 0
     for sciezka, oczekiwany_plik, oczekiwany_kod in PRZYPADKI:
@@ -332,6 +376,7 @@ def main() -> int:
     bledy += sprawdz_hero()
     bledy += sprawdz_slowo()
     bledy += sprawdz_wydarzenia()
+    bledy += sprawdz_uploads_dowiazanie()
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")
     return 0 if bledy == 0 else 1
