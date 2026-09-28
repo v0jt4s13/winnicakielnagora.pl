@@ -178,6 +178,8 @@ def main() -> int:
     (wsgi.galeria.ZASOBY / "uploads").symlink_to(cel_uploads, target_is_directory=True)
     sprawdz("/zdrowie: uploads jako dowiązanie pokazuje cel",
             json.loads(tresc(wsgi.zdrowie()))["uploads"] == str(cel_uploads.resolve()))
+    sprawdz("/zdrowie: brak katalogu pokoje zaznaczony wprost",
+            json.loads(tresc(wsgi.zdrowie()))["pokoje"].startswith("brak katalogu"))
     wsgi.galeria.ZASOBY = poprzednie_zasoby
 
     sprawdz("globalny limit żądania = limit wgrywania",

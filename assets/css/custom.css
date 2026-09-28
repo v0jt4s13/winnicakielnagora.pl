@@ -1056,6 +1056,71 @@ body.cart-open #cart-panel {
   object-fit: cover;
 }
 
+/* ── Sekcja #noclegi: karuzela zdjęć pokoi (initPokojeKaruzela w main.js, SPEC-010) ──
+   Własne klasy, nie .gallery-swiper: kod galerii „O nas" szuka kropek globalnie
+   (qsa(".gallery-swiper__dot")), więc wspólna klasa wmieszałaby się w tamtą karuzelę.
+   Strzałki wyglądają jak w galerii „O nas". */
+.pokoje-karuzela {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.pokoje-karuzela[hidden] { display: none; }
+.pokoje-karuzela__pas {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pokoje-karuzela__pas::-webkit-scrollbar { display: none; }
+.pokoje-karuzela__link {
+  flex: 0 0 calc((100% - 1.5rem) / 3);
+  scroll-snap-align: start;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--card-border));
+}
+.pokoje-karuzela__link:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+.pokoje-karuzela__zdjecie {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 200ms;
+}
+.pokoje-karuzela__link:hover .pokoje-karuzela__zdjecie { transform: scale(1.04); }
+.pokoje-karuzela__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity 200ms;
+}
+.pokoje-karuzela__nav svg { width: 100%; height: 100%; }
+.pokoje-karuzela__nav:hover { background: hsl(var(--primary) / 0.9); }
+.pokoje-karuzela__nav[hidden] { display: none; }
+.pokoje-karuzela__nav--wstecz { left: -0.75rem; }
+.pokoje-karuzela__nav--dalej { right: -0.75rem; }
+@media (max-width: 640px) {
+  .pokoje-karuzela__link { flex-basis: calc((100% - 0.75rem) / 2); }
+}
+
 /* ── Sekcja #noclegi: formularz „szukaj terminu" ─────────────────────────────
    Deep-link do karty obiektu na Booking.com natywnym GET-em (działa bez JS —
    initNoclegi() tylko podpowiada daty). <input type="date"> i <select> nie

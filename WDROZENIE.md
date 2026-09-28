@@ -143,6 +143,22 @@ oznacza zwykły katalog zamiast dowiązania, a `"brak katalogu: …"` — że ni
 Potem: wgraj w panelu małe zdjęcie → plik jest w `dane/uploads/`, a adres
 `…/winnicakielnagora.pl/attached_assets/uploads/<nazwa>.jpg` go zwraca.
 
+### 2b. Katalog na zdjęcia pokoi — karuzela w `#noclegi` (SPEC-010)
+
+Ten sam układ co `uploads`: dowiązanie do katalogu poza gitem.
+
+```bash
+sudo mkdir -p /opt/apps/app_winnicakielnagora.pl/dane/pokoje
+sudo chown winnicakielnagora:www-data /opt/apps/app_winnicakielnagora.pl/dane/pokoje
+sudo chmod 750 /opt/apps/app_winnicakielnagora.pl/dane/pokoje
+sudo -u winnicakielnagora ln -s /opt/apps/app_winnicakielnagora.pl/dane/pokoje \
+  /opt/apps/app_winnicakielnagora.pl/app/attached_assets/pokoje
+```
+
+Bez tego katalogu panel nie pokaże „pokoje” na liście „Przenieś do” (przenosi tylko do
+istniejących katalogów). Sprawdzenie: `/zdrowie` → `"pokoje"` wskazuje `…/dane/pokoje`;
+`/data/pokoje.json` pokazuje pary oraz listy `bez_miniatury` / `bez_pelnego`.
+
 ### 3. Uruchomić usługę
 
 ```bash

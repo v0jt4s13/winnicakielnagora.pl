@@ -41,6 +41,15 @@ odmian) panel nie usuwa.
 
 Wymaga Pillow — lokalnie i na produkcji.
 
+### Zdjęcia pokoi w sekcji Noclegi (SPEC-010)
+
+Karuzela w karcie rezerwacji bierze pary z `attached_assets/pokoje/`: `{nazwa}-thumb.*`
+(miniatura) + `{nazwa}.*` (podgląd). Kolejność jest alfabetyczna — nazwij pliki `01-salon`,
+`02-lazienka`. Kroki w panelu: „Wgraj zdjęcia…” → zaznacz → „Przenieś do: attached_assets/pokoje”
+→ zaznacz przeniesione → „Utwórz warianty: -thumb”. Zdjęcie bez `-thumb` nie pojawi się
+w karuzeli — `/data/pokoje.json` wypisze je w `bez_miniatury`. Usuwanie działa tylko
+w `uploads/`, więc zdjęcie pokoju do skasowania najpierw przenieś z powrotem do `uploads`.
+
 ## Czego panel nie robi
 
 - **Nie publikuje.** Po zapisie zmiany są tylko na dysku. Trzeba zrobić commit i wdrożenie.

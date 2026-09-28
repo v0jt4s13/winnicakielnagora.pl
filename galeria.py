@@ -19,6 +19,10 @@ ZASOBY = PROJEKT / "attached_assets"
 # poza wdrozeniem (dane/uploads), wiec po resolve() lezy POZA ZASOBY — dlatego jest
 # osobnym dozwolonym korzeniem, a sciezki wzgledne liczymy leksykalnie, nie z resolve().
 KATALOG_UPLOADS = "uploads"
+# Zdjecia pokoi do karuzeli w #noclegi (SPEC-010) — ten sam uklad co uploads: na produkcji
+# dowiazanie do dane/pokoje. Kazdy katalog z tej krotki moze prowadzic poza ZASOBY.
+KATALOG_POKOJE = "pokoje"
+KATALOGI_ZEWNETRZNE = (KATALOG_UPLOADS, KATALOG_POKOJE)
 ROZSZERZENIA = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 ROZMIARY_WARIANTOW = {"sm": 600, "thumb": 300}
 SUFIKS_WARIANTU = re.compile(r"-(?:sm|thumb)$", re.IGNORECASE)
@@ -30,9 +34,14 @@ def uploads() -> Path:
     return ZASOBY / KATALOG_UPLOADS
 
 
+def pokoje_katalog() -> Path:
+    """Katalog zdjec pokoi liczony od biezacego ZASOBY (testy podmieniaja ZASOBY)."""
+    return ZASOBY / KATALOG_POKOJE
+
+
 def _korzenie() -> tuple[Path, ...]:
     """Katalogi, w ktorych po rozwiazaniu dowiazan moze lezec plik galerii."""
-    return (ZASOBY.resolve(), uploads().resolve())
+    return (ZASOBY.resolve(), *((ZASOBY / nazwa).resolve() for nazwa in KATALOGI_ZEWNETRZNE))
 
 
 def _w_korzeniach(sciezka: Path) -> bool:
@@ -109,11 +118,13 @@ def stan() -> dict:
 
     katalogi = {""}
     pliki = []
-    # rglob (Python 3.11) nie wchodzi do katalogow-dowiazan, wiec dowiazane uploads/
-    # przechodzimy osobno. Gdy uploads jest zwyklym katalogiem, obejmuje go juz pierwszy rglob.
+    # rglob (Python 3.11) nie wchodzi do katalogow-dowiazan, wiec dowiazane uploads/ i pokoje/
+    # przechodzimy osobno. Zwykly katalog obejmuje juz pierwszy rglob.
     kandydaci = list(ZASOBY.rglob("*"))
-    if uploads().is_symlink() and uploads().is_dir():
-        kandydaci += list(uploads().rglob("*"))
+    for nazwa in KATALOGI_ZEWNETRZNE:
+        katalog = ZASOBY / nazwa
+        if katalog.is_symlink() and katalog.is_dir():
+            kandydaci += list(katalog.rglob("*"))
     for sciezka in kandydaci:
         try:
             if not _w_korzeniach(sciezka):
@@ -377,3 +388,56 @@ def usun(pliki: object, uzycia: dict[str, list[str]]) -> int:
     for _, sciezka in cele:
         sciezka.unlink()
     return len(cele)
+
+
+# --- karuzela pokoi (SPEC-010) ------------------------------------------------------
+
+# Kolejnosc szukania pelnego zdjecia do miniatury: najpierw to samo rozszerzenie.
+_PREFEROWANE_PELNE = (".jpg", ".jpeg", ".webp", ".png")
+_MINIATURA = re.compile(r"^(?P<rdzen>.+)-thumb$", re.IGNORECASE)
+
+
+def pokoje() -> dict:
+    """Pary miniatura + pelne zdjecie z attached_assets/pokoje/, alfabetycznie po nazwie.
+
+    Miniatura: {nazwa}-thumb.{ext}; pelne: {nazwa}.{ext}. Tylko pary trafiaja do karuzeli,
+    reszta jest wypisana osobno, zeby Wlasciciel widzial, czego brakuje. Wariant -sm pomijamy.
+    Sciezki wzgledne od korzenia witryny ("attached_assets/pokoje/…").
+    """
+    katalog = pokoje_katalog()
+    wynik: dict = {"pokoje": [], "bez_miniatury": [], "bez_pelnego": []}
+    if not katalog.is_dir() or not _w_korzeniach(katalog):
+        return wynik
+
+    obrazy = {}
+    for plik in katalog.iterdir():
+        if (plik.name.startswith(".") or not plik.is_file()
+                or plik.suffix.lower() not in ROZSZERZENIA or not _w_korzeniach(plik)):
+            continue
+        obrazy.setdefault(plik.stem, []).append(plik)
+
+    miniatury = {}
+    pelne = {}
+    for rdzen, pliki in obrazy.items():
+        trafienie = _MINIATURA.match(rdzen)
+        if trafienie:
+            miniatury[trafienie.group("rdzen")] = sorted(pliki)[0]
+        elif not rdzen.lower().endswith("-sm"):
+            pelne[rdzen] = pliki
+
+    def sciezka(plik: Path) -> str:
+        return f"{ZASOBY.name}/{_relatywna(plik)}"
+
+    for nazwa in sorted(miniatury.keys() | pelne.keys(), key=str.lower):
+        if nazwa not in pelne:
+            wynik["bez_pelnego"].append(nazwa)
+            continue
+        if nazwa not in miniatury:
+            wynik["bez_miniatury"].append(nazwa)
+            continue
+        miniatura = miniatury[nazwa]
+        kolejnosc = (miniatura.suffix.lower(), *_PREFEROWANE_PELNE)
+        pelny = min(pelne[nazwa], key=lambda p: (
+            kolejnosc.index(p.suffix.lower()) if p.suffix.lower() in kolejnosc else len(kolejnosc)))
+        wynik["pokoje"].append({"nazwa": nazwa, "miniatura": sciezka(miniatura), "pelne": sciezka(pelny)})
+    return wynik

@@ -145,16 +145,19 @@ def _plik(sciezka: str) -> str | None:
         wzgledna = kandydat.relative_to(korzen)
         return str(wzgledna) if _publiczna(wzgledna) else None
 
-    # Jedyny wyjatek: attached_assets/uploads na produkcji jest dowiazaniem do dane/uploads
-    # poza wdrozeniem (SPEC-009), wiec po resolve() lezy poza STATIC_ROOT. Przepuszczamy go
-    # tylko, gdy sciezka LEKSYKALNIE zaczyna sie od attached_assets/uploads/ i plik lezy
-    # w rozwinietym katalogu uploads. Kazde inne dowiazanie wychodzace poza repo — 404.
+    # Jedyny wyjatek: attached_assets/uploads i attached_assets/pokoje sa na produkcji
+    # dowiazaniami do dane/ poza wdrozeniem (SPEC-009, SPEC-010), wiec po resolve() leza poza
+    # STATIC_ROOT. Przepuszczamy je tylko, gdy sciezka LEKSYKALNIE zaczyna sie od jednego z
+    # tych katalogow i plik lezy w jego rozwinietym celu. Kazde inne dowiazanie poza repo — 404.
     leksykalna = Path(sciezka)
-    uploads = STATIC_ROOT / "attached_assets" / galeria.KATALOG_UPLOADS
     if (leksykalna.is_absolute()
             or any(czesc in ("", ".", "..") for czesc in leksykalna.parts)
-            or leksykalna.parts[:2] != ("attached_assets", galeria.KATALOG_UPLOADS)
-            or not kandydat.is_relative_to(uploads.resolve())):
+            or len(leksykalna.parts) < 3
+            or leksykalna.parts[0] != "attached_assets"
+            or leksykalna.parts[1] not in galeria.KATALOGI_ZEWNETRZNE):
+        return None
+    zewnetrzny = (STATIC_ROOT / "attached_assets" / leksykalna.parts[1]).resolve()
+    if not kandydat.is_relative_to(zewnetrzny):
         return None
     return str(leksykalna) if _publiczna(leksykalna) else None
 
@@ -258,6 +261,8 @@ def zdrowie():
         # (…/dane/uploads), zwykly katalog — sciezke w app/. Brak katalogu zaznaczamy wprost.
         "uploads": str(galeria.uploads().resolve()) if galeria.uploads().exists()
                    else f"brak katalogu: {galeria.uploads()}",
+        "pokoje": str(galeria.pokoje_katalog().resolve()) if galeria.pokoje_katalog().exists()
+                  else f"brak katalogu: {galeria.pokoje_katalog()}",
         "sciezka_bazowa": SCIEZKA_BAZOWA,
     }
     if powod:
@@ -297,6 +302,16 @@ def zywe_wydarzenia():
         # Uszkodzony plik nie moze wywalic sekcji na stronie glownej — main.js dostanie
         # pusta liste i zostawi statyczna tresc sekcji wydarzen.
         return _json({"wydarzenia": []}, 500)
+
+
+@app.route("/data/pokoje.json")
+def zywe_pokoje():
+    """Pary miniatura + pelne zdjecie do karuzeli w #noclegi (SPEC-010).
+
+    Przegladarka nie wylistuje katalogu sama. Logika par siedzi w galeria.pokoje() —
+    GUARDRAILS "Architectural boundaries" #3: ta trasa tylko wola i oddaje.
+    """
+    return _json(galeria.pokoje())
 
 
 @app.route("/data/o_nas_galeria.json")

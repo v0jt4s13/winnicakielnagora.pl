@@ -326,6 +326,10 @@ def sprawdz_uploads_dowiazanie() -> int:
         (dane / "mapa.webp").write_bytes(b"RIFF")
         (dane / ".ukryty.jpg").write_bytes(b"x")
         (korzen / "attached_assets" / "uploads").symlink_to(dane, target_is_directory=True)
+        pokoje = baza / "dane" / "pokoje"
+        pokoje.mkdir(parents=True)
+        (pokoje / "salon-thumb.jpg").write_bytes(b"x")
+        (korzen / "attached_assets" / "pokoje").symlink_to(pokoje, target_is_directory=True)
         sekret = baza / "sekret"
         sekret.mkdir()
         (sekret / "tajne.jpg").write_bytes(b"x")
@@ -334,6 +338,10 @@ def sprawdz_uploads_dowiazanie() -> int:
         try:
             sprawdz("uploads za dowiązaniem: 200",
                     wynik("attached_assets/uploads/mapa.webp") == ("PLIK:attached_assets/uploads/mapa.webp", 200))
+            sprawdz("pokoje za dowiązaniem: 200",
+                    wynik("attached_assets/pokoje/salon-thumb.jpg") == ("PLIK:attached_assets/pokoje/salon-thumb.jpg", 200))
+            sprawdz("pokoje/../ do obcego dowiązania: 404",
+                    wynik("attached_assets/pokoje/../photos/wyciek/tajne.jpg")[1] == 404)
             sprawdz("obce dowiązanie poza repo: 404",
                     wynik("attached_assets/photos/wyciek/tajne.jpg")[1] == 404)
             sprawdz("uploads/../ do obcego dowiązania: 404",

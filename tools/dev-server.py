@@ -16,6 +16,7 @@ from pathlib import Path
 PROJEKT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJEKT))
 
+import galeria
 import kontakt
 
 
@@ -39,6 +40,10 @@ class ObslugaWitryny(SimpleHTTPRequestHandler):
                     {"ok": False, "komunikat": "Formularz jest chwilowo niedostepny."},
                     HTTPStatus.SERVICE_UNAVAILABLE,
                 )
+            return
+        if self.path.split("?", 1)[0] == "/data/pokoje.json":
+            # Jak wsgi.zywe_pokoje(): katalogu nie da sie oddac statycznie (SPEC-010).
+            self._odpowiedz_json(galeria.pokoje())
             return
         super().do_GET()
 

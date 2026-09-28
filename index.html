@@ -579,14 +579,13 @@
 
           <div class="max-w-2xl mx-auto rounded-md border border-card-border bg-card p-8" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5 text-center">Zarezerwuj nocleg w winnicy</h2>
-            <!-- TODO(#37 / #15): rząd zdjęć 3 pokoi nad formularzem, gdy będą materiały.
-                 Klasy `md:grid-cols-3` NIE MA w prebuilt bundlu — użyć `grid grid-cols-3 gap-3`.
-            <div class="grid grid-cols-3 gap-3 mb-8">
-              <img src="./attached_assets/photos/pokoj-01.jpg" alt="Pokój nr 1 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
-              <img src="./attached_assets/photos/pokoj-02.jpg" alt="Pokój nr 2 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
-              <img src="./attached_assets/photos/pokoj-03.jpg" alt="Pokój nr 3 w budynku winiarni" width="800" height="600" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-md">
+            <!-- Karuzela zdjęć pokoi (SPEC-010): wypełnia initPokojeKaruzela() z /data/pokoje.json,
+                 czyli par {nazwa}-thumb.* + {nazwa}.* z attached_assets/pokoje/. Bez zdjęć zostaje ukryta. -->
+            <div id="pokoje-karuzela" class="pokoje-karuzela" aria-label="Zdjęcia pokoi" hidden>
+              <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--wstecz" data-pokoje-krok="-1" aria-label="Poprzednie zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg></button>
+              <div id="pokoje-karuzela-pas" class="pokoje-karuzela__pas"></div>
+              <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--dalej" data-pokoje-krok="1" aria-label="Następne zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
             </div>
-            -->
 
             <form id="noclegi-form" class="noclegi-form"
                   method="get"

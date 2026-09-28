@@ -156,6 +156,42 @@ def testy_dowiazania(baza: Path) -> None:
             and not (zewnetrzny / "przez-dowiazanie.jpg").exists())
 
 
+def testy_pokoi(baza: Path) -> None:
+    """galeria.pokoje() — pary {nazwa}-thumb.* + {nazwa}.* w attached_assets/pokoje (SPEC-010)."""
+    zasoby = baza / "attached_assets"
+    zasoby.mkdir()
+    galeria.ZASOBY = zasoby
+    sprawdz("pokoje: brak katalogu -> pusta lista", galeria.pokoje()["pokoje"] == [])
+
+    zewnetrzny = baza / "dane" / "pokoje"
+    zewnetrzny.mkdir(parents=True)
+    (zasoby / "pokoje").symlink_to(zewnetrzny, target_is_directory=True)
+    maly = Image.new("RGB", (8, 8))
+    for nazwa in ("02-lazienka-thumb.jpg", "02-lazienka.jpg", "02-lazienka.webp",
+                  "01-salon-thumb.webp", "01-salon.png", "01-salon.jpg", "01-salon.webp",
+                  "03-balkon.jpg", "04-sypialnia-thumb.jpg", "05-kuchnia-sm.jpg"):
+        maly.save(zewnetrzny / nazwa)
+    (zewnetrzny / ".ukryty-thumb.jpg").write_bytes(b"x")
+    (zewnetrzny / "notatka.txt").write_text("nie obraz")
+
+    wynik = galeria.pokoje()
+    sprawdz("pokoje: tylko pary, alfabetycznie",
+            [p["nazwa"] for p in wynik["pokoje"]] == ["01-salon", "02-lazienka"])
+    sprawdz("pokoje: pełne w tym samym rozszerzeniu co miniatura",
+            wynik["pokoje"][0]["pelne"] == "attached_assets/pokoje/01-salon.webp"
+            and wynik["pokoje"][1]["pelne"] == "attached_assets/pokoje/02-lazienka.jpg")
+    sprawdz("pokoje: ścieżka miniatury od korzenia witryny",
+            wynik["pokoje"][0]["miniatura"] == "attached_assets/pokoje/01-salon-thumb.webp")
+    sprawdz("pokoje: brak miniatury wypisany", wynik["bez_miniatury"] == ["03-balkon"])
+    sprawdz("pokoje: brak pełnego wypisany", wynik["bez_pelnego"] == ["04-sypialnia"])
+    sprawdz("pokoje: wariant -sm, ukryte i nie-obrazy pominięte",
+            all("kuchnia" not in str(v) and "ukryty" not in str(v) and "notatka" not in str(v) for v in wynik.values()))
+    sprawdz("pokoje: plik za dowiązaniem widoczny w galerii panelu",
+            "pokoje/01-salon.jpg" in [p["sciezka"] for p in galeria.stan()["pliki"]])
+    odrzuca("pokoje: usuwanie z pokoje/ zablokowane (tylko uploads/)",
+            lambda: galeria.usun(["pokoje/03-balkon.jpg"], {}))
+
+
 def main() -> int:
     poprzednie = galeria.ZASOBY
     try:
@@ -167,6 +203,8 @@ def main() -> int:
             testy_usuwania(zasoby)
         with TemporaryDirectory() as tymczasowy:
             testy_dowiazania(Path(tymczasowy))
+        with TemporaryDirectory() as tymczasowy:
+            testy_pokoi(Path(tymczasowy))
     finally:
         galeria.ZASOBY = poprzednie
         _TMP.cleanup()

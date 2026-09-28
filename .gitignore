@@ -40,6 +40,8 @@ skills/
 # --- zdjecia wgrywane z panelu (SPEC-009) ---
 # Lokalnie zwykly katalog, na produkcji dowiazanie do dane/uploads poza wdrozeniem.
 /attached_assets/uploads
+# Zdjecia pokoi do karuzeli w #noclegi (SPEC-010) — ten sam uklad co uploads.
+/attached_assets/pokoje
 
 # --- kopia zapasowa robiona przez panel redakcyjny ---
 data/

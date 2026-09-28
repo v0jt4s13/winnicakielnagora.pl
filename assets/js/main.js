@@ -1170,6 +1170,74 @@ async function initNoclegiWydarzenie() {
   }
 }
 
+/** "01-pokoj-z-balkonem" → "pokoj z balkonem" — numer w nazwie steruje tylko kolejnością. */
+function opisPokoju(nazwa) {
+  return String(nazwa).replace(/^\d+[-_ ]*/, "").replace(/[-_]+/g, " ").trim() || String(nazwa);
+}
+
+/**
+ * Karuzela zdjęć pokoi w karcie #noclegi (SPEC-010). Pary {nazwa}-thumb.* (karuzela)
+ * + {nazwa}.* (podgląd) liczy serwer z attached_assets/pokoje/ — przeglądarka katalogu nie wylistuje.
+ * Osobna instancja GLightbox i własne klasy: galeria „O nas" łapie [data-glightbox]
+ * i .gallery-swiper__dot na całej stronie, więc wspólne selektory by się pomieszały.
+ */
+async function initPokojeKaruzela() {
+  const karuzela = qs("#pokoje-karuzela");
+  const pas = qs("#pokoje-karuzela-pas");
+  if (!karuzela || !pas) return;
+
+  let pokoje;
+  try {
+    const odpowiedz = await fetch(`${KORZEN}data/pokoje.json`, { cache: "no-store" });
+    if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
+    pokoje = (await odpowiedz.json())?.pokoje;
+    if (!Array.isArray(pokoje)) throw new Error("brak tablicy 'pokoje'");
+  } catch (blad) {
+    // Cicho dla gościa: bez zdjęć karta rezerwacji działa jak wcześniej.
+    console.error("Nie udało się wczytać data/pokoje.json:", blad);
+    return;
+  }
+  if (pokoje.length === 0) return;
+
+  // DOM API, nie innerHTML — nazwy plików pochodzą z katalogu na serwerze.
+  pokoje.forEach((pokoj) => {
+    const link = document.createElement("a");
+    link.className = "pokoje-karuzela__link";
+    link.href = `${KORZEN}${pokoj.pelne}`;
+    link.dataset.gallery = "pokoje";
+    const zdjecie = document.createElement("img");
+    zdjecie.className = "pokoje-karuzela__zdjecie";
+    zdjecie.src = `${KORZEN}${pokoj.miniatura}`;
+    zdjecie.alt = `Pokój: ${opisPokoju(pokoj.nazwa)}`;
+    zdjecie.loading = "lazy";
+    zdjecie.decoding = "async";
+    link.appendChild(zdjecie);
+    pas.appendChild(link);
+  });
+  karuzela.hidden = false;
+
+  if (typeof GLightbox !== "undefined") {
+    GLightbox({ selector: ".pokoje-karuzela__link" });
+  }
+
+  const strzalki = qsa("#pokoje-karuzela [data-pokoje-krok]");
+  const odswiezStrzalki = () => {
+    const maks = pas.scrollWidth - pas.clientWidth;
+    strzalki.forEach((strzalka) => {
+      const wstecz = Number(strzalka.dataset.pokojeKrok) < 0;
+      strzalka.hidden = maks <= 1 || (wstecz ? pas.scrollLeft <= 1 : pas.scrollLeft >= maks - 1);
+    });
+  };
+  strzalki.forEach((strzalka) => {
+    strzalka.addEventListener("click", () => {
+      pas.scrollBy({ left: Number(strzalka.dataset.pokojeKrok) * pas.clientWidth, behavior: "smooth" });
+    });
+  });
+  pas.addEventListener("scroll", odswiezStrzalki, { passive: true });
+  window.addEventListener("resize", odswiezStrzalki);
+  odswiezStrzalki();
+}
+
 function initContactForm() {
   const form = qs("#contact-form");
   const options = qs("#contact-challenge-options");
@@ -1503,6 +1571,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   initWydarzenia();
   initNoclegiWydarzenie();
+  initPokojeKaruzela();
   initOpisWiecej();
   if (SKLEP_WLACZONY) {
     cennik = await wczytajCennik();
