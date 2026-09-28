@@ -992,6 +992,32 @@ function zakresDatWydarzenia(od, do_) {
   return `${(tenSamRok ? bezRoku : pelny).format(dzien(od))} – ${pelny.format(dzien(do_))}`;
 }
 
+/**
+ * Wstawia tekst z panelu do `el`, zamieniając adresy (http://, https://, www.) na linki.
+ * Buduje węzły DOM zamiast innerHTML — treść wpisuje człowiek, więc HTML w niej zostaje tekstem,
+ * a `href` może mieć wyłącznie schemat http(s).
+ */
+function wstawTekstZLinkami(el, tekst) {
+  el.textContent = "";
+  const wzorzec = /(?:https?:\/\/|www\.)[^\s<>"]+/gi;
+  const zrodlo = String(tekst ?? "");
+  let od = 0;
+  for (const trafienie of zrodlo.matchAll(wzorzec)) {
+    // Kropka czy nawias zamykający zdanie nie są częścią adresu: "…na www.x.pl."
+    const adres = trafienie[0].replace(/[.,;:!?)\]}'"]+$/, "");
+    el.append(zrodlo.slice(od, trafienie.index));
+    const link = document.createElement("a");
+    link.href = /^www\./i.test(adres) ? `https://${adres}` : adres;
+    link.textContent = adres;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "link-w-tresci";
+    el.append(link);
+    od = trafienie.index + adres.length;
+  }
+  el.append(zrodlo.slice(od));
+}
+
 /** Wydarzenia z /data/wydarzenia.json.
  *
  * Serwer oddaje wyłącznie wpisy aktywne dziś (wydarzenia.aktywne w Pythonie), więc tutaj
@@ -1032,9 +1058,8 @@ async function initWydarzenia() {
 
     const tresc = document.createElement("p");
     tresc.className = "text-muted-foreground wydarzenie-tresc";
-    // textContent, nigdy innerHTML — to jedyne miejsce, gdzie tekst wpisany przez człowieka
-    // w panelu trafia do markupu strony publicznej.
-    tresc.textContent = wpis.tresc;
+    // Nigdy innerHTML — tekst wpisany przez człowieka w panelu trafia do strony publicznej.
+    wstawTekstZLinkami(tresc, wpis.tresc);
 
     // Bez zdjęcia: zwykła karta z paddingiem. Ze zdjęciem: ten sam układ dwukolumnowy,
     // co statyczna karta „Co się u nas dzieje" w tej sekcji — biblioteka zdjęć ma też
@@ -1110,7 +1135,7 @@ async function initNoclegiWydarzenie() {
   const trescWydarzenia = qs("#noclegi-tresc-wydarzenia");
   if (trescDefault && trescWydarzenia) {
     trescDefault.hidden = true;
-    trescWydarzenia.textContent = wpis.tresc;
+    wstawTekstZLinkami(trescWydarzenia, wpis.tresc);
     trescWydarzenia.hidden = false;
   }
 

@@ -1025,6 +1025,16 @@ body.cart-open #cart-panel {
   white-space: pre-line;
 }
 
+/* Adresy w treści wydarzeń zamienione na linki (wstawTekstZLinkami w main.js). Kolor
+   dziedziczony, nie --primary: w motywie dark --primary jest prawie czarny na ciemnym tle. */
+.link-w-tresci {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.link-w-tresci:hover { color: hsl(var(--ring)); }
+
 /* ── Sekcja #noclegi: formularz „szukaj terminu" ─────────────────────────────
    Deep-link do karty obiektu na Booking.com natywnym GET-em (działa bez JS —
    initNoclegi() tylko podpowiada daty). <input type="date"> i <select> nie
