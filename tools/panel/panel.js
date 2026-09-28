@@ -896,6 +896,7 @@ async function wgrajZdjecia(pliki) {
   const wgrane = [];
   const bledy = [];
   przycisk.disabled = true;
+  postep.dataset.rodzaj = "";
   try {
     for (const [i, plik] of pliki.entries()) {
       postep.textContent = `Wgrywam ${i + 1} z ${pliki.length}…`;
@@ -919,20 +920,24 @@ async function wgrajZdjecia(pliki) {
     }
   } finally {
     przycisk.disabled = false;
-    postep.textContent = "";
   }
 
   if (wgrane.length) {
     galeriaKatalog = KATALOG_UPLOADS;
     await wczytajGalerie();
   }
+  const rodzaj = bledy.length ? (wgrane.length ? "ostrzezenie" : "blad") : "sukces";
+  const podsumowanie = `${wgrane.length ? "✓ " : "✗ "}Wgrano ${wgrane.length} z ${pliki.length}.`;
+  // #komunikat stoi na górze strony, daleko nad galerią — bez tego wynik (zwłaszcza błąd
+  // serwera) pojawiał się poza ekranem i wyglądało, jakby nic się nie stało.
+  postep.textContent = bledy.length ? `${podsumowanie} ${bledy.join(" · ")}` : podsumowanie;
+  postep.dataset.rodzaj = rodzaj;
+  pokazToast(bledy.length ? `${podsumowanie} ${bledy.join(" · ")}` : podsumowanie,
+    bledy.length ? "blad" : "sukces", bledy.length ? 0 : 5000);
   const lista = bledy.length
     ? `<br>Nie wgrano:<ul>${bledy.map((b) => `<li>${Produkty.escape(b)}</li>`).join("")}</ul>`
     : "";
-  pokazKomunikat(
-    `${wgrane.length ? "✓ " : ""}Wgrano ${wgrane.length} z ${pliki.length} do <code>attached_assets/${KATALOG_UPLOADS}/</code>.${lista}`,
-    bledy.length ? (wgrane.length ? "ostrzezenie" : "blad") : "sukces"
-  );
+  pokazKomunikat(`${podsumowanie} Katalog: <code>attached_assets/${KATALOG_UPLOADS}/</code>.${lista}`, rodzaj);
 }
 
 function pokazPotwierdzenieUsuwania() {
@@ -964,13 +969,18 @@ async function usunZaznaczone() {
         `Nie usunięto nic. ${Produkty.escape(wynik.komunikat || `HTTP ${odp.status}`)}${uzycia ? `<ul>${uzycia}</ul>` : ""}`,
         "blad"
       );
+      // Szczegóły (gdzie plik jest użyty) są w komunikacie na górze — toast odsyła do niego.
+      pokazToast(`Nie usunięto nic: ${wynik.komunikat || `HTTP ${odp.status}`}. Szczegóły na górze strony.`, "blad", 0);
       return;
     }
     galeriaZaznaczone.clear();
     await wczytajGalerie();
-    pokazKomunikat(`✓ Usunięto ${wynik.usunieto} ${wynik.usunieto === 1 ? "plik" : "pliki/plików"}.`, "sukces");
+    const tresc = `✓ Usunięto ${wynik.usunieto} ${wynik.usunieto === 1 ? "plik" : "pliki/plików"}.`;
+    pokazKomunikat(tresc, "sukces");
+    pokazToast(tresc, "sukces");
   } catch (blad) {
     pokazKomunikat(`Nie udało się usunąć plików: ${Produkty.escape(blad.message)}`, "blad");
+    pokazToast(`Nie udało się usunąć plików: ${blad.message}`, "blad", 0);
   } finally {
     odswiezAkcjeGalerii(galeriaZaznaczone.size);
   }

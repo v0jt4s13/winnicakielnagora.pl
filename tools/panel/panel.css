@@ -436,6 +436,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
   border-radius: 8px;
 }
 .galeria-wgrywanie .podpowiedz { margin: 0; }
+#galeria-wgraj-postep[data-rodzaj="sukces"] { color: var(--sukces); font-weight: 600; }
+#galeria-wgraj-postep[data-rodzaj="ostrzezenie"] { color: var(--ostrzezenie); font-weight: 600; }
+#galeria-wgraj-postep[data-rodzaj="blad"] { color: var(--blad); font-weight: 600; }
 .galeria-potwierdzenie {
   display: inline-flex;
   flex-wrap: wrap;

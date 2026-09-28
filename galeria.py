@@ -295,7 +295,13 @@ def wgraj(nazwa: object, dane: bytes) -> dict:
     if not _w_korzeniach(katalog):
         raise RuntimeError("Katalog uploads wskazuje poza dozwolone miejsca")
 
-    fd, tymczasowy = tempfile.mkstemp(dir=katalog, prefix=".wgrywanie.", suffix=rozszerzenie)
+    try:
+        fd, tymczasowy = tempfile.mkstemp(dir=katalog, prefix=".wgrywanie.", suffix=rozszerzenie)
+    except PermissionError as blad:
+        raise RuntimeError(
+            f"Aplikacja nie ma prawa zapisu do {katalog.resolve()}. Na serwerze: "
+            "chown winnicakielnagora:www-data i chmod 750 na tym katalogu (WDROZENIE.md, krok 2a)."
+        ) from blad
     os.close(fd)
     tymczasowy_path = Path(tymczasowy)
     try:
