@@ -1041,6 +1041,9 @@ async function initWydarzenia() {
     return;
   }
 
+  // Wpis oznaczony w panelu jako „noclegi" podmienia tekst w #noclegi (initNoclegiWydarzenie)
+  // i nie powtarza się tutaj. Brak pola = "wydarzenia", jak w danych sprzed tej opcji.
+  wpisy = wpisy.filter((wpis) => wpis.wyswietl_w !== "noclegi");
   if (wpisy.length === 0) return;
 
   wpisy.forEach((wpis) => {
@@ -1094,6 +1097,13 @@ async function initWydarzenia() {
   });
 
   lista.hidden = false;
+  // Aktywne wydarzenie zastępuje ogólną kartę „Co się u nas dzieje". Bez niej margines pod
+  // listą zostawiałby pustą przerwę przed końcem sekcji.
+  const kartaStala = qs("#wydarzenia-karta-stala");
+  if (kartaStala) {
+    kartaStala.hidden = true;
+    lista.classList.remove("mb-12");
+  }
 }
 
 async function initNoclegiWydarzenie() {
@@ -1117,26 +1127,28 @@ async function initNoclegiWydarzenie() {
     return dzis >= poczatek && dzis <= w.data_do;
   });
 
-  if (aktywneNoclegi.length === 0) {
-    // Brak aktywnego — ukryj sloty
-    qs("#noclegi-tresc-domyslna")?.classList.remove("hidden");
-    const trescWydarzenia = qs("#noclegi-tresc-wydarzenia");
-    if (trescWydarzenia) trescWydarzenia.hidden = true;
-    const zdjeciaWydarzenia = qs("#noclegi-zdjecia-wydarzenia");
-    if (zdjeciaWydarzenia) zdjeciaWydarzenia.hidden = true;
-    return;
-  }
+  // Brak aktywnego wpisu: blok #noclegi-wydarzenie i zdjęcia zostają ukryte (stan z HTML-a),
+  // sekcja to sama karta rezerwacji.
+  if (aktywneNoclegi.length === 0) return;
 
   // Weź pierwsze (najwcześniejsze)
   const wpis = aktywneNoclegi[0];
 
-  // Wyświetl treść Wydarzenia zamiast domyślnego tekstu
-  const trescDefault = qs("#noclegi-tresc-domyslna");
-  const trescWydarzenia = qs("#noclegi-tresc-wydarzenia");
-  if (trescDefault && trescWydarzenia) {
-    trescDefault.hidden = true;
-    wstawTekstZLinkami(trescWydarzenia, wpis.tresc);
-    trescWydarzenia.hidden = false;
+  // Tytuł i treść wydarzenia nad kartą rezerwacji; karta z formularzem Booking się nie zmienia.
+  const blok = qs("#noclegi-wydarzenie");
+  if (blok) {
+    qs("#noclegi-tytul").textContent = wpis.tytul || "";
+    wstawTekstZLinkami(qs("#noclegi-tresc-wydarzenia"), wpis.tresc);
+    // Zdjęcie z panelu (slug, jak w kartach #wydarzenia) — obok tekstu; bez niego blok
+    // zostaje wyśrodkowanym tekstem.
+    const zdjecie = qs("#noclegi-zdjecie");
+    if (wpis.zdjecie && zdjecie) {
+      zdjecie.src = `${KORZEN}attached_assets/photos/${wpis.zdjecie}.jpg`;
+      zdjecie.alt = wpis.tytul || "";
+      zdjecie.hidden = false;
+      blok.classList.add("noclegi-wydarzenie--ze-zdjeciem");
+    }
+    blok.hidden = false;
   }
 
   // Wyświetl zdjęcia (jeśli są)

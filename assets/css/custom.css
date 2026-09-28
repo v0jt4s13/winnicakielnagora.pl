@@ -1035,6 +1035,27 @@ body.cart-open #cart-panel {
 }
 .link-w-tresci:hover { color: hsl(var(--ring)); }
 
+/* ── Sekcja #noclegi: wydarzenie ze zdjęciem (initNoclegiWydarzenie w main.js) ──
+   Zdjęcie obok tekstu od md, nad tekstem na telefonie. Klas `max-w-5xl` i `md:text-left`
+   NIE MA w bundlu Tailwinda, więc układ jest tutaj. */
+.noclegi-wydarzenie--ze-zdjeciem {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+@media (min-width: 768px) {
+  .noclegi-wydarzenie--ze-zdjeciem { grid-template-columns: 1fr 1fr; }
+}
+.noclegi-wydarzenie__zdjecie {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
 /* ── Sekcja #noclegi: formularz „szukaj terminu" ─────────────────────────────
    Deep-link do karty obiektu na Booking.com natywnym GET-em (działa bez JS —
    initNoclegi() tylko podpowiada daty). <input type="date"> i <select> nie

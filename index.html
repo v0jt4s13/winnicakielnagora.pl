@@ -543,7 +543,8 @@
           <!-- Wypełnia initWydarzenia() z /data/wydarzenia.json. Serwer oddaje wyłącznie wpisy
                aktywne dziś, więc pusty kontener = brak wydarzeń, a nie błąd. Patrz SPEC-005. -->
           <div id="lista-wydarzen" class="space-y-5 mb-12" data-reveal hidden></div>
-          <div class="rounded-md border border-card-border overflow-hidden" data-reveal>
+          <!-- Karta zastępcza: initWydarzenia() ukrywa ją, gdy jest aktywne wydarzenie dla tej sekcji. -->
+          <div id="wydarzenia-karta-stala" class="rounded-md border border-card-border overflow-hidden" data-reveal>
             <div class="grid md:grid-cols-2">
               <div class="aspect-video md:aspect-auto">
                 <img src="./attached_assets/generated_images/sala-degustacyjna-ai.jpg" alt="Wnętrze winiarni" class="w-full h-full object-cover" width="1200" height="655" loading="lazy" decoding="async">
@@ -565,13 +566,19 @@
 
       <section id="noclegi" class="py-20 bg-secondary/20">
         <div class="max-w-7xl mx-auto px-5">
-          <div class="text-center mb-12" data-reveal>
-            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5">Nocleg w winnicy</h2>
-            <p id="noclegi-tresc-domyslna" class="text-muted-foreground max-w-2xl mx-auto">Trzy pokoje w budynku winiarni, z widokiem na winorośl. Wybierz termin i liczbę osób — przeniesiemy Cię do karty obiektu na Booking.com z wpisanym wyszukiwaniem.</p>
-            <p id="noclegi-tresc-wydarzenia" class="text-muted-foreground max-w-2xl mx-auto" hidden></p>
+          <!-- Wydarzenie oznaczone w panelu „Sekcja Noclegi" — wypełnia initNoclegiWydarzenie().
+               Bez aktywnego wpisu blok zostaje ukryty i sekcja to sama karta rezerwacji.
+               Bez data-reveal: blok ukryty w chwili startu obserwatora mógłby zostać przezroczysty. -->
+          <div id="noclegi-wydarzenie" class="text-center mb-12" hidden>
+            <img id="noclegi-zdjecie" class="noclegi-wydarzenie__zdjecie rounded-md" alt="" loading="lazy" decoding="async" hidden>
+            <div>
+              <h2 id="noclegi-tytul" class="font-serif text-3xl md:text-4xl font-bold mb-5"></h2>
+              <p id="noclegi-tresc-wydarzenia" class="text-muted-foreground max-w-2xl mx-auto wydarzenie-tresc"></p>
+            </div>
           </div>
 
           <div class="max-w-2xl mx-auto rounded-md border border-card-border bg-card p-8" data-reveal>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5 text-center">Zarezerwuj nocleg w winnicy</h2>
             <!-- TODO(#37 / #15): rząd zdjęć 3 pokoi nad formularzem, gdy będą materiały.
                  Klasy `md:grid-cols-3` NIE MA w prebuilt bundlu — użyć `grid grid-cols-3 gap-3`.
             <div class="grid grid-cols-3 gap-3 mb-8">
