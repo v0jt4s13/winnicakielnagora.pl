@@ -240,6 +240,10 @@ def zdrowie():
         "panel_wlaczony": not powod,
         "cennik": str(cennik.CENNIK),
         "wydarzenia": str(wydarzenia.WYDARZENIA),
+        # Gdzie fizycznie laduja zdjecia z panelu: po resolve() dowiazanie pokazuje cel
+        # (…/dane/uploads), zwykly katalog — sciezke w app/. Brak katalogu zaznaczamy wprost.
+        "uploads": str(galeria.uploads().resolve()) if galeria.uploads().exists()
+                   else f"brak katalogu: {galeria.uploads()}",
         "sciezka_bazowa": SCIEZKA_BAZOWA,
     }
     if powod:

@@ -136,7 +136,11 @@ Do sprawdzenia przy pierwszym wdrożeniu (nie da się tego ustalić z repozytori
 - **Pillow w środowisku aplikacji** — `python -c "import PIL"` interpreterem, którym startuje
   gunicorn. Bez Pillow panel pokaże „Wgrywanie wymaga biblioteki Pillow na serwerze”.
 
-Sprawdzenie: wgraj w panelu małe zdjęcie → plik jest w `dane/uploads/`, a adres
+Sprawdzenie bez logowania na serwer: `/zdrowie` → pole `"uploads"` musi wskazywać
+`/opt/apps/app_winnicakielnagora.pl/dane/uploads`. Ścieżka w `app/attached_assets/uploads`
+oznacza zwykły katalog zamiast dowiązania, a `"brak katalogu: …"` — że nic jeszcze nie założono.
+
+Potem: wgraj w panelu małe zdjęcie → plik jest w `dane/uploads/`, a adres
 `…/winnicakielnagora.pl/attached_assets/uploads/<nazwa>.jpg` go zwraca.
 
 ### 3. Uruchomić usługę

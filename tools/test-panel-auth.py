@@ -169,6 +169,15 @@ def main() -> int:
     odp = wsgi.panel_api("galeria-usun")
     sprawdz("usuwanie po zalogowaniu: 200 i plik znika",
             kod(odp) == 200 and not (wsgi.galeria.ZASOBY / "uploads" / "butelka-nowa.jpg").exists())
+    # /zdrowie pokazuje, gdzie fizycznie laduja zdjecia — dowiazanie rozwiniete do celu.
+    (wsgi.galeria.ZASOBY / "uploads").rmdir()
+    sprawdz("/zdrowie: brak katalogu uploads zaznaczony wprost",
+            json.loads(tresc(wsgi.zdrowie()))["uploads"].startswith("brak katalogu"))
+    cel_uploads = KATALOG_TYMCZASOWY / "dane-uploads"
+    cel_uploads.mkdir()
+    (wsgi.galeria.ZASOBY / "uploads").symlink_to(cel_uploads, target_is_directory=True)
+    sprawdz("/zdrowie: uploads jako dowiązanie pokazuje cel",
+            json.loads(tresc(wsgi.zdrowie()))["uploads"] == str(cel_uploads.resolve()))
     wsgi.galeria.ZASOBY = poprzednie_zasoby
 
     sprawdz("globalny limit żądania = limit wgrywania",
