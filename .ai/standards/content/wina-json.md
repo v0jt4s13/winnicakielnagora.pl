@@ -9,13 +9,18 @@
 { "cena_brutto": 65.00, "rabat_procent": 10 }
 ```
 
-Wszystko inne wylicza `main.js`, w jednym miejscu:
+`cena_brutto` to cena **regularna, sprzed rabatu** — od niej liczy się zniżkę.
+Wszystko inne wylicza `Produkty.policzCeny()` (`assets/js/produkty.js`), w jednym miejscu:
 
-- `netto = cena_brutto / (1 + stawka_vat)`
-- `cena_przed_rabatem = cena_brutto / (1 - rabat_procent / 100)` — pokazywana tylko gdy rabat > 0
+- `cena_promocyjna = round(cena_brutto × (1 - rabat_procent / 100), 2)` — cena do zapłaty
+  (koszyk, `data-price`); bez rabatu równa `cena_brutto`
+- `netto = cena_promocyjna / (1 + stawka_vat)`
+- przekreślona cena na karcie = `cena_brutto`, pokazywana tylko gdy rabat > 0
 - `promocja = rabat_procent > 0`
 
-**Nigdy** nie zapisuj ceny netto, kwoty rabatu ani ceny sprzed rabatu jako osobnego pola i nie
+Przykład: `cena_brutto: 40`, `rabat_procent: 10` → przekreślone 40.00 zł, cena 36.00 zł, badge -10%.
+
+**Nigdy** nie zapisuj ceny netto, kwoty rabatu ani ceny promocyjnej jako osobnego pola i nie
 wpisuj żadnej z nich do HTML-a. Wcześniej cena występowała w sześciu miejscach jednej karty
 i rozjechała się po cichu — ten standard istnieje właśnie po to.
 

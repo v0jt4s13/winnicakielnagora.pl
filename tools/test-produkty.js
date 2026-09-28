@@ -9,14 +9,17 @@ const sprawdz = (opis, warunek) => {
   if (!warunek) bledy++;
 };
 
-// promocja: brutto 58.50 przy rabacie 10% => przed rabatem 65.00, netto 47.56
+// promocja: cena_brutto 65.00 (regularna) przy rabacie 10% => do zaplaty 58.50, netto 47.56
 const promo = { id: "monarch-2023", nazwa: "Monarch", odmiany_slug: ["monarch"], kategoria: "Czerwone",
-  rocznik: 2023, alkohol: 12.5, pojemnosc_ml: 750, cena_brutto: 58.50, rabat_procent: 10,
+  rocznik: 2023, alkohol: 12.5, pojemnosc_ml: 750, cena_brutto: 65, rabat_procent: 10,
   dostepne: true, opis: "Wyraziste czerwone.", zdjecie: "monarch-kieliszek-01" };
 const c = Produkty.policzCeny(promo, 0.23);
-sprawdz("netto = brutto / 1.23", Math.abs(c.netto - 58.50 / 1.23) < 1e-9);
-sprawdz("cena sprzed rabatu = 65.00", Math.abs(c.przedRabatem - 65) < 1e-9);
+sprawdz("cena promocyjna = 58.50", c.brutto === 58.5);
+sprawdz("netto = cena promocyjna / 1.23", Math.abs(c.netto - 58.50 / 1.23) < 1e-9);
+sprawdz("cena sprzed rabatu = cena_brutto", c.przedRabatem === 65);
 sprawdz("promocja rozpoznana", c.promocja === true);
+sprawdz("40 zl -10% = 36.00", Produkty.policzCeny({ cena_brutto: 40, rabat_procent: 10 }, 0.23).brutto === 36);
+sprawdz("zaokraglenie do grosza", Produkty.policzCeny({ cena_brutto: 33.33, rabat_procent: 15 }, 0.23).brutto === 28.33);
 
 const html = Produkty.renderProductCard(promo, 0.23);
 sprawdz("badge -10%", html.includes(">-10%<"));
