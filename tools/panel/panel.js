@@ -1211,11 +1211,16 @@ qs("#lista-wydarzen-panel").addEventListener("click", (e) => {
   if (wiersz) wybierzWydarzenie(Number(wiersz.dataset.wydarzenie));
 });
 
-qs("#formularz-wydarzenia").addEventListener("input", () => {
+function zmianaWydarzenia() {
   zbierzFormularzWydarzenia();
   oznaczZmianeWydarzen();
   renderListeWydarzen();
-});
+}
+
+qs("#formularz-wydarzenia").addEventListener("input", zmianaWydarzenia);
+// „Wyświetl w" stoi poza <form>, więc jego zdarzenia nie docierają do słuchacza formularza —
+// bez tego sam wybór „Sekcja Noclegi" nie trafiał do danych i nie dało się go zapisać.
+qs("#wyswietl-w-wydarzenia").addEventListener("change", zmianaWydarzenia);
 
 qs("#dodaj-wydarzenie").addEventListener("click", () => {
   const dzis = dzisWWinnicy();
