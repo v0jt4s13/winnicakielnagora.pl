@@ -27,11 +27,25 @@ Aby podpiąć obraz do produktu: wybierz produkt w sekcji „Pozycje”, znajdź
 i kliknij „Użyj jako zdjęcia produktu w sklepie”. Ścieżka pojawi się w formularzu produktu;
 kliknięcie „Zapisz” utrwali ją w cenniku. „Wyczyść” usuwa przypisanie po zapisaniu.
 
+### Wgrywanie i usuwanie (SPEC-009)
+
+„Wgraj zdjęcia…” przyjmuje JPG, PNG i WebP do 15 MB na plik. Każde zdjęcie jest zmniejszane
+(dłuższy bok 2000 px) i zapisywane **bez metadanych** — znika GPS, model aparatu i data.
+PNG z przezroczystością zapisuje się jako `.webp`, reszta jako `.jpg`. Pliki trafiają do
+`attached_assets/uploads/` (w `.gitignore` — nie idą do repozytorium) i od razu są w galerii.
+
+„Usuń zaznaczone” działa **tylko** dla plików z `uploads/` i jest operacją „wszystko albo nic”:
+jeśli choć jeden zaznaczony plik jest użyty jako zdjęcie produktu albo w wydarzeniu, nic nie
+zostaje usunięte, a panel pokazuje, gdzie jest użyty. Grafik witryny (hero, logo, zdjęcia
+odmian) panel nie usuwa.
+
+Wymaga Pillow — lokalnie i na produkcji.
+
 ## Czego panel nie robi
 
 - **Nie publikuje.** Po zapisie zmiany są tylko na dysku. Trzeba zrobić commit i wdrożenie.
 - **Nie edytuje stron odmian** (`wina/*.html`), sekcji „O nas", kontaktu ani wydarzeń.
-- **Nie wgrywa zdjęć.** Nowe zdjęcia trzeba dodać do `attached_assets/` poza panelem.
+- **Nie usuwa grafik witryny.** Usuwanie działa tylko w `attached_assets/uploads/`.
 
 ## Panel na produkcji (za hasłem)
 

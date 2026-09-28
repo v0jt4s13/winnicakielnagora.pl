@@ -113,6 +113,32 @@ Uwagi:
 > `systemctl restart` albo `production_manager.sh restart` uruchomi proces ze **starym**
 > zestawem zmiennych. Po każdej zmianie `EXTRA_SYSTEMD_ENV` uruchom `update`.
 
+### 2a. Katalog na zdjęcia wgrywane z panelu (SPEC-009)
+
+Panel zapisuje zdjęcia do `attached_assets/uploads/`. Na produkcji ma to być **dowiązanie**
+do katalogu poza gitem — tak jak cennik, żeby wdrożenie nie kasowało wgranych plików:
+
+```bash
+sudo mkdir -p /opt/apps/app_winnicakielnagora.pl/dane/uploads
+sudo chown winnicakielnagora:www-data /opt/apps/app_winnicakielnagora.pl/dane/uploads
+sudo chmod 750 /opt/apps/app_winnicakielnagora.pl/dane/uploads
+sudo -u winnicakielnagora ln -s /opt/apps/app_winnicakielnagora.pl/dane/uploads \
+  /opt/apps/app_winnicakielnagora.pl/app/attached_assets/uploads
+```
+
+Do sprawdzenia przy pierwszym wdrożeniu (nie da się tego ustalić z repozytorium):
+
+- **Czy `production_manager.sh update` usuwa nieśledzone pliki** (`git clean`, świeży klon).
+  Jeśli tak, dowiązanie znika przy każdym wdrożeniu — trzeba je odtwarzać w kroku `update`.
+  Pliki w `dane/uploads` są bezpieczne w obu przypadkach.
+- **nginx: `client_max_body_size 16m;`** w bloku `location ^~ /winnicakielnagora.pl/`.
+  Domyślny limit nginx to 1 MB — większe zdjęcie dostanie 413 od nginx, zanim trafi do aplikacji.
+- **Pillow w środowisku aplikacji** — `python -c "import PIL"` interpreterem, którym startuje
+  gunicorn. Bez Pillow panel pokaże „Wgrywanie wymaga biblioteki Pillow na serwerze”.
+
+Sprawdzenie: wgraj w panelu małe zdjęcie → plik jest w `dane/uploads/`, a adres
+`…/winnicakielnagora.pl/attached_assets/uploads/<nazwa>.jpg` go zwraca.
+
 ### 3. Uruchomić usługę
 
 ```bash

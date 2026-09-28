@@ -136,7 +136,8 @@ Zmiana jest gotowa dopiero, gdy:
       `python3 tools/test-routing.py` (routing i pliki publiczne),
       `python3 tools/test-panel-auth.py` (dostęp do panelu na produkcji),
       `python3 tools/test-cennik-sciezka.py` (ścieżka żywego cennika),
-      `python3 tools/test-contact.py` (walidacja formularza i wyzwania)
+      `python3 tools/test-contact.py` (walidacja formularza i wyzwania),
+      `python3 tools/test-uploads.py` (wgrywanie i usuwanie zdjęć w `uploads/`)
 
 > Nie ma lintera ani type-checkera. Testy pokrywają logikę, ale wygląd sprawdza wyłącznie
 > podgląd w przeglądarce.
