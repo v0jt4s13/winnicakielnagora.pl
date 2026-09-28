@@ -788,7 +788,7 @@ async function wczytajCennik() {
 function zakresCen() {
   const ceny = (cennik?.wina || [])
     .filter((wino) => wino.dostepne !== false)
-    .map((wino) => Number(wino.cena_brutto || 0));
+    .map((wino) => Produkty.policzCeny(wino, stawkaVat()).brutto);
   if (ceny.length === 0) return { min: 0, max: 100 };
   return { min: Math.floor(Math.min(...ceny)), max: Math.ceil(Math.max(...ceny)) };
 }

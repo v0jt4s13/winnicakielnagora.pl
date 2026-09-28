@@ -24,16 +24,18 @@ const Produkty = {
   },
 
   /**
-   * Zapisana jest wyłącznie cena brutto — netto i cena sprzed rabatu są wyliczane.
-   * Patrz .ai/standards/content/wina-json.md.
+   * Zapisana jest wyłącznie cena brutto sprzed rabatu — cena promocyjna i netto są wyliczane.
+   * `brutto` w wyniku to cena do zapłaty (po rabacie). Patrz .ai/standards/content/wina-json.md.
    */
   policzCeny(wino, stawkaVat) {
-    const brutto = Number(wino.cena_brutto || 0);
+    const bazowa = Number(wino.cena_brutto || 0);
     const rabat = Number(wino.rabat_procent || 0);
+    // zaokrąglenie do grosza: 40 zł przy -10% → 36.00, nie 35.999…
+    const brutto = rabat > 0 ? Math.round(bazowa * (100 - rabat)) / 100 : bazowa;
     return {
       brutto,
       netto: brutto / (1 + Number(stawkaVat || 0)),
-      przedRabatem: rabat > 0 ? brutto / (1 - rabat / 100) : null,
+      przedRabatem: rabat > 0 ? bazowa : null,
       promocja: rabat > 0,
     };
   },
