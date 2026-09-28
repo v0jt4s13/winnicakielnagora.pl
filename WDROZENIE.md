@@ -62,7 +62,7 @@ spacjach i zamienia na `Environment=` w unicie systemd, więc **żadna wartość
 spacji**).
 
 ```bash
-EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=WKLEJ_HASH CONTACT_CAPTCHA_SECRET=WKLEJ_DLUGI_SEKRET CONTACT_SMTP_HOST=smtp.example CONTACT_SMTP_PORT=587 CONTACT_SMTP_USER=WKLEJ_UZYTKOWNIKA CONTACT_SMTP_PASSWORD=WKLEJ_HASLO CONTACT_SMTP_SSL=0 CONTACT_FROM=kontakt@example CONTACT_TO=odbiorca@example'
+EXTRA_SYSTEMD_ENV='PYTHONDONTWRITEBYTECODE=1 CENNIK_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wina.json WYDARZENIA_SCIEZKA=/opt/apps/app_winnicakielnagora.pl/dane/wydarzenia.json PANEL_UZYTKOWNIK=wlasciciel PANEL_HASLO_HASH=WKLEJ_HASH CONTACT_CAPTCHA_SECRET=WKLEJ_DLUGI_SEKRET CONTACT_SMTP_HOST=smtp.example CONTACT_SMTP_PORT=587 CONTACT_SMTP_USER=WKLEJ_UZYTKOWNIKA CONTACT_SMTP_PASSWORD=WKLEJ_HASLO CONTACT_SMTP_SSL=0 CONTACT_FROM=kontakt@example CONTACT_TO=odbiorca@example'
 ```
 
 > **Wartości nie mogą zawierać spacji.** Skrypt dzieli `EXTRA_SYSTEMD_ENV` po spacjach, więc
@@ -90,6 +90,13 @@ Uwagi:
 
   Bez prawa zapisu panel wczyta cennik, ale **zapis skończy się błędem 500**. Aplikacja poda
   wtedy w komunikacie ścieżkę, do której nie mogła pisać.
+
+- `WYDARZENIA_SCIEZKA` — to samo dla wydarzeń, ten sam katalog `dane/`. **Bez niej** panel
+  zapisuje do `${APP_DIR}/app/data/wydarzenia.json`, czyli do katalogu z gitem: użytkownik
+  aplikacji zwykle nie ma tam prawa zapisu, a nawet udany zapis nadpisze kolejny deploy. Przy pierwszym
+  starcie aplikacja sama kopiuje tam wersję startową z repozytorium.
+  Sprawdzenie: `/zdrowie` → pole `"wydarzenia"` musi wskazywać `…/dane/wydarzenia.json`,
+  tak jak `"cennik"` wskazuje `…/dane/wina.json`.
 
 - Hash generuje `python3 tools/panel/haslo.py`. **Hasła nie zapisuj nigdzie** — do konfiguracji
   trafia wyłącznie hash.
