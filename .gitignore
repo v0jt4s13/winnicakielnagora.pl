@@ -37,6 +37,10 @@ skills/
 # poziomie, wiec attached_assets/docs/ bylo po cichu pomijane przy commitowaniu.
 /docs/
 
+# --- zdjecia wgrywane z panelu (SPEC-009) ---
+# Lokalnie zwykly katalog, na produkcji dowiazanie do dane/uploads poza wdrozeniem.
+/attached_assets/uploads
+
 # --- kopia zapasowa robiona przez panel redakcyjny ---
 data/
 filmy/

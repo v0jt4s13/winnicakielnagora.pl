@@ -22,6 +22,7 @@ import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 PROJEKT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJEKT))
@@ -222,7 +223,7 @@ class Panel(BaseHTTPRequestHandler):
         # resolve() rozwija dowiazania symboliczne PRZED sprawdzeniem — samo
         # obciecie ".." nie wystarcza.
         kandydat = kandydat.resolve()
-        dozwolone = [p.resolve() for p in (PANEL, ZASOBY, O_NAS_GALERIA_ZASOBY)]
+        dozwolone = [p.resolve() for p in (PANEL, ZASOBY, O_NAS_GALERIA_ZASOBY, galeria.uploads())]
         dozwolone += [p.resolve() for p in POJEDYNCZE_PLIKI.values()]
         pasuje = any(kandydat == p or (p.is_dir() and kandydat.is_relative_to(p))
                      for p in dozwolone)
@@ -282,12 +283,27 @@ class Panel(BaseHTTPRequestHandler):
         sciezka = self._bez_prefiksu(self.path.split("?")[0])
         if sciezka not in ("/api/zapisz", "/api/opisz", "/api/wydarzenia-zapisz",
                            "/api/galeria-przenies", "/api/galeria-warianty",
+                           "/api/galeria-wgraj", "/api/galeria-usun",
                            "/api/o-nas-galeria-zapisz", "/api/o-nas-galeria-dodaj-z-galerii"):
             return self._json(404, {"ok": False, "komunikat": "Nieznany adres"})
         if not self._origin_ok():
             return self._json(403, {"ok": False, "komunikat": "Niedozwolone źródło żądania"})
 
         dlugosc = int(self.headers.get("Content-Length") or 0)
+        if sciezka == "/api/galeria-wgraj":
+            # Surowe bajty pliku, nie JSON — wlasny limit (SPEC-009), sprawdzany przed odczytem.
+            if dlugosc <= 0:
+                return self._json(400, {"ok": False, "komunikat": "Pusty plik"})
+            if dlugosc > galeria.MAX_WGRYWANIE:
+                return self._json(413, {"ok": False, "komunikat": "Plik jest większy niż 15 MB"})
+            nazwa = parse_qs(urlsplit(self.path).query).get("nazwa", [""])[0]
+            try:
+                wynik = galeria.wgraj(nazwa, self.rfile.read(dlugosc))
+            except ValueError as blad:
+                return self._json(400, {"ok": False, "komunikat": str(blad)})
+            except (OSError, RuntimeError) as blad:
+                return self._json(500, {"ok": False, "komunikat": str(blad)})
+            return self._json(200, {"ok": True, **wynik})
         if dlugosc <= 0 or dlugosc > MAX_ZADANIE:
             return self._json(400, {"ok": False, "bledy": [
                 {"pozycja": None, "pole": None, "komunikat": "Puste albo zbyt duże żądanie"}]})
@@ -317,6 +333,17 @@ class Panel(BaseHTTPRequestHandler):
             except (OSError, RuntimeError) as blad:
                 return self._json(500, {"ok": False, "komunikat": str(blad)})
             return self._json(200, {"ok": True, **wynik})
+
+        if sciezka == "/api/galeria-usun":
+            try:
+                liczba = galeria.usun(dane.get("pliki"), galeria.uzycia_zdjec())
+            except galeria.PlikUzywany as blad:
+                return self._json(400, {"ok": False, "komunikat": str(blad), "uzycia": blad.uzycia})
+            except ValueError as blad:
+                return self._json(400, {"ok": False, "komunikat": str(blad)})
+            except OSError as blad:
+                return self._json(500, {"ok": False, "komunikat": f"Nie udało się usunąć plików: {blad}"})
+            return self._json(200, {"ok": True, "usunieto": liczba})
 
         if sciezka == "/api/opisz":
             wynik, komunikat, kod = przygotuj_opis(

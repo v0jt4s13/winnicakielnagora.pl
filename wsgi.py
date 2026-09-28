@@ -20,7 +20,9 @@ STATIC_CANDIDATES = [BASE / "dist" / "public", BASE]  # wybierz dist/public po b
 STATIC_ROOT = next((p for p in STATIC_CANDIDATES if p.exists()), BASE)
 
 app = Flask(__name__, static_folder=None)  # statyki wydajemy sami, przez serve()
-app.config["MAX_CONTENT_LENGTH"] = kontakt.MAX_CIAZAR_ZADANIA
+# Globalny limit = najwiekszy dozwolony upload (panel, za haslem, SPEC-009). Jedyna publiczna
+# trasa POST, /api/contact, sama pilnuje swojego limitu kontakt.MAX_CIAZAR_ZADANIA (16 KB).
+app.config["MAX_CONTENT_LENGTH"] = galeria.MAX_WGRYWANIE
 
 
 # Witryna bywa serwowana pod podsciezka (dev stoi pod /winnicakielnagora.pl/). Jesli proxy
@@ -362,6 +364,34 @@ def panel_api(akcja: str):
         except (OSError, RuntimeError) as blad:
             return _json({"ok": False, "komunikat": str(blad)}, 500)
         return _json({"ok": True, **wynik})
+
+    if akcja == "galeria-wgraj" and request.method == "POST":
+        # Surowe bajty pliku w ciele (nie multipart). Rozmiar sprawdzony przed odczytem.
+        if not request.content_length:
+            return _json({"ok": False, "komunikat": "Pusty plik"}, 400)
+        if request.content_length > galeria.MAX_WGRYWANIE:
+            return _json({"ok": False, "komunikat": "Plik jest większy niż 15 MB"}, 413)
+        try:
+            wynik = galeria.wgraj(request.args.get("nazwa", ""), request.get_data())
+        except ValueError as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 400)
+        except (OSError, RuntimeError) as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 500)
+        return _json({"ok": True, **wynik})
+
+    if akcja == "galeria-usun" and request.method == "POST":
+        dane = request.get_json(silent=True)
+        if not isinstance(dane, dict):
+            return _json({"ok": False, "komunikat": "Nieczytelne żądanie"}, 400)
+        try:
+            liczba = galeria.usun(dane.get("pliki"), galeria.uzycia_zdjec())
+        except galeria.PlikUzywany as blad:
+            return _json({"ok": False, "komunikat": str(blad), "uzycia": blad.uzycia}, 400)
+        except ValueError as blad:
+            return _json({"ok": False, "komunikat": str(blad)}, 400)
+        except OSError as blad:
+            return _json({"ok": False, "komunikat": f"Nie udało się usunąć plików: {blad}"}, 500)
+        return _json({"ok": True, "usunieto": liczba})
 
     if akcja == "zapisz" and request.method == "POST":
         zadanie = request.get_json(silent=True)

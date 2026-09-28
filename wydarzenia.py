@@ -21,6 +21,8 @@ import tempfile
 from datetime import date, datetime
 from pathlib import Path
 
+import galeria
+
 PROJEKT = Path(__file__).resolve().parent
 
 # Wersja startowa, wersjonowana w repozytorium. Na produkcji sluzy tylko do zasiania
@@ -247,12 +249,10 @@ def waliduj(dane) -> list[dict]:
                     if any(c in ("", ".", "..") for c in czesci):
                         bledy.append(_blad(i, "zdjecia", f"{etykieta}: nieprawidłowa ścieżka"))
                         continue
-                    cel = (PROJEKT / "attached_assets" / sciezka).resolve()
-                    korzen = (PROJEKT / "attached_assets").resolve()
-                    if not cel.is_relative_to(korzen):
-                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: ścieżka wychodzi poza katalog zdjęć"))
-                    elif not cel.is_file():
-                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: nie ma takiego pliku"))
+                    # Wspolna regula z galeria: przepuszcza takze uploads/ dowiazane poza
+                    # attached_assets; odrzuca wyjscie poza oba korzenie i nieistniejacy plik.
+                    if galeria.w_zasobach(sciezka) is None:
+                        bledy.append(_blad(i, "zdjecia", f"{etykieta}: nie ma takiego pliku obrazu w katalogu zdjęć"))
 
         wyswietl_w = wpis.get("wyswietl_w")
         if wyswietl_w not in (None, "") and wyswietl_w not in MIEJSCA_WYSWIETLANIA:

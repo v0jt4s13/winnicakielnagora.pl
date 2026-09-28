@@ -17,6 +17,8 @@ import re
 import tempfile
 from pathlib import Path
 
+import galeria
+
 PROJEKT = Path(__file__).resolve().parent
 ZDJECIA = PROJEKT / "attached_assets" / "photos"
 STRONY_ODMIAN = PROJEKT / "wina"
@@ -91,13 +93,11 @@ def sciezka_zdjecia_sklep(wartosc: object) -> Path | None:
             break
     if not wartosc:
         return None
-    zasoby = (PROJEKT / "attached_assets").resolve()
-    kandydat = (zasoby / wartosc).resolve()
-    if not kandydat.is_relative_to(zasoby):
+    # Wspolna regula z galeria: przepuszcza takze uploads/ dowiazane poza attached_assets.
+    kandydat = galeria.w_zasobach(wartosc)
+    if kandydat is None or kandydat.suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp"}:
         return None
-    if kandydat.suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp"}:
-        return None
-    return kandydat if kandydat.is_file() else None
+    return kandydat
 
 
 def wczytaj() -> dict:

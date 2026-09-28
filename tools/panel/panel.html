@@ -212,6 +212,15 @@
           Obrazy są pogrupowane według katalogów w <code>attached_assets/</code>.
           Operacje na plikach zapisują się od razu na dysku.
         </p>
+        <div class="galeria-wgrywanie">
+          <button type="button" id="galeria-wgraj" class="przycisk glowny">Wgraj zdjęcia…</button>
+          <input type="file" id="galeria-wgraj-pliki" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <span class="podpowiedz">
+            JPG, PNG, WebP · do 15 MB na plik. Trafiają do <code>attached_assets/uploads/</code>,
+            zmniejszone do 2000 px, bez danych GPS i modelu aparatu.
+          </span>
+          <span id="galeria-wgraj-postep" class="podpowiedz" aria-live="polite"></span>
+        </div>
         <div class="galeria-filtry">
           <label>Katalog
             <select id="galeria-katalog"></select>
@@ -234,6 +243,14 @@
             <span>-thumb (300 px)</span>
           </label>
           <button type="button" id="utworz-warianty" class="przycisk" disabled>Utwórz warianty</button>
+          <span class="galeria-separator" aria-hidden="true"></span>
+          <button type="button" id="usun-zdjecia" class="przycisk niebezpieczny" disabled
+                  title="Usuwać można tylko zdjęcia z attached_assets/uploads/">Usuń zaznaczone</button>
+          <span id="usun-potwierdzenie" class="galeria-potwierdzenie" hidden>
+            <span id="usun-pytanie"></span>
+            <button type="button" id="usun-tak" class="przycisk niebezpieczny">Usuń</button>
+            <button type="button" id="usun-nie" class="przycisk">Anuluj</button>
+          </span>
         </div>
         <div id="galeria-grid" class="galeria-grid" aria-live="polite"></div>
         <p id="galeria-pusto" class="pusto" hidden>Nie znaleziono obrazów w tym katalogu.</p>

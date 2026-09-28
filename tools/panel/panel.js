@@ -24,6 +24,9 @@ let zmienione = false;
 let galeriaStan = { katalogi: [], pliki: [] };
 let galeriaKatalog = "";
 let galeriaZaznaczone = new Set();
+// Wgrywanie (SPEC-009): katalog pod attached_assets/ i limit — te same co w galeria.py.
+const KATALOG_UPLOADS = "uploads";
+const MAX_WGRYWANIE = 15 * 1024 * 1024;
 
 // Wydarzenia to drugi, niezalezny plik danych — wlasny stan i wlasny zapis.
 let wydarzenia = [];
@@ -732,6 +735,10 @@ function odswiezAkcjeGalerii(liczba) {
     : "Zaznacz obrazy, aby je przenieść albo utworzyć warianty.";
   qs("#przenies-zdjecia").disabled = liczba === 0;
   qs("#utworz-warianty").disabled = liczba === 0;
+  // Serwer i tak odrzuci plik spoza uploads/ — tu tylko nie proponujemy akcji, która się nie uda.
+  const tylkoUploads = [...galeriaZaznaczone].every((sciezka) => sciezka.startsWith(`${KATALOG_UPLOADS}/`));
+  qs("#usun-zdjecia").disabled = liczba === 0 || !tylkoUploads;
+  qs("#usun-potwierdzenie").hidden = true;
 }
 
 function renderGaleria() {
@@ -877,6 +884,107 @@ async function utworzWarianty() {
     przycisk.disabled = false;
   }
 }
+
+// --- wgrywanie i usuwanie (SPEC-009) ---------------------------------------
+
+/** Pliki po kolei, nie równolegle: 15 MB × kilka zdjęć naraz przez telefon łatwo się urywa,
+ *  a błąd jednego pliku nie może przerwać reszty. */
+async function wgrajZdjecia(pliki) {
+  if (!pliki.length) return;
+  const postep = qs("#galeria-wgraj-postep");
+  const przycisk = qs("#galeria-wgraj");
+  const wgrane = [];
+  const bledy = [];
+  przycisk.disabled = true;
+  try {
+    for (const [i, plik] of pliki.entries()) {
+      postep.textContent = `Wgrywam ${i + 1} z ${pliki.length}…`;
+      if (plik.size > MAX_WGRYWANIE) {
+        bledy.push(`${plik.name} — plik jest większy niż 15 MB`);
+        continue;
+      }
+      try {
+        // Adres względny — bez tego na produkcji pomija prefiks nginx (standard panel-fetch-sciezki).
+        const odp = await fetch(`api/galeria-wgraj?nazwa=${encodeURIComponent(plik.name)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/octet-stream" },
+          body: plik,
+        });
+        const wynik = await odp.json().catch(() => ({ komunikat: `HTTP ${odp.status}` }));
+        if (!odp.ok) throw new Error(wynik.komunikat || `HTTP ${odp.status}`);
+        wgrane.push(wynik.sciezka);
+      } catch (blad) {
+        bledy.push(`${plik.name} — ${blad.message}`);
+      }
+    }
+  } finally {
+    przycisk.disabled = false;
+    postep.textContent = "";
+  }
+
+  if (wgrane.length) {
+    galeriaKatalog = KATALOG_UPLOADS;
+    await wczytajGalerie();
+  }
+  const lista = bledy.length
+    ? `<br>Nie wgrano:<ul>${bledy.map((b) => `<li>${Produkty.escape(b)}</li>`).join("")}</ul>`
+    : "";
+  pokazKomunikat(
+    `${wgrane.length ? "✓ " : ""}Wgrano ${wgrane.length} z ${pliki.length} do <code>attached_assets/${KATALOG_UPLOADS}/</code>.${lista}`,
+    bledy.length ? (wgrane.length ? "ostrzezenie" : "blad") : "sukces"
+  );
+}
+
+function pokazPotwierdzenieUsuwania() {
+  const liczba = galeriaZaznaczone.size;
+  if (!liczba) return;
+  qs("#usun-pytanie").textContent = `Usunąć ${liczba} ${liczba === 1 ? "plik" : "pliki/plików"}? Tego nie da się cofnąć.`;
+  qs("#usun-potwierdzenie").hidden = false;
+  qs("#usun-nie").focus();
+}
+
+async function usunZaznaczone() {
+  const pliki = wybranePlikiGalerii();
+  qs("#usun-potwierdzenie").hidden = true;
+  if (!pliki.length) return;
+  qs("#usun-zdjecia").disabled = true;
+  try {
+    const odp = await fetch("api/galeria-usun", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pliki }),
+    });
+    const wynik = await odp.json();
+    if (!odp.ok) {
+      // Plik używany w cenniku/wydarzeniu blokuje całą operację — pokazujemy, gdzie.
+      const uzycia = Object.entries(wynik.uzycia || {})
+        .map(([plik, gdzie]) => `<li><code>${Produkty.escape(plik)}</code>: ${gdzie.map(Produkty.escape).join("; ")}</li>`)
+        .join("");
+      pokazKomunikat(
+        `Nie usunięto nic. ${Produkty.escape(wynik.komunikat || `HTTP ${odp.status}`)}${uzycia ? `<ul>${uzycia}</ul>` : ""}`,
+        "blad"
+      );
+      return;
+    }
+    galeriaZaznaczone.clear();
+    await wczytajGalerie();
+    pokazKomunikat(`✓ Usunięto ${wynik.usunieto} ${wynik.usunieto === 1 ? "plik" : "pliki/plików"}.`, "sukces");
+  } catch (blad) {
+    pokazKomunikat(`Nie udało się usunąć plików: ${Produkty.escape(blad.message)}`, "blad");
+  } finally {
+    odswiezAkcjeGalerii(galeriaZaznaczone.size);
+  }
+}
+
+qs("#galeria-wgraj").addEventListener("click", () => qs("#galeria-wgraj-pliki").click());
+qs("#galeria-wgraj-pliki").addEventListener("change", async (e) => {
+  const pliki = Array.from(e.target.files || []);
+  e.target.value = ""; // ten sam plik wybrany drugi raz też ma wywołać "change"
+  await wgrajZdjecia(pliki);
+});
+qs("#usun-zdjecia").addEventListener("click", pokazPotwierdzenieUsuwania);
+qs("#usun-tak").addEventListener("click", usunZaznaczone);
+qs("#usun-nie").addEventListener("click", () => { qs("#usun-potwierdzenie").hidden = true; });
 
 qs("#galeria-katalog").addEventListener("change", (e) => {
   galeriaKatalog = e.target.value;

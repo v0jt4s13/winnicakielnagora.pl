@@ -97,6 +97,8 @@ def main() -> int:
     wsgi.request.authorization = None
     sprawdz("bez logowania: 401 na plik panelu", kod(wsgi.panel_pliki("panel.html")) == 401)
     sprawdz("bez logowania: 401 na API", kod(wsgi.panel_api("wczytaj")) == 401)
+    for akcja in ("galeria-wgraj", "galeria-usun"):
+        sprawdz(f"bez logowania: 401 na {akcja}", kod(wsgi.panel_api(akcja)) == 401)
     sprawdz("401 niesie naglowek WWW-Authenticate",
             "WWW-Authenticate" in wsgi.panel_pliki("panel.html").headers)
 
@@ -146,6 +148,35 @@ def main() -> int:
     sprawdz("zapis z właściwą wersją faktycznie zmienił plik",
             wsgi.cennik.wersja_pliku() != wersja_przed)
 
+    # Wgrywanie i usuwanie zdjec (SPEC-009) — do tymczasowego attached_assets, nie do repo.
+    import io
+    from PIL import Image
+    poprzednie_zasoby = wsgi.galeria.ZASOBY
+    wsgi.galeria.ZASOBY = KATALOG_TYMCZASOWY / "attached_assets"
+    wsgi.galeria.ZASOBY.mkdir()
+    bufor = io.BytesIO()
+    Image.new("RGB", (40, 30), "red").save(bufor, "JPEG")
+    wsgi.request.args = {"nazwa": "Butelka Nowa.jpg"}
+    wsgi.request.get_data = lambda: bufor.getvalue()
+    wsgi.request.content_length = wsgi.galeria.MAX_WGRYWANIE + 1
+    sprawdz("wgrywanie ponad limit: 413", kod(wsgi.panel_api("galeria-wgraj")) == 413)
+    wsgi.request.content_length = len(bufor.getvalue())
+    odp = wsgi.panel_api("galeria-wgraj")
+    sprawdz("wgrywanie po zalogowaniu: 200 i plik w uploads/",
+            kod(odp) == 200 and json.loads(tresc(odp))["sciezka"] == "uploads/butelka-nowa.jpg"
+            and (wsgi.galeria.ZASOBY / "uploads" / "butelka-nowa.jpg").is_file())
+    wsgi.request.get_json = lambda silent=False: {"pliki": ["uploads/butelka-nowa.jpg"]}
+    odp = wsgi.panel_api("galeria-usun")
+    sprawdz("usuwanie po zalogowaniu: 200 i plik znika",
+            kod(odp) == 200 and not (wsgi.galeria.ZASOBY / "uploads" / "butelka-nowa.jpg").exists())
+    wsgi.galeria.ZASOBY = poprzednie_zasoby
+
+    sprawdz("globalny limit żądania = limit wgrywania",
+            wsgi.app.config["MAX_CONTENT_LENGTH"] == wsgi.galeria.MAX_WGRYWANIE)
+    wsgi.request.content_length = wsgi.kontakt.MAX_CIAZAR_ZADANIA + 1
+    sprawdz("formularz kontaktowy nadal odrzuca > 16 KB (413)", kod(wsgi.formularz_kontaktowy()) == 413)
+    del wsgi.request.content_length, wsgi.request.args, wsgi.request.get_data
+
     del wsgi.request.get_json  # przywraca domyslne z klasy _Zadanie (zwraca None)
     wsgi.request.method = "GET"
 
@@ -171,6 +202,7 @@ def main() -> int:
     wsgi.PANEL_HASLO_HASH = ""
     sprawdz("brak konfiguracji: 404 na plik", kod(wsgi.panel_pliki("panel.html")) == 404)
     sprawdz("brak konfiguracji: 404 na API", kod(wsgi.panel_api("wczytaj")) == 404)
+    sprawdz("brak konfiguracji: 404 na galeria-wgraj", kod(wsgi.panel_api("galeria-wgraj")) == 404)
 
     print("\nWSZYSTKIE TESTY PRZESZLY" if bledy == 0 else f"\n{bledy} TESTOW NIE PRZESZLO")
     return 0 if bledy == 0 else 1

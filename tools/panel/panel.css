@@ -423,6 +423,28 @@ main { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 .galeria-checkbox { flex-direction: row !important; align-items: center; color: var(--tekst) !important; }
 .galeria-checkbox input { width: auto; }
 .galeria-separator { width: 1px; height: 1.8rem; background: var(--ramka); }
+
+/* Wgrywanie i usuwanie zdjęć (SPEC-009) */
+.galeria-wgrywanie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--ramka);
+  border-radius: 8px;
+}
+.galeria-wgrywanie .podpowiedz { margin: 0; }
+.galeria-potwierdzenie {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--blad);
+  font-weight: 600;
+}
+.galeria-potwierdzenie[hidden] { display: none; }
 .galeria-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
