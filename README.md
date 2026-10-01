@@ -17,6 +17,9 @@ docker run --rm -it -p 5000:5000 -v "$PWD":/app -w /app python:3.11-slim python 
 # → http://localhost:8765
 docker run --rm -it --network host -v "$PWD":/app -w /app  --user "$(id -u):$(id -g)" python:3.11-slim python tools/panel/serwer.py --port 8765
 
+# Mozliwosc dodawania zdjec w panelu > Pillow - doinstalowanie przy każdym starcie, bez budowania obraz
+docker run --rm -it --network host -v "$PWD":/app -w /app --user "$(id -u):$(id -g)" python:3.11-slim sh -c 'pip install --quiet --target /tmp/pylibs Pillow && PYTHONPATH=/tmp/pylibs python tools/panel/serwer.py --port 8765'
+
 # Testy
 python3 tools/test-contact.py
 python3 tools/test-cennik-sciezka.py

@@ -163,13 +163,15 @@ Działa bez JS; `initNoclegi()` w `main.js` podpowiada daty jutro/pojutrze i pil
 osadzalne widgety są tylko przez Affiliate Partner Centre (obcy skrypt `aff.bstatic.com`),
 Właściciel świadomie tego nie chce (2026-09-09, GUARDRAILS #6).
 
+Zrobione 2026-10-01: karuzela zdjęć pokoi (SPEC-010), prezentacja pokoi pod nagłówkiem „Zarezerwuj
+nocleg w winnicy" (karty pokoju, „Kuchnia i jadalnia", „Dla wszystkich gości", „W okolicy" z odległościami).
+
 Zostaje:
-- **Zdjęcia 3 pokoi** (w zasobach nie ma kadru pokoju — patrz #15). Po materiałach wgrać
-  3 do `attached_assets/photos/`, odkomentować rząd w karcie: `grid grid-cols-3 gap-3`
-  (**nie** `md:grid-cols-3` — nie ma w prebuilt bundlu), `alt` po polsku, `width`/`height`,
-  `loading="lazy"`.
-- **Lista udogodnień i „cena od"** — komentowane sloty w karcie `#noclegi`, wypełnia
-  Właściciel; nie wymyślać wartości.
+- **Zdjęcia pokoi** — wgrać przez panel do `attached_assets/pokoje/` (para `-thumb` + pełne; patrz SPEC-010).
+- **Dane w prezentacji pokoi są PRZYKŁADOWE** (komentarz TODO nad `.pokoje-oferta` w `index.html`):
+  powierzchnia w m², zestaw udogodnień pokoju, czy balkon jest tylko w pokoju dwuosobowym, liczba
+  pokoi w plakietce i tekst wstępny. Wypełnia Właściciel; nie wymyślać wartości.
+- **„Cena od"** — komentowany slot w karcie `#noclegi`, wypełnia Właściciel.
 - **Ręczne potwierdzenie** — Właściciel klika raz przez formularz i sprawdza, czy Booking
   honoruje `checkin` / `checkout` / `group_adults` (WebFetch nie zweryfikuje — Booking
   blokuje boty).

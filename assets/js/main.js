@@ -1212,7 +1212,7 @@ async function initPokojeKaruzela() {
     link.dataset.gallery = "pokoje";
     const zdjecie = document.createElement("img");
     zdjecie.className = "pokoje-karuzela__zdjecie";
-    zdjecie.src = `${KORZEN}${pokoj.miniatura}`;
+    zdjecie.src = `${KORZEN}${pokoj.pelne}`;
     zdjecie.alt = `Pokój: ${opisPokoju(pokoj.nazwa)}`;
     zdjecie.loading = "lazy";
     zdjecie.decoding = "async";
@@ -1225,9 +1225,25 @@ async function initPokojeKaruzela() {
     GLightbox({ selector: ".pokoje-karuzela__link" });
   }
 
+  const kropki = qs("#pokoje-karuzela-dots");
+  const krok = () => pas.children[0].offsetWidth + (parseFloat(getComputedStyle(pas).gap) || 0);
+  pokoje.forEach((_, i) => {
+    const kropka = document.createElement("button");
+    kropka.type = "button";
+    kropka.className = "pokoje-karuzela__dot" + (i === 0 ? " active" : "");
+    kropka.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
+    kropka.addEventListener("click", () => pas.scrollTo({ left: i * krok(), behavior: "smooth" }));
+    kropki?.appendChild(kropka);
+  });
+
   const strzalki = qsa("#pokoje-karuzela [data-pokoje-krok]");
   const odswiezStrzalki = () => {
     const maks = pas.scrollWidth - pas.clientWidth;
+    if (kropki) {
+      kropki.hidden = maks <= 1;
+      const aktywna = Math.round(pas.scrollLeft / krok());
+      kropki.querySelectorAll(".pokoje-karuzela__dot").forEach((k, i) => k.classList.toggle("active", i === aktywna));
+    }
     strzalki.forEach((strzalka) => {
       const wstecz = Number(strzalka.dataset.pokojeKrok) < 0;
       strzalka.hidden = maks <= 1 || (wstecz ? pas.scrollLeft <= 1 : pas.scrollLeft >= maks - 1);

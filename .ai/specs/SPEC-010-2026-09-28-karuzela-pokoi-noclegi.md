@@ -104,8 +104,15 @@ atrybutów, więc front-end używa DOM API (`setAttribute`, `textContent`), nie 
 
 ## UI/UX
 
-- Pas przewijany poziomo, `scroll-snap-type: x mandatory`; miniatury `aspect-ratio: 4/3`,
-  ~3 widoczne na desktopie, ~2 na telefonie.
+- Pas przewijany poziomo, `scroll-snap-type: x mandatory`; slajd `aspect-ratio: 3/4` jak w galerii
+  „O nas" (1 zdjęcie mobile, 2 od 640px, 3 od 1024px), `rounded-md`, hover `scale(1.04)`.
+- **Karuzela pokazuje duże zdjęcie (`pelne`), nie miniaturę** (zmiana 2026-10-01). Para `-thumb`
+  jest jednak nadal wymagana po stronie serwera (`galeria.pokoje()`) — bez niej zdjęcie nie trafi
+  do JSON-a. Zdjęcie bez `-thumb` nadal ląduje w `bez_miniatury`. Do decyzji: zdjąć to wymaganie.
+- Kropki pod pasem (`#pokoje-karuzela-dots`, klasy `.pokoje-karuzela__dot*`): jak w „O nas",
+  nadmiarowe chowane CSS-em (od 640px ostatnia, od 1024px dwie ostatnie); gdy wszystko mieści się
+  naraz, kropki są ukryte (`hidden`). Pas i strzałki siedzą w `.pokoje-karuzela__okno`, żeby kropki
+  nie przesuwały środka strzałek.
 - Strzałki ‹ › (przyciski z `aria-label`) tylko, gdy jest co przewijać; ikony `#icon-chevron-left/right`.
 - `alt` miniatury: „Pokój: {nazwa bez numeru i myślników}”.
 - Obrazy `loading="lazy"`, `decoding="async"`.
@@ -152,3 +159,6 @@ Panel przenosi tylko do **istniejącego** katalogu — bez tego kroku „pokoje�
 
 ### 2026-09-28
 - Pierwsza wersja specyfikacji.
+
+### 2026-10-01
+- Układ jak w galerii „O nas" (3:4, 1/2/3 kolumny, hover), duże zdjęcie zamiast miniatury, kropki.
