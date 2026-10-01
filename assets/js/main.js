@@ -1413,7 +1413,7 @@ async function loadGalleryFromJSON() {
     const html = items
       .map(item => `
         <a class="gallery-swiper__link" href="./${item.path}" data-glightbox="gallery" data-title="${qs0(item.title)}">
-          <img class="gallery-swiper__slide" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
+          <img class="gallery-swiper__slide rounded-md" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
         </a>
       `)
       .join("");
@@ -1475,7 +1475,7 @@ function initGallerySwiperDots() {
     dot.dataset.slide = i;
 
     if (isLastItemCta && i === itemCount - 1) {
-      dot.classList.add("gallery-swiper__dot--cta", "md:hidden");
+      dot.classList.add("gallery-swiper__dot--cta");
       dot.setAttribute("aria-label", "Przejdź do sklepu");
     } else {
       dot.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
