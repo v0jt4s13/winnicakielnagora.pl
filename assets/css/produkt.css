@@ -92,3 +92,27 @@ a.chip-link:focus-visible {
   font-weight: 600;
   color: hsl(var(--muted-foreground));
 }
+
+/* Szkielet kart sklepu — widoczny do czasu renderSklep(), potem znika razem z innerHTML kontenera.
+   Liczba kart = liczba kolumn siatki (1 mobile, 2 tablet, 3 desktop). */
+.karta-szkielet:nth-child(n+2) { display: none; }
+@media (min-width: 640px) { .karta-szkielet:nth-child(2) { display: block; } }
+@media (min-width: 1024px) { .karta-szkielet:nth-child(3) { display: block; } }
+
+.szkielet {
+  background: hsl(var(--muted));
+  animation: szkielet-puls 1.4s ease-in-out infinite;
+}
+.szkielet-zdjecie { aspect-ratio: 3 / 4; }
+.szkielet-linia { height: 1rem; border-radius: 0.25rem; margin-bottom: 0.75rem; }
+.szkielet-tytul { height: 1.75rem; width: 60%; margin-bottom: 1.25rem; }
+.szkielet-krotka { width: 70%; }
+.szkielet-cena { height: 2rem; width: 35%; margin: 1.5rem 0 0; }
+
+@keyframes szkielet-puls {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .szkielet { animation: none; }
+}

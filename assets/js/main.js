@@ -773,7 +773,10 @@ function initCart() {
 /** Wczytuje data/wina.json. Zwraca null, jeśli się nie udało — komunikat pokazuje initShop. */
 async function wczytajCennik() {
   try {
-    const odpowiedz = await fetch(`${KORZEN}data/wina.json`, { cache: "no-store" });
+    // index.html pobieranie win startuje w <head>
+    const wstepny = window.__cennikFetch;
+    window.__cennikFetch = null;
+    const odpowiedz = await (wstepny || fetch(`${KORZEN}data/wina.json`, { cache: "no-store" }));
     if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
     const dane = await odpowiedz.json();
     if (!Array.isArray(dane?.wina)) throw new Error("brak tablicy 'wina'");
@@ -806,6 +809,7 @@ function renderKategorie() {
 function komunikatSklepu(tresc) {
   const wrap = qs("#lista-produktow");
   if (!wrap) return;
+  wrap.removeAttribute("aria-busy");
   wrap.innerHTML = `
                 <p class="col-span-full text-center text-muted-foreground py-12">${tresc}</p>`;
 }
@@ -840,6 +844,7 @@ function renderSklep() {
     return false;
   }
 
+  wrap.removeAttribute("aria-busy");
   wrap.innerHTML = dostepne
     .map((wino) => Produkty.renderProductCard(wino, stawkaVat(), {
       bazaZdjec: `${KORZEN}attached_assets/photos/`,
@@ -1573,6 +1578,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initNoclegiWydarzenie();
   initPokojeKaruzela();
   initOpisWiecej();
+  // @info #kst: aby przetestowac szkielet nalezy dodac:
+  //  -  && !location.search.includes("szkielet")
+  //  - test po url: ?szkielet=1#sklep
   if (SKLEP_WLACZONY) {
     cennik = await wczytajCennik();
     renderKategorie();

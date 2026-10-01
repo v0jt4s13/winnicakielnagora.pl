@@ -13,6 +13,11 @@
     }, { once: true });
   </script>
   <script>
+    // Wczesny start pobierania cennika — main.js (defer) odbiera obietnicę w wczytajCennik().
+    window.__cennikFetch = fetch("./data/wina.json", { cache: "no-store" });
+    window.__cennikFetch.catch(() => {});
+  </script>
+  <script>
     try {
       const ageVerified = window.localStorage.getItem("winnica-age-verified") === "true";
       document.documentElement.classList.add(ageVerified ? "age-gate-verified" : "age-gate-pending");
@@ -363,7 +368,39 @@
                 <p class="text-muted-foreground">Nie znaleziono produktów spełniających kryteria filtrowania</p>
               </div>
               <!-- Karty renderuje renderSklep() z data/wina.json — patrz .ai/standards/content/wina-json.md -->
-              <div id="lista-produktow" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+              <div id="lista-produktow" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-busy="true">
+                <!-- Szkielet do czasu renderSklep(); 1 / 2 / 3 karty zależnie od szerokości -->
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
         </div>
