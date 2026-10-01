@@ -480,6 +480,12 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis w obydwu obiektach
   `themeStyles` (decyzja: kst, 2026-09-18 — usunięto motywy `modern`, `rustic`, `light`).
   Szczegóły: `.ai/standards/frontend/theming.md`.
+- **Pobieranie cennika startuje w `<head>`, przed `main.js`.** `index.html` startuje `fetch` do
+  `data/wina.json` już w `<head>` (`window.__cennikFetch`), a `wczytajCennik()` w `main.js` odbiera tę
+  obietnicę zamiast tworzyć nowe zapytanie (podstrony `wina/*.html` jej nie mają i robią zwykły `fetch`).
+  Do czasu `renderSklep()` w `#lista-produktow` stoi szkielet kart (`.karta-szkielet`, style w
+  `produkt.css`, 1 / 2 / 3 karty zależnie od szerokości) — znika razem z `innerHTML` kontenera.
+  Zmieniając układ siatki sklepu, popraw też szkielet i zachowaj `cache: "no-store"`.
 - **Motyw zależny od pory dnia nie może żyć w inicjalizatorze hero.** Podstrony `wina/*.html`
   nie mają `#hero-image`, ale nadal muszą dostać nocny `dark`. Logikę ogólnowitrynową trzymaj
   w osobnym `initTimeTheme()`, a `initHeroImage()` niech odpowiada wyłącznie za obraz.
@@ -526,11 +532,12 @@ treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa 
 |------|-------|
 | Serwowanie plików | `wsgi.py` — catch-all `serve()` z białą listą `PLIKI_PUBLICZNE` / `KATALOGI_PUBLICZNE`; nieznany adres to **404**, nie strona główna |
 | Endpointy | `wsgi.py` — `/zdrowie`, `/data/wina.json`, `/data/wydarzenia.json` (tylko wpisy aktywne dziś), `/api/contact`, `/api/contact/challenge`, `/tools/panel/api/<akcja>` za hasłem |
-| Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `kontakt` |
+| Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `noclegi`, `kontakt` |
 | Dane produktów (zamiast bazy) | `data/wina.json` — jedyne źródło asortymentu i cen; `index.html` NIE zawiera kart, renderuje je `renderSklep()` w `main.js`. Reguły: `.ai/standards/content/wina-json.md` |
 | Wydarzenia | `data/wydarzenia.json` + `wydarzenia.py` (walidacja, `aktywne()`); render `initWydarzenia()` w `main.js`, kontener `#lista-wydarzen` w sekcji `#wydarzenia` |
 | Panel redakcyjny | `tools/panel/` — lokalnie `serwer.py` na `127.0.0.1` bez hasła, na produkcji `wsgi.py` za Basic Auth (`PANEL_UZYTKOWNIK`, `PANEL_HASLO_HASH`) |
 | Testy | `tools/test-*.py` — routing, wydarzenia, ścieżka cennika, uwierzytelnianie panelu, serwowanie na prawdziwym Flasku |
+| Noclegi | `index.html` `#noclegi`: karuzela `#pokoje-karuzela` (SPEC-010, `initPokojeKaruzela()`), potem `.pokoje-oferta` — karty pokoju, „Kuchnia i jadalnia", „Dla wszystkich gości", „W okolicy" i formularz Booking. Style: `.pokoje-*` / `.pokoj-*` w `custom.css`. Wartości w prezentacji pokoi są przykładowe — patrz `TODO.md` #37 |
 | Ikony | `<symbol id="icon-…">` w ukrytym `<svg>` na początku `<body>`, użycie `<use href="#icon-…">` — `grep -n '<symbol' index.html` |
 | Koszyk | `assets/js/main.js` — stan w `const cart = new Map()`, render w `renderCart`, zdarzenia w `initCart` (`grep -n 'function initCart' assets/js/main.js`) |
 | Motywy | `assets/js/main.js` — obiekt `themeStyles` na górze pliku + `setTheme` / `initStyleSwitcher` |

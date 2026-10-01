@@ -50,6 +50,9 @@ Karuzela w karcie rezerwacji bierze pary z `attached_assets/pokoje/`: `{nazwa}-t
 w karuzeli — `/data/pokoje.json` wypisze je w `bez_miniatury`. Usuwanie działa tylko
 w `uploads/`, więc zdjęcie pokoju do skasowania najpierw przenieś z powrotem do `uploads`.
 
+Karuzela na stronie pokazuje dziś **duże** zdjęcie, nie miniaturę, ale para `-thumb` nadal jest
+wymagana, żeby zdjęcie trafiło do karuzeli (patrz SPEC-010).
+
 ## Czego panel nie robi
 
 - **Nie publikuje.** Po zapisie zmiany są tylko na dysku. Trzeba zrobić commit i wdrożenie.

@@ -157,8 +157,12 @@ function initGalleryGlightbox()          // GLightbox modal do przeglądania w p
 8. `initGalleryGlightbox()` — rejestracja modal zdjęć
 
 **Carousel CSS** (`assets/css/custom-kst.css`):
-- `aspect-ratio: 8/9` (mobile — jedno zdjęcie)
-- `aspect-ratio: 16/9` (desktop ≥768px — dwa zdjęcia obok siebie)
+- slajd `aspect-ratio: 3/4` (jak karty win; wysokość wynika ze slajdu, nie z kontenera)
+- kolumny: 1 zdjęcie (mobile), 2 (≥640px), 3 (≥1024px) — te same progi co siatka sklepu
+- kropki: tyle co slajdów, ale przy N widocznych naraz nadmiarowe z końca chowa CSS
+  (od 640px ostatnia, od 1024px dwie ostatnie)
+- zdjęcia `rounded-md`, hover powiększa zdjęcie o 4% (`scale(1.04)`; link przycina brzegi,
+  wyłączone przy `prefers-reduced-motion`)
 - `scroll-snap-type: x mandatory` — smooth scroll
 - `gap: 1rem` — padding między zdjęciami
 - Padding `1rem` dookoła (responsywny na mobilach)
@@ -303,3 +307,7 @@ python3 tools/test-routing.py          # routing + publiczne pliki
 - Dodana automatyczna synchronizacja z główną galerią (copy images with suffix)
 - Implementacja detekcji konfliktów i wersjonowania pliku
 - Auto-zapis JSON po dodaniu zdjęć (umożliwia bezpieczne cofnięcie zmian)
+
+### 2026-10-01
+- Układ galerii „O nas": slajdy 3:4, kolumny 1 / 2 / 3 (mobile / ≥640px / ≥1024px) zamiast 8:9 i 16:9;
+  `rounded-md`; powiększenie zdjęcia po najechaniu; chowanie nadmiarowych kropek.

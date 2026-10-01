@@ -773,7 +773,10 @@ function initCart() {
 /** Wczytuje data/wina.json. Zwraca null, jeśli się nie udało — komunikat pokazuje initShop. */
 async function wczytajCennik() {
   try {
-    const odpowiedz = await fetch(`${KORZEN}data/wina.json`, { cache: "no-store" });
+    // index.html pobieranie win startuje w <head>
+    const wstepny = window.__cennikFetch;
+    window.__cennikFetch = null;
+    const odpowiedz = await (wstepny || fetch(`${KORZEN}data/wina.json`, { cache: "no-store" }));
     if (!odpowiedz.ok) throw new Error(`HTTP ${odpowiedz.status}`);
     const dane = await odpowiedz.json();
     if (!Array.isArray(dane?.wina)) throw new Error("brak tablicy 'wina'");
@@ -806,6 +809,7 @@ function renderKategorie() {
 function komunikatSklepu(tresc) {
   const wrap = qs("#lista-produktow");
   if (!wrap) return;
+  wrap.removeAttribute("aria-busy");
   wrap.innerHTML = `
                 <p class="col-span-full text-center text-muted-foreground py-12">${tresc}</p>`;
 }
@@ -840,6 +844,7 @@ function renderSklep() {
     return false;
   }
 
+  wrap.removeAttribute("aria-busy");
   wrap.innerHTML = dostepne
     .map((wino) => Produkty.renderProductCard(wino, stawkaVat(), {
       bazaZdjec: `${KORZEN}attached_assets/photos/`,
@@ -1207,7 +1212,7 @@ async function initPokojeKaruzela() {
     link.dataset.gallery = "pokoje";
     const zdjecie = document.createElement("img");
     zdjecie.className = "pokoje-karuzela__zdjecie";
-    zdjecie.src = `${KORZEN}${pokoj.miniatura}`;
+    zdjecie.src = `${KORZEN}${pokoj.pelne}`;
     zdjecie.alt = `Pokój: ${opisPokoju(pokoj.nazwa)}`;
     zdjecie.loading = "lazy";
     zdjecie.decoding = "async";
@@ -1220,9 +1225,25 @@ async function initPokojeKaruzela() {
     GLightbox({ selector: ".pokoje-karuzela__link" });
   }
 
+  const kropki = qs("#pokoje-karuzela-dots");
+  const krok = () => pas.children[0].offsetWidth + (parseFloat(getComputedStyle(pas).gap) || 0);
+  pokoje.forEach((_, i) => {
+    const kropka = document.createElement("button");
+    kropka.type = "button";
+    kropka.className = "pokoje-karuzela__dot" + (i === 0 ? " active" : "");
+    kropka.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
+    kropka.addEventListener("click", () => pas.scrollTo({ left: i * krok(), behavior: "smooth" }));
+    kropki?.appendChild(kropka);
+  });
+
   const strzalki = qsa("#pokoje-karuzela [data-pokoje-krok]");
   const odswiezStrzalki = () => {
     const maks = pas.scrollWidth - pas.clientWidth;
+    if (kropki) {
+      kropki.hidden = maks <= 1;
+      const aktywna = Math.round(pas.scrollLeft / krok());
+      kropki.querySelectorAll(".pokoje-karuzela__dot").forEach((k, i) => k.classList.toggle("active", i === aktywna));
+    }
     strzalki.forEach((strzalka) => {
       const wstecz = Number(strzalka.dataset.pokojeKrok) < 0;
       strzalka.hidden = maks <= 1 || (wstecz ? pas.scrollLeft <= 1 : pas.scrollLeft >= maks - 1);
@@ -1408,7 +1429,7 @@ async function loadGalleryFromJSON() {
     const html = items
       .map(item => `
         <a class="gallery-swiper__link" href="./${item.path}" data-glightbox="gallery" data-title="${qs0(item.title)}">
-          <img class="gallery-swiper__slide" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
+          <img class="gallery-swiper__slide rounded-md" src="./${item.path}" alt="${qs0(item.alt)}" loading="lazy">
         </a>
       `)
       .join("");
@@ -1470,7 +1491,7 @@ function initGallerySwiperDots() {
     dot.dataset.slide = i;
 
     if (isLastItemCta && i === itemCount - 1) {
-      dot.classList.add("gallery-swiper__dot--cta", "md:hidden");
+      dot.classList.add("gallery-swiper__dot--cta");
       dot.setAttribute("aria-label", "Przejdź do sklepu");
     } else {
       dot.setAttribute("aria-label", `Zdjęcie ${i + 1}`);
@@ -1573,6 +1594,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initNoclegiWydarzenie();
   initPokojeKaruzela();
   initOpisWiecej();
+  // @info #kst: aby przetestowac szkielet nalezy dodac:
+  //  -  && !location.search.includes("szkielet")
+  //  - test po url: ?szkielet=1#sklep
   if (SKLEP_WLACZONY) {
     cennik = await wczytajCennik();
     renderKategorie();

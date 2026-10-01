@@ -13,6 +13,11 @@
     }, { once: true });
   </script>
   <script>
+    // Wczesny start pobierania cennika — main.js (defer) odbiera obietnicę w wczytajCennik().
+    window.__cennikFetch = fetch("./data/wina.json", { cache: "no-store" });
+    window.__cennikFetch.catch(() => {});
+  </script>
+  <script>
     try {
       const ageVerified = window.localStorage.getItem("winnica-age-verified") === "true";
       document.documentElement.classList.add(ageVerified ? "age-gate-verified" : "age-gate-pending");
@@ -141,12 +146,6 @@
     <symbol id="icon-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect width="18" height="18" x="3" y="3" rx="2"></rect>
     </symbol>
-    <symbol id="icon-sprout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M7 20h10"></path>
-      <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
-      <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"></path>
-      <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"></path>
-    </symbol>
     <symbol id="icon-magnifying-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8"></circle>
       <path d="m21 21-4.35-4.35"></path>
@@ -156,6 +155,83 @@
     </symbol>
     <symbol id="icon-chevron-right" viewBox="0 0 477.175 477.175">
       <path d="M360.731,229.075l-225.1-225.1c-5.3-5.3-13.8-5.3-19.1,0s-5.3,13.8,0,19.1l215.5,215.5l-215.5,215.5c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4c3.4,0,6.9-1.3,9.5-4l225.1-225.1C365.931,242.875,365.931,234.275,360.731,229.075z" fill="currentColor"></path>
+    </symbol>
+    <symbol id="icon-wifi" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M14.25 18.75a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0m1.5 0a3.75 3.75 0 1 0-7.5 0 3.75 3.75 0 0 0 7.5 0m2.08-5.833a8.25 8.25 0 0 0-11.666 0 .75.75 0 0 0 1.06 1.06 6.75 6.75 0 0 1 9.546 0 .75.75 0 0 0 1.06-1.06m3.185-3.182c-4.979-4.98-13.051-4.98-18.03 0a.75.75 0 1 0 1.06 1.06c4.394-4.393 11.516-4.393 15.91 0a.75.75 0 1 0 1.06-1.06m2.746-3.603C17.136-.043 6.864-.043.24 6.132A.75.75 0 1 0 1.26 7.23c6.05-5.638 15.429-5.638 21.478 0a.75.75 0 0 0 1.022-1.098z"></path>
+    </symbol>
+    <symbol id="icon-bath" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M15.375 10.875a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0zm1.5 0a3.375 3.375 0 1 0-6.75 0 3.375 3.375 0 0 0 6.75 0zm.375 12.375V18.7l-.667.745C20.748 18.98 24 15.925 24 10.5a2.25 2.25 0 0 0-4.5 0c0 1.945-.609 3.154-1.64 3.848a3.973 3.973 0 0 1-2.132.652H9a3.75 3.75 0 1 0 0 7.5h3a2.25 2.25 0 0 0 0-4.5H9a.75.75 0 0 0 0 1.5h3a.75.75 0 0 1 0 1.5H9a2.25 2.25 0 0 1 0-4.5h6.74a5.426 5.426 0 0 0 2.957-.908C20.154 14.613 21 12.932 21 10.5a.75.75 0 0 1 1.5 0c0 4.6-2.628 7.069-6.083 7.455a.75.75 0 0 0-.667.745v4.55a.75.75 0 0 0 1.5 0zm-7.5-1.5v1.5a.75.75 0 0 0 1.5 0v-1.5a.75.75 0 0 0-1.5 0zM.75 1.5h1.5l-.53-.22 1.402 1.402a.75.75 0 0 0 1.06-1.06L2.78.22A.75.75 0 0 0 2.25 0H.75a.75.75 0 1 0 0 1.5zm2.983 3.754a.01.01 0 0 1 .016.002c-.542-1.072-.1-2.426 1.008-2.988a2.25 2.25 0 0 1 2.037 0c-.041-.022-.043-.029-.04-.034l.002-.002-3.013 3.012zm1.07 1.05l3.002-3A1.489 1.489 0 0 0 7.51.951 3.766 3.766 0 0 0 4.079.929 3.75 3.75 0 0 0 2.43 5.971a1.49 1.49 0 0 0 2.382.323zm3.408-.968l1.116.62a.75.75 0 1 0 .728-1.312l-1.116-.62a.75.75 0 1 0-.728 1.312zm1.964-2.233l1.615.44a.75.75 0 1 0 .394-1.448l-1.615-.44a.75.75 0 1 0-.394 1.448zm4.217 1.15l1.615.44a.75.75 0 0 0 .396-1.447l-1.615-.44a.75.75 0 0 0-.396 1.447zM5.697 7.388l.577 1.038a.75.75 0 1 0 1.312-.728L7.009 6.66a.75.75 0 1 0-1.312.728zM3.284 8.94l.44 1.615a.75.75 0 1 0 1.448-.394l-.44-1.615a.75.75 0 1 0-1.448.394zm1.15 4.219l.246.896a.75.75 0 1 0 1.446-.396l-.245-.896a.75.75 0 1 0-1.446.396z"></path>
+    </symbol>
+    <symbol id="icon-area" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3.75 23.25V7.5a.75.75 0 0 0-1.5 0v15.75a.75.75 0 0 0 1.5 0zM.22 21.53l2.25 2.25a.75.75 0 0 0 1.06 0l2.25-2.25a.75.75 0 1 0-1.06-1.06l-2.25 2.25h1.06l-2.25-2.25a.75.75 0 0 0-1.06 1.06zM5.78 9.22L3.53 6.97a.75.75 0 0 0-1.06 0L.22 9.22a.75.75 0 1 0 1.06 1.06l2.25-2.25H2.47l2.25 2.25a.75.75 0 1 0 1.06-1.06zM7.5 3.75h15.75a.75.75 0 0 0 0-1.5H7.5a.75.75 0 0 0 0 1.5zM9.22.22L6.97 2.47a.75.75 0 0 0 0 1.06l2.25 2.25a.75.75 0 1 0 1.06-1.06L8.03 2.47v1.06l2.25-2.25A.75.75 0 1 0 9.22.22zm12.31 5.56l2.25-2.25a.75.75 0 0 0 0-1.06L21.53.22a.75.75 0 1 0-1.06 1.06l2.25 2.25V2.47l-2.25 2.25a.75.75 0 0 0 1.06 1.06zM10.5 13.05v7.2a2.25 2.25 0 0 0 2.25 2.25h6A2.25 2.25 0 0 0 21 20.25v-7.2a.75.75 0 0 0-1.5 0v7.2a.75.75 0 0 1-.75.75h-6a.75.75 0 0 1-.75-.75v-7.2a.75.75 0 0 0-1.5 0zm13.252 2.143l-6.497-5.85a2.25 2.25 0 0 0-3.01 0l-6.497 5.85a.75.75 0 0 0 1.004 1.114l6.497-5.85a.75.75 0 0 1 1.002 0l6.497 5.85a.75.75 0 0 0 1.004-1.114z"></path>
+    </symbol>
+    <symbol id="icon-snowflake" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M11.25.75v7.5a.75.75 0 0 0 1.5 0V.75a.75.75 0 0 0-1.5 0m4.031.914-3.75 3h.938l-3.75-3a.75.75 0 1 0-.938 1.172l3.75 3a.75.75 0 0 0 .938 0l3.75-3a.75.75 0 1 0-.938-1.172M1.883 7.024l6.495 3.75a.75.75 0 0 0 .75-1.299l-6.495-3.75a.75.75 0 1 0-.75 1.3zM4.69 3.99l.723 4.748.468-.812-4.473 1.748a.75.75 0 0 0 .546 1.398l4.473-1.748a.75.75 0 0 0 .468-.812l-.723-4.748a.75.75 0 1 0-1.482.226M2.632 18.274l6.495-3.75a.75.75 0 1 0-.75-1.298l-6.495 3.75a.75.75 0 1 0 .75 1.299zm-1.224-3.948 4.473 1.748-.468-.812-.723 4.748a.75.75 0 0 0 1.482.226l.723-4.748a.75.75 0 0 0-.468-.812l-4.473-1.748a.75.75 0 0 0-.546 1.398M12.75 23.25v-7.5a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 0 1.5 0m-4.031-.914 3.75-3h-.938l3.75 3a.75.75 0 0 0 .937-1.172l-3.75-3a.75.75 0 0 0-.937 0l-3.75 3a.75.75 0 0 0 .938 1.172m13.399-5.36-6.495-3.75a.75.75 0 0 0-.75 1.298l6.495 3.75a.75.75 0 0 0 .75-1.299zm-2.807 3.034-.724-4.748-.468.812 4.473-1.748a.75.75 0 0 0-.546-1.398l-4.473 1.748a.75.75 0 0 0-.468.812l.723 4.748a.75.75 0 0 0 1.483-.226m2.057-14.285-6.495 3.75a.75.75 0 0 0 .75 1.3l6.495-3.75a.75.75 0 0 0-.75-1.3m1.224 3.95-4.473-1.749.468.812.724-4.748a.75.75 0 0 0-1.483-.226l-.723 4.748a.75.75 0 0 0 .468.812l4.473 1.748a.75.75 0 0 0 .546-1.398zM11.625 7.6 8.377 9.475a.75.75 0 0 0-.375.65v3.75a.75.75 0 0 0 .375.65l3.248 1.874a.75.75 0 0 0 .75 0l3.248-1.875a.75.75 0 0 0 .375-.649v-3.75a.75.75 0 0 0-.375-.65L12.375 7.6a.75.75 0 0 0-.75 0m.75 1.3h-.75l3.248 1.874-.375-.649v3.75l.375-.65-3.248 1.876h.75l-3.248-1.876.375.65v-3.75l-.375.65z"></path>
+    </symbol>
+    <symbol id="icon-tv" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.5 10.375v6.5a.25.25 0 0 1-.25.25H1.75a.25.25 0 0 1-.25-.25v-13a.25.25 0 0 1 .25-.25h20.5a.25.25 0 0 1 .25.25v6.5zm1.5 0v-6.5a1.75 1.75 0 0 0-1.75-1.75H1.75A1.75 1.75 0 0 0 0 3.875v13c0 .966.784 1.75 1.75 1.75h20.5a1.75 1.75 0 0 0 1.75-1.75v-6.5zm-16.5 12h9a.75.75 0 0 0 0-1.5h-9a.75.75 0 0 0 0 1.5zm3.75-4.5v3.75a.75.75 0 0 0 1.5 0v-3.75a.75.75 0 0 0-1.5 0z"></path>
+    </symbol>
+    <symbol id="icon-coffee" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M.75 24h22.5a.75.75 0 0 0 0-1.5H.75a.75.75 0 0 0 0 1.5zM24 2.25A2.25 2.25 0 0 0 21.75 0H4.5a2.25 2.25 0 0 0-2.25 2.25v6A2.25 2.25 0 0 0 4.5 10.5H12a.75.75 0 0 1 .75.75v12c0 .414.336.75.75.75h9.75a.75.75 0 0 0 .75-.75v-21zm-1.5 0v21l.75-.75H13.5l.75.75v-12A2.25 2.25 0 0 0 12 9H4.5a.75.75 0 0 1-.75-.75v-6a.75.75 0 0 1 .75-.75h17.25a.75.75 0 0 1 .75.75zM18.75 24h4.5a.75.75 0 0 0 .75-.75v-10.5a.75.75 0 0 0-.75-.75h-3A2.25 2.25 0 0 0 18 14.25v9c0 .414.336.75.75.75zm0-1.5l.75.75v-9a.75.75 0 0 1 .75-.75h3l-.75-.75v10.5l.75-.75h-4.5zM6 9.75v3a.75.75 0 0 0 1.5 0v-3a.75.75 0 0 0-1.5 0zm2.25-4.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0zm1.5 0a2.25 2.25 0 1 0-4.5 0 2.25 2.25 0 0 0 4.5 0zm13.5-.75h-4.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5zm0 3h-4.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5zM2.344 18c0 .866.012 1.295.069 1.833C2.69 22.437 4.003 24 6.844 24c2.234 0 3.38-1.189 3.977-3.297.057-.203.11-.411.168-.66l.136-.599c.029-.126.054-.228.077-.32a1.5 1.5 0 0 0-1.454-1.874H3.094a.75.75 0 0 0-.75.75zm1.5 0l-.75.75h6.655c-.027.107-.054.22-.086.357l-.135.595c-.053.229-.1.415-.15.592-.434 1.53-1.085 2.206-2.534 2.206-1.97 0-2.736-.912-2.94-2.825-.05-.47-.06-.861-.06-1.675zm-.75-.75a3 3 0 0 0-3 3 .75.75 0 0 0 1.5 0 1.5 1.5 0 0 1 1.5-1.5.75.75 0 0 0 0-1.5z"></path>
+    </symbol>
+    <symbol id="icon-terrace" viewBox="0 0 24 24" fill="currentColor">
+      <path d="m.768 11.413 1.5 6.75a.75.75 0 0 0 1.464-.326l-1.5-6.75a.75.75 0 0 0-1.464.326M2.22 23.456l1.5-5.25-.72.544h3a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 0 1.5 0V19.5A2.25 2.25 0 0 0 6 17.25H3a.75.75 0 0 0-.721.544l-1.5 5.25a.75.75 0 1 0 1.442.412zm19.547-12.369-1.5 6.75a.75.75 0 1 0 1.464.326l1.5-6.75a.75.75 0 1 0-1.464-.326m1.453 11.957-1.5-5.25a.75.75 0 0 0-.72-.544h-3a2.25 2.25 0 0 0-2.25 2.25v3.75a.75.75 0 0 0 1.5 0V19.5a.75.75 0 0 1 .75-.75h3l-.721-.544 1.5 5.25a.75.75 0 1 0 1.442-.412zM11.25 6.75v16.5a.75.75 0 0 0 1.5 0V6.75a.75.75 0 0 0-1.5 0m-4.5 7.5h10.5a.75.75 0 0 0 0-1.5H6.75a.75.75 0 0 0 0 1.5M1.5 6l10.064-4.37c.297-.161.575-.161.803-.033l10.178 4.425L22.5 6zm0 1.5h21a1.5 1.5 0 0 0 .689-2.832L13.034.255c-.616-.35-1.452-.35-2.136.034L.858 4.646c-.544.28-.856.792-.857 1.352A1.5 1.5 0 0 0 1.499 7.5z"></path>
+    </symbol>
+    <symbol id="icon-bed-double" viewBox="0 -960 960 960" fill="currentColor">
+      <path d="M176-200h-30.3L126-280H80v-214q0-25.9 17-43.95Q114-556 140-556h26v-144q0-24.75 17.63-42.38Q201.25-760 226-760h507q24.75 0 42.38 17.62Q793-724.75 793-700v144h27q24.75 0 42.38 17.62Q880-520.75 880-496v216h-46l-19.78 80h-30.44L764-280H197l-21 80Zm334-356h223v-144H510v144Zm-284 0h224v-144H226v144Zm-86 216h680v-156H140v156Zm680 0H140h680Z"></path>
+    </symbol>
+    <symbol id="icon-parking" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.5 12c0 5.799-4.701 10.5-10.5 10.5S1.5 17.799 1.5 12 6.201 1.5 12 1.5 22.5 6.201 22.5 12m1.5 0c0-6.627-5.373-12-12-12S0 5.373 0 12s5.373 12 12 12 12-5.373 12-12m-9.75-1.5a1.5 1.5 0 0 1-1.5 1.5H10.5l.75.75v-4.5L10.5 9h2.25a1.5 1.5 0 0 1 1.5 1.5m1.5 0a3 3 0 0 0-3-3H10.5a.75.75 0 0 0-.75.75v4.5c0 .414.336.75.75.75h2.25a3 3 0 0 0 3-3m-4.5 6.75v-4.5a.75.75 0 0 0-1.5 0v4.5a.75.75 0 0 0 1.5 0"></path>
+    </symbol>
+    <symbol id="icon-kite" viewBox="0 0 24 24" fill="currentColor">
+      <path d="m16.25 15.862-5.491-8.964c-.009-.013-.009-.014-.008-.014l5.526-5.41c-.025.024-.025.024-.024.025l5.474 5.36.026.026-5.511 8.992zm1.27.799 5.504-8.979a1.5 1.5 0 0 0-.273-1.918L17.277.404c-.595-.533-1.455-.533-2.024-.025L9.727 5.79c-.525.466-.638 1.284-.24 1.906l5.492 8.966a1.5 1.5 0 0 0 2.532.015zM10.01 7.5h12.48a.75.75 0 0 0 0-1.5H10.01a.75.75 0 0 0 0 1.5M1.78 23.78l1.982-1.982a4.39 4.39 0 0 1 4.92-.891 5.89 5.89 0 0 0 7.951-3.294l.305-.702a.8.8 0 0 0 .062-.298V.75a.75.75 0 0 0-1.5 0v15.863l.062-.298-.32.737a4.39 4.39 0 0 1-5.94 2.49 5.89 5.89 0 0 0-6.6 1.196L.72 22.72a.75.75 0 1 0 1.06 1.06"></path>
+    </symbol>
+    <symbol id="icon-grill" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.633 9.75a.384.384 0 0 1 .38.457c-.726 3.298-4.007 5.394-7.324 4.664a6.15 6.15 0 0 1-4.684-4.683.379.379 0 0 1 .384-.438h11.236zm-.008-1.5H6.4a1.882 1.882 0 0 0-1.863 2.243 7.65 7.65 0 0 0 14.945.018 1.884 1.884 0 0 0-1.865-2.26zm2.58 14.742l-3.268-8.923a.75.75 0 0 0-1.408.516l3.267 8.923a.75.75 0 0 0 1.408-.516zm-15 .516l3.266-8.923a.75.75 0 0 0-1.408-.516l-3.267 8.923a.75.75 0 0 0 1.408.516zM18.401 19.5H5.598a.75.75 0 0 0 0 1.5h12.804a.75.75 0 0 0 0-1.5zM6.321.299l-.62.823a2.333 2.333 0 0 0 .364 3.204.835.835 0 0 1 .126 1.146l-.166.221a.75.75 0 1 0 1.2.9l.162-.216c.754-.987.597-2.4-.36-3.202a.834.834 0 0 1-.13-1.147l.622-.827A.75.75 0 0 0 6.321.3zM11.956.3l-.617.823c-.754.987-.597 2.4.36 3.202.344.287.4.792.129 1.147l-.166.221a.75.75 0 1 0 1.2.9l.162-.216a2.332 2.332 0 0 0-.362-3.202.835.835 0 0 1-.127-1.147l.621-.828a.75.75 0 1 0-1.2-.9zm5.25 0l-.617.823c-.754.987-.597 2.4.36 3.202.344.287.4.792.129 1.147l-.166.221a.75.75 0 1 0 1.2.9l.162-.216a2.332 2.332 0 0 0-.362-3.202.835.835 0 0 1-.127-1.147l.621-.828a.75.75 0 1 0-1.2-.9z"></path>
+    </symbol>
+    <symbol id="icon-foosball" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11.05 5.9 8.37 6.8l.38 5.5h.69l.82 6.6h-.63v3.7h4.74v-3.7h-.63l.82-6.6h.69l.38-5.5-2.68-.9A2.3 2.3 0 1 0 11.05 5.9z"></path>
+      <path d="M8.4 8.2H1.2V10h7.2"></path>
+      <path d="M15.6 8.2h7.2V10h-7.2"></path>
+    </symbol>
+    <symbol id="icon-oven" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M2.25 2.25h19.5L21 1.5v21l.75-.75H2.25l.75.75v-21l-.75.75zm0-1.5a.75.75 0 0 0-.75.75v21c0 .414.336.75.75.75h19.5a.75.75 0 0 0 .75-.75v-21a.75.75 0 0 0-.75-.75H2.25zm-1.5 1.5h22.5a.75.75 0 0 0 0-1.5H.75a.75.75 0 0 0 0 1.5zm0 21h22.5a.75.75 0 0 0 0-1.5H.75a.75.75 0 0 0 0 1.5zM18 15v3.539a.211.211 0 0 1-.211.211H6.211A.211.211 0 0 1 6 18.539v-7.078c0-.117.094-.211.211-.211h11.578c.116 0 .211.095.211.211V15zm1.5 0v-3.539a1.71 1.71 0 0 0-1.711-1.711H6.211c-.945 0-1.711.766-1.711 1.711v7.078c0 .945.766 1.711 1.711 1.711h11.578a1.71 1.71 0 0 0 1.711-1.711V15zM9 14.25h6a.75.75 0 0 0 0-1.5H9a.75.75 0 0 0 0 1.5zM5.25 4.875a.375.375 0 1 1 0-.75.375.375 0 0 1 0 .75.75.75 0 0 0 0-1.5 1.125 1.125 0 1 0 0 2.25 1.125 1.125 0 0 0 0-2.25.75.75 0 0 0 0 1.5zm3 0a.375.375 0 1 1 0-.75.375.375 0 0 1 0 .75.75.75 0 0 0 0-1.5 1.125 1.125 0 1 0 0 2.25 1.125 1.125 0 0 0 0-2.25.75.75 0 0 0 0 1.5zm-6 3.375h19.5a.75.75 0 0 0 0-1.5H2.25a.75.75 0 0 0 0 1.5zm11.25-3h5.25a.75.75 0 0 0 0-1.5H13.5a.75.75 0 0 0 0 1.5z"></path>
+    </symbol>
+    <symbol id="icon-dishwasher" viewBox="0 0 128 128" fill="currentColor">
+      <path d="M108 0H20C13.37 0 8 5.37 8 12v104c0 6.63 5.37 12 12 12h88c6.63 0 12-5.37 12-12V12c0-6.63-5.37-12-12-12ZM20 8h88c2.21 0 4 1.79 4 4v20H16V12c0-2.21 1.79-4 4-4Zm88 112H20c-2.21 0-4-1.79-4-3.99V40h96v76c0 1.06-.42 2.08-1.17 2.83S109.06 120 108 120ZM28 24h16c2.21 0 4-1.79 4-4s-1.79-4-4-4H28c-2.21 0-4 1.79-4 4s1.79 4 4 4Zm25.78 34.33H31.56a6.119 6.119 0 0 0-6.23 6v4c0 7.55 5.7 13.88 13.34 15.56v4.44h-.5c-2.21 0-4 1.79-4 4s1.79 4 4 4h8.89c2.21 0 4-1.79 4-4s-1.79-4-4-4h-.39v-4.44C54.3 82.21 60 75.88 60 68.33v-4c-.07-3.37-2.85-6.06-6.22-6Zm-1.78 10c0 4.41-4.19 8-9.33 8s-9.34-3.59-9.34-8v-2H52v2Zm30.67-11c-11.05 0-20 8.95-20 20s8.95 20 20 20 20-8.95 20-20-8.95-20-20-20Zm0 32c-6.63 0-12-5.37-12-12s5.37-12 12-12 12 5.37 12 12-5.37 12-12 12ZM96 26c3.31 0 6-2.69 6-6s-2.69-6-6-6-6 2.69-6 6 2.69 6 6 6Zm-24 0c3.31 0 6-2.69 6-6s-2.69-6-6-6-6 2.69-6 6 2.69 6 6 6Z"></path>
+    </symbol>
+    <symbol id="icon-garden-view" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5.361 6.625a6.75 6.75 0 0 0 7.413 6.721 6.93 6.93 0 0 0 6.087-6.988V2.125a1.5 1.5 0 0 0-2.4-1.2l-1.8 1.35h.9L13.461.7c-.8-.6-1.9-.6-2.7 0l-2.1 1.575h.9l-1.8-1.35a1.5 1.5 0 0 0-2.4 1.2zm1.5 0v-4.5l1.8 1.35c.267.2.633.2.9 0l2.1-1.575a.75.75 0 0 1 .9 0l2.1 1.575c.267.2.633.2.9 0l1.8-1.35V6.37a5.43 5.43 0 0 1-4.754 5.486 5.25 5.25 0 0 1-5.746-5.23zm4.5 6v10.5a.75.75 0 0 0 1.5 0v-10.5a.75.75 0 0 0-1.5 0m-5.359 3.811c1.473.285 2.458 1.077 2.374 1.51-.084.432-1.292.801-2.765.516-1.473-.284-2.458-1.076-2.374-1.51.084-.432 1.292-.8 2.765-.516m.285-1.473c-2.179-.42-4.233.206-4.523 1.705s1.383 2.846 3.562 3.267 4.233-.205 4.523-1.705-1.383-2.846-3.562-3.267m14.699 2.09c.084.434-.9 1.226-2.374 1.51-1.473.285-2.681-.084-2.765-.516-.084-.433.9-1.226 2.374-1.51 1.473-.285 2.681.084 2.765.517zm1.473-.284c-.29-1.5-2.344-2.126-4.523-1.705s-3.851 1.767-3.562 3.267 2.344 2.126 4.523 1.705 3.852-1.767 3.562-3.267"></path>
+    </symbol>
+    <symbol id="icon-no-smoking" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.5 9h2.25a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-.75.75h-7.5a.75.75 0 0 0 0 1.5h7.5A2.25 2.25 0 0 0 24 12.75v-3a2.25 2.25 0 0 0-2.25-2.25H19.5a.75.75 0 0 0 0 1.5M5.25 13.5h-1.5l.75.75v-6L3.75 9h7.5a.75.75 0 0 0 0-1.5h-7.5a.75.75 0 0 0-.75.75v6c0 .414.336.75.75.75h1.5a.75.75 0 0 0 0-1.5M15 12v2.25a.75.75 0 0 0 1.5 0V12a.75.75 0 0 0-1.5 0M0 8.25v6a.75.75 0 0 0 1.5 0v-6a.75.75 0 0 0-1.5 0m1.28 15.53 22.5-22.5A.75.75 0 0 0 22.72.22L.22 22.72a.75.75 0 1 0 1.06 1.06M4.5.75A2.25 2.25 0 0 1 2.25 3 2.25 2.25 0 0 0 0 5.25a.75.75 0 0 0 1.5 0 .75.75 0 0 1 .75-.75A3.75 3.75 0 0 0 6 .75a.75.75 0 0 0-1.5 0"></path>
+    </symbol>
+    <symbol id="icon-okolica-park" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 20h10"></path>
+      <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
+      <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"></path>
+      <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"></path>
+    </symbol>
+    <symbol id="icon-okolica-trasa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </symbol>
+    <symbol id="icon-okolica-sklep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+      <path d="M3 6h18"></path>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </symbol>
+    <symbol id="icon-okolica-lotnisko" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path>
+    </symbol>
+    <symbol id="icon-fridge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="2" width="12" height="20" rx="2"></rect>
+      <path d="M6 10h12"></path>
+      <path d="M9 5.5v2"></path>
+      <path d="M9 12.5v3"></path>
+    </symbol>
+    <symbol id="icon-utensils" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M5.999.75v22.5a.75.75 0 0 0 1.5 0V.75a.75.75 0 0 0-1.5 0m3 0V7.5a2.26 2.26 0 0 1-2.252 2.25 2.26 2.26 0 0 1-2.248-2.252V.75a.75.75 0 0 0-1.5 0V7.5a3.76 3.76 0 0 0 3.748 3.75 3.76 3.76 0 0 0 3.752-3.748V.75a.75.75 0 0 0-1.5 0m6.75 15.75h3c1.183.046 2.203-.9 2.25-2.111a2 2 0 0 0 0-.168c-.25-6.672-.828-9.78-3.231-13.533a1.508 1.508 0 0 0-2.77.81V23.25a.75.75 0 0 0 1.5 0V1.503c0 .003.001 0 .003 0l.008.002c2.21 3.45 2.75 6.354 2.99 12.773v.053a.696.696 0 0 1-.721.67L15.749 15a.75.75 0 0 0 0 1.5"></path>
     </symbol>
   </svg>
 
@@ -363,7 +439,39 @@
                 <p class="text-muted-foreground">Nie znaleziono produktów spełniających kryteria filtrowania</p>
               </div>
               <!-- Karty renderuje renderSklep() z data/wina.json — patrz .ai/standards/content/wina-json.md -->
-              <div id="lista-produktow" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+              <div id="lista-produktow" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-busy="true">
+                <!-- Szkielet do czasu renderSklep(); 1 / 2 / 3 karty zależnie od szerokości -->
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+                <article class="karta-szkielet rounded-md border border-card-border overflow-hidden">
+                  <div class="szkielet szkielet-zdjecie"></div>
+                  <div class="p-5">
+                    <div class="szkielet szkielet-linia szkielet-tytul"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia"></div>
+                    <div class="szkielet szkielet-linia szkielet-krotka"></div>
+                    <div class="szkielet szkielet-linia szkielet-cena"></div>
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
         </div>
@@ -577,14 +685,82 @@
             </div>
           </div>
 
-          <div class="max-w-2xl mx-auto rounded-md border border-card-border bg-card p-8" data-reveal>
+          <div class="p-8" data-reveal>
             <h2 class="font-serif text-3xl md:text-4xl font-bold mb-5 text-center">Zarezerwuj nocleg w winnicy</h2>
+            <p class="text-center text-muted-foreground max-w-3xl mx-auto mb-3">Winnica Kielna Góra to ogród, taras i pokoje dwuosobowe. W każdej opcji zakwaterowania czeka klimatyzacja, bezpłatne Wi-Fi, telewizor z płaskim ekranem i prywatna łazienka z prysznicem.</p>
+            <p class="text-center text-muted-foreground max-w-3xl mx-auto mb-8">Do dyspozycji gości jest jadalnia i dobrze wyposażona kuchnia, a na terenie obiektu prywatny parking i sprzęt do grillowania.</p>
             <!-- Karuzela zdjęć pokoi (SPEC-010): wypełnia initPokojeKaruzela() z /data/pokoje.json,
                  czyli par {nazwa}-thumb.* + {nazwa}.* z attached_assets/pokoje/. Bez zdjęć zostaje ukryta. -->
             <div id="pokoje-karuzela" class="pokoje-karuzela" aria-label="Zdjęcia pokoi" hidden>
-              <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--wstecz" data-pokoje-krok="-1" aria-label="Poprzednie zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg></button>
-              <div id="pokoje-karuzela-pas" class="pokoje-karuzela__pas"></div>
-              <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--dalej" data-pokoje-krok="1" aria-label="Następne zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+              <div class="pokoje-karuzela__okno">
+                <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--wstecz" data-pokoje-krok="-1" aria-label="Poprzednie zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg></button>
+                <div id="pokoje-karuzela-pas" class="pokoje-karuzela__pas"></div>
+                <button type="button" class="pokoje-karuzela__nav pokoje-karuzela__nav--dalej" data-pokoje-krok="1" aria-label="Następne zdjęcia pokoi"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+              </div>
+              <div id="pokoje-karuzela-dots" class="pokoje-karuzela__dots"></div>
+            </div>
+
+            <!-- Prezentacja pokoi: tylko zajawka, szczegóły i rezerwacja są na Booking.com. -->
+            <div class="pokoje-oferta">
+              <div class="pokoje-oferta__siatka">
+              <article class="pokoj-karta rounded-md border border-card-border bg-card">
+                <div class="pokoj-karta__naglowek">
+                  <svg class="w-6 h-6" aria-hidden="true"><use href="#icon-bed-double"></use></svg>
+                  <div>
+                    <h4 class="font-serif text-xl font-semibold">Pokój dwuosobowy</h4>
+                    <p class="pokoj-karta__podpis">5 pokoi · 2 osoby</p>
+                  </div>
+                </div>
+                <ul class="pokoj-udogodnienia">
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-area"></use></svg><span>16 m²</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-bath"></use></svg><span>Łazienka z prysznicem i suszarką</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-snowflake"></use></svg><span>Klimatyzacja</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-tv"></use></svg><span>Telewizor z płaskim ekranem</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-wifi"></use></svg><span>Bezpłatne Wi-Fi</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-no-smoking"></use></svg><span>Pokoje dla niepalących</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-garden-view"></use></svg><span>Balkon z widokiem na ogród</span></li>
+                </ul>
+              </article>
+              <article class="pokoj-karta rounded-md border border-card-border bg-card">
+                <div class="pokoj-karta__naglowek">
+                  <svg class="w-6 h-6" aria-hidden="true"><use href="#icon-utensils"></use></svg>
+                  <div>
+                    <h4 class="font-serif text-xl font-semibold">Kuchnia i jadalnia</h4>
+                    <p class="pokoj-karta__podpis">Wspólna dla gości</p>
+                  </div>
+                </div>
+                <ul class="pokoj-udogodnienia">
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-fridge"></use></svg><span>Lodówka</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-dishwasher"></use></svg><span>Zmywarka</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-coffee"></use></svg><span>Ekspres do kawy</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-oven"></use></svg><span>Piekarnik</span></li>
+                </ul>
+              </article>
+              </div>
+              <article class="pokoj-karta pokoje-oferta__wspolne rounded-md border border-card-border bg-card">
+                <div class="pokoj-karta__naglowek">
+                  <h4 class="font-serif text-xl font-semibold">Dla wszystkich gości</h4>
+                </div>
+                <ul class="pokoj-udogodnienia">
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-terrace"></use></svg><span>Taras</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-garden-view"></use></svg><span>Ogród</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-parking"></use></svg><span>Prywatny parking</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-grill"></use></svg><span>Grill</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-kite"></use></svg><span>Plac zabaw</span></li>
+                  <li><svg class="w-5 h-5" aria-hidden="true"><use href="#icon-foosball"></use></svg><span>Piłkarzyki</span></li>
+                </ul>
+              </article>
+              <article class="pokoj-karta pokoje-oferta__wspolne pokoje-okolica rounded-md border border-card-border bg-card">
+                <div class="pokoj-karta__naglowek">
+                  <h4 class="font-serif text-xl font-semibold">W okolicy</h4>
+                </div>
+                <ul class="pokoje-okolica__lista">
+                  <li><svg class="w-6 h-6" aria-hidden="true"><use href="#icon-okolica-park"></use></svg><strong class="pokoje-okolica__km">11 km</strong><span>Park im. W. Szafera</span></li>
+                  <li><svg class="w-6 h-6" aria-hidden="true"><use href="#icon-okolica-trasa"></use></svg><strong class="pokoje-okolica__km">12 km</strong><span>Podziemna trasa turystyczna</span></li>
+                  <li><svg class="w-6 h-6" aria-hidden="true"><use href="#icon-okolica-sklep"></use></svg><strong class="pokoje-okolica__km">15 km</strong><span>Centrum handlowe Nowy Świat</span></li>
+                  <li><svg class="w-6 h-6" aria-hidden="true"><use href="#icon-okolica-lotnisko"></use></svg><strong class="pokoje-okolica__km">22 km</strong><span>Lotnisko Rzeszów-Jasionka</span></li>
+                </ul>
+              </article>
             </div>
 
             <form id="noclegi-form" class="noclegi-form"
