@@ -139,10 +139,19 @@
   scroll-snap-stop: always;
 }
 
-/* Przyciski tylko na desktop */
+/* Strzałki widoczne na każdym ekranie; na telefonie mniejsze i wsunięte na zdjęcie. */
 @media (max-width: 767px) {
   .gallery-swiper__nav {
-    display: none !important;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .gallery-swiper__prev {
+    left: 0.25rem;
+  }
+
+  .gallery-swiper__next {
+    right: 0.25rem;
   }
 }
 

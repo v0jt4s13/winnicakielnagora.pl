@@ -1272,7 +1272,11 @@ async function initPokojeKaruzela() {
     }
     strzalki.forEach((strzalka) => {
       const wstecz = Number(strzalka.dataset.pokojeKrok) < 0;
-      strzalka.hidden = maks <= 1 || (wstecz ? pas.scrollLeft <= 1 : pas.scrollLeft >= maks - 1);
+      strzalka.hidden = maks <= 1;
+      // Strzałka na krańcu jest przezroczysta, ale zostaje na miejscu i przejmuje kliknięcie —
+      // dzięki temu klik przy krawędzi nie otwiera przypadkiem zdjęcia pod nią (jak w galerii „O nas").
+      const naKrancu = wstecz ? pas.scrollLeft <= 1 : pas.scrollLeft >= maks - 1;
+      strzalka.style.opacity = naKrancu ? "0" : "1";
     });
   };
   strzalki.forEach((strzalka) => {
