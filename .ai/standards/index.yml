@@ -12,6 +12,8 @@ backend:
 content:
   html-editing:
     description: Zasady edycji index.html — punktowe zmiany, wcięcia, ikony <symbol>, kotwice zamiast numerów linii
+  menu-i-stopka:
+    description: Menu i stopka skopiowane do index, sklep, noclegi i wina/*.html — każda zmiana etykiety/linku w każdym pliku, tabela celów i polecenie kontrolne
   wina-json:
     description: data/wina.json jako jedyne źródło asortymentu i cen; zapisujemy tylko brutto, resztę wyliczamy
 

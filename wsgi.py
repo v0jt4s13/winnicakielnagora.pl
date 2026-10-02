@@ -54,7 +54,8 @@ app.wsgi_app = ObetnijPrzedrostek(app.wsgi_app)
 # dostepne bylyby takze wsgi.py, AGENTS.md, TODO.md, tools/ oraz .git/ z cala historia.
 # Wpuszczamy tylko to, co ma trafic do przegladarki.
 PLIKI_PUBLICZNE = {"index.html", "404.html", "sitemap.xml", "robots.txt", "favicon.ico",
-                   "favicon.svg", "plan-startu.html"}
+                   "favicon.svg", "plan-startu.html", "sklep.html", "noclegi.html",
+                   "odmiany-winogron.html"}
 # `data` nie ma tu wpisu celowo: /data/wina.json obsluguje osobna trasa, ktora czyta
 # plik roboczy spoza katalogu wdrozenia.
 KATALOGI_PUBLICZNE = {"assets", "attached_assets", "wina", "filmy"}

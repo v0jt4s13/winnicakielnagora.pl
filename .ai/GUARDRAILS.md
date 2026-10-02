@@ -79,11 +79,11 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
 5. `attached_assets/` i `assets/` → jedyne miejsca na grafiki; ścieżki zawsze względne.
 6. **Sklep działa w trybie „Cennik", zakupy online wyłączone** (SPEC-006 + decyzja Właściciela
    z 2026-09-07). Dwie flagi w `assets/js/main.js`:
-   - `SKLEP_WLACZONY = true` → sekcja `#sklep` („Nasze wina i ceny", w menu „Cennik") jest
-     widoczna: `renderSklep()` + `initFilters()` budują listę win z cenami.
+   - `SKLEP_WLACZONY = true` → strona `sklep.html` („Nasze wina i ceny", w menu „Nasze wina") jest
+     widoczna (sekcja `#sklep`): `renderSklep()` + `initFilters()` budują listę win z cenami.
    - `KOSZYK_WLACZONY = false` → `initCart()` się nie uruchamia, a `Produkty.renderProductCard`
      dostaje `przyciskKoszyka: KOSZYK_WLACZONY`, więc karty są **bez przycisku „Dodaj"**.
-     `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html` zostają `hidden`.
+     `#cart-button`, `#cart-overlay`, `#cart-panel` w `index.html` zostają `hidden` (`sklep.html` ich nie ma).
 
    Kod koszyka (`initCart`, `renderCart`, `openCart`/`closeCart`, `cart`), `data/wina.json`
    i cała reszta **zostają nietknięte** — sprzedaż ma wrócić w całości. **NIGDY** nie usuwaj
@@ -100,7 +100,7 @@ Gdy wartości są w konflikcie, rozstrzyga ta kolejność:
    `kategorie` w tym samym pliku; opcjonalna lista `odmiany_slug` musi wskazywać istniejące pliki `wina/<slug>.html`.
 4. Dodajesz kategorię → **ZAWSZE** do tablicy `kategorie`; filtr w sklepie buduje z niej swoje
    opcje, więc nic nie trzeba zmieniać w HTML.
-5. Dodajesz odmianę → **ZAWSZE** kafelek w `#nasze-wina` **i** strona `wina/<slug>.html`
+5. Dodajesz odmianę → **ZAWSZE** kartę w `odmiany-winogron.html` **i** strona `wina/<slug>.html`
    **i** wpis w `sitemap.xml`. Odmiana bez własnej strony jest niewidoczna dla wyszukiwarek.
 6. Dodajesz sekcję z `id` → **ZAWSZE** pozycja w nawigacji desktopowej i mobilnej
    (`data-scroll="id-sekcji"`), jeśli ma być osiągalna z menu.

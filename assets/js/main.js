@@ -272,7 +272,7 @@ function updateStyleMenu(style) {
 
 function preferredTheme() {
   const saved = localStorage.getItem("winery-style");
-  return themeStyles[saved] ? saved : "light";
+  return themeStyles[saved] ? saved : "classic";
 }
 
 function initStyleSwitcher() {
@@ -429,7 +429,9 @@ function initScrollReveal() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.08 }
+      // threshold 0, nie ułamek wysokości: wysoki blok (lista kart) przy niskim oknie nigdy
+      // nie osiągał 8% widoczności i zostawał przezroczysty.
+      { rootMargin: "0px", threshold: 0 }
     );
 
     blocks
@@ -1597,7 +1599,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // @info #kst: aby przetestowac szkielet nalezy dodac:
   //  -  && !location.search.includes("szkielet")
   //  - test po url: ?szkielet=1#sklep
-  if (SKLEP_WLACZONY) {
+  // Galeria „O nas" startuje od razu, równolegle — nie czeka na cennik (strona główna go nie
+  // potrzebuje), bo do czasu jej wczytania w sekcji stoi pusty box.
+  const galeria = loadGalleryFromJSON();
+  // Cennik tylko tam, gdzie jest lista produktów (sklep.html); index.html jej nie ma.
+  if (SKLEP_WLACZONY && qs("#lista-produktow")) {
     cennik = await wczytajCennik();
     renderKategorie();
     if (renderSklep()) {
@@ -1607,7 +1613,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (KOSZYK_WLACZONY) initCart();
   }
   initWineOffer();
-  await loadGalleryFromJSON();
+  await galeria;
   initGallerySwiperDots();
   initGalleryGlightbox();
 });

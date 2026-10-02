@@ -83,6 +83,10 @@ bloków.
 
 `index.html` otrzymuje atrybut `data-reveal` na dokładnie 18 istniejących blokach:
 
+**Gdzie te bloki są dziś (2026-10-02):** bloki `#nasze-wina` (8) mieszkają w `odmiany-winogron.html`,
+bloki `#sklep` w `sklep.html` (panel filtrów `aside` jest tam zakomentowany); `index.html` ma resztę
+(`#o-nas`, `#wydarzenia`, `#noclegi`, `#kontakt`). Lista poniżej to układ z dnia wdrożenia.
+
 - `#o-nas > .max-w-7xl > .grid` — 1,
 - `#nasze-wina > .max-w-7xl > .text-center` — 1,
 - `#nasze-wina > .max-w-7xl > .space-y-12 > article` — 7,
@@ -131,7 +135,7 @@ Nowa funkcja `initScrollReveal()` w `assets/js/main.js`:
    i usuwa klasy sterujące,
 4. jeśli adres zawiera kotwicę, ujawnia przed uruchomieniem obserwatora każdy blok zawierający
    wskazany element oraz każdy blok wewnątrz wskazanej sekcji,
-5. w `try` tworzy jeden obserwator z `rootMargin: "0px 0px -10% 0px"` i `threshold: 0.08`,
+5. w `try` tworzy jeden obserwator z `rootMargin: "0px"` i `threshold: 0` (zero, bo wysoki blok — lista kart — nigdy nie osiągał ułamka widoczności w niskim oknie),
    zaczyna obserwować targety, następnie dodaje `.reveal-ready` i usuwa `.reveal-pending`,
 6. przy pierwszym przecięciu dodaje `.is-visible` i wykonuje `unobserve(element)`,
 7. nasłuchuje `prefers-reduced-motion`; po zmianie na `reduce` ujawnia wszystko i wywołuje
@@ -219,3 +223,11 @@ jednego obserwatora.
 
 - Pierwsza wersja specyfikacji efektu ujawniania bloków podczas przewijania.
 - Wdrożono jednorazowe ujawnianie 18 bloków, fallbacki oraz obsługę ograniczonego ruchu.
+
+### 2026-10-02
+
+- Obserwator: `threshold: 0.08` → `0` i `rootMargin: "0px 0px -10% 0px"` → `"0px"`. Wysoki blok
+  (lista kart sklepu) przy niskim oknie lub na telefonie nigdy nie osiągał 8% widoczności i zostawał
+  przezroczysty; martwy pas 10% przy dole ekranu dawał białą przerwę. Bloki `data-reveal` są teraz też na
+  `sklep.html`, `noclegi.html` i `odmiany-winogron.html` (sekcje `#sklep` i `#nasze-wina` zostały
+  wydzielone z `index.html`, SPEC-011); wymóg „niezagnieżdżone, bez duplikatów” obowiązuje na każdej z nich.

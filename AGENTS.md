@@ -232,7 +232,10 @@ Order: `spec ready → TaskCreate (all steps) → TaskUpdate (dependencies) → 
 ## Project Layout
 
 ```
-index.html                # CAŁA witryna — jeden plik, wszystkie sekcje
+index.html                # strona główna: o-nas, wydarzenia, noclegi, kontakt (+ zakomentowana zaślepka #promocje)
+sklep.html                # „Nasze wina”: cennik z data/wina.json (renderSklep), bez koszyka
+noclegi.html              # sekcja Noclegi na osobnej stronie — menu linkuje TYMCZASOWO do index.html#noclegi
+odmiany-winogron.html     # „Odmiany winogron”: karty odmian, linki do wina/*.html
 404.html                  # projektowa strona błędu; <base> podmienia wsgi.py wg przedrostka wdrożenia
 wsgi.py                   # Flask: statyki, API cennika/wydarzen/kontaktu, panel, kadr hero
 kontakt.py               # walidacja wyzwania i wysylka formularza przez SMTP
@@ -461,7 +464,7 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   przekreślona cena sprzed rabatu i badge `-N%` (plus `data-promo` i `data-discount`). JS czyta **tylko** `data-price`, `data-promo`, `data-category`,
   `data-id`, `data-name`, `data-image` — `data-price-net` i `data-discount` są martwe
   i utrzymywane ręcznie. Szczegóły: `.ai/standards/content/product-card.md`.
-- **Filtr cenowy ma zaszyty zakres 0–100 zł** (`input[type="range"]` w sekcji `#sklep`
+- **Filtr cenowy ma zaszyty zakres 0–100 zł** (`input[type="range"]` na `sklep.html` (sekcja `#sklep`)
   oraz `initFilters` w `main.js`). Produkt droższy niż 100 zł zniknie z listy bez żadnego
   komunikatu.
 - **VAT 23% jest zaszyty w dwóch miejscach**: `renderCart` w `main.js` (`subtotal / 1.23`)
@@ -480,8 +483,8 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   po przełączeniu wartość z poprzedniego. Nowa zmienna = wpis w obydwu obiektach
   `themeStyles` (decyzja: kst, 2026-09-18 — usunięto motywy `modern`, `rustic`, `light`).
   Szczegóły: `.ai/standards/frontend/theming.md`.
-- **Pobieranie cennika startuje w `<head>`, przed `main.js`.** `index.html` startuje `fetch` do
-  `data/wina.json` już w `<head>` (`window.__cennikFetch`), a `wczytajCennik()` w `main.js` odbiera tę
+- **Pobieranie cennika startuje w `<head>`, przed `main.js`.** `sklep.html` startuje `fetch` do
+  `data/wina.json` już w `<head>` (`index.html` go nie ma i cennika nie wczytuje — `main.js` robi to tylko tam, gdzie jest `#lista-produktow`) (`window.__cennikFetch`), a `wczytajCennik()` w `main.js` odbiera tę
   obietnicę zamiast tworzyć nowe zapytanie (podstrony `wina/*.html` jej nie mają i robią zwykły `fetch`).
   Do czasu `renderSklep()` w `#lista-produktow` stoi szkielet kart (`.karta-szkielet`, style w
   `produkt.css`, 1 / 2 / 3 karty zależnie od szerokości) — znika razem z `innerHTML` kontenera.
@@ -501,6 +504,9 @@ można by opisać osobno. Scenariusz jest więc jedynym miejscem, gdzie widać, 
   publiczną. Widoczność liczy `wydarzenia.aktywne()`; handler ma tylko wczytać, zawęzić i oddać.
   Pilnuje tego `tools/test-routing.py`. Wpisy przyszłe i zakończone **nie opuszczają serwera**,
   więc `main.js` nie ma żadnej logiki dat.
+- **Menu i stopka są skopiowane do każdej strony `.html`** (`index.html`, `sklep.html`, `noclegi.html`, `odmiany-winogron.html`, `wina/*.html`) —
+  nie ma szablonu. Zmiana w menu lub stopce musi trafić do wszystkich plików naraz.
+  Lista, tabela celów i polecenie kontrolne: `.ai/standards/content/menu-i-stopka.md`.
 - **`alert()` blokuje automatyzację przeglądarki.** „Przejdź do płatności" (`initCart`)
   nadal woła `alert()` - formularz kontaktowy używa komunikatów inline.
 - **Koszyk nie jest trwały** — `Map` w pamięci, znika po odświeżeniu strony. To świadomy stan
@@ -532,8 +538,8 @@ treści i numery natychmiast kłamią. Zawsze kotwica: `id`, nazwa klasy, nazwa 
 |------|-------|
 | Serwowanie plików | `wsgi.py` — catch-all `serve()` z białą listą `PLIKI_PUBLICZNE` / `KATALOGI_PUBLICZNE`; nieznany adres to **404**, nie strona główna |
 | Endpointy | `wsgi.py` — `/zdrowie`, `/data/wina.json`, `/data/wydarzenia.json` (tylko wpisy aktywne dziś), `/api/contact`, `/api/contact/challenge`, `/tools/panel/api/<akcja>` za hasłem |
-| Sekcje strony | `grep -n '<section id=' index.html` — dziś: `o-nas`, `nasze-wina`, `sklep`, `wydarzenia`, `noclegi`, `kontakt` |
-| Dane produktów (zamiast bazy) | `data/wina.json` — jedyne źródło asortymentu i cen; `index.html` NIE zawiera kart, renderuje je `renderSklep()` w `main.js`. Reguły: `.ai/standards/content/wina-json.md` |
+| Sekcje strony | `grep -n '<section id=' index.html` — dziś na `index.html`: `o-nas`, `wydarzenia`, `noclegi`, `kontakt` (`promocje` zakomentowana). Osobne strony: `sklep.html`, `noclegi.html`, `odmiany-winogron.html` — każda z własną kopią menu, stopki i bramki wieku (patrz `.ai/standards/content/menu-i-stopka.md`) |
+| Dane produktów (zamiast bazy) | `data/wina.json` — jedyne źródło asortymentu i cen; żadna strona nie zawiera kart na sztywno, renderuje je `renderSklep()` w `main.js` na `sklep.html`. Reguły: `.ai/standards/content/wina-json.md` |
 | Wydarzenia | `data/wydarzenia.json` + `wydarzenia.py` (walidacja, `aktywne()`); render `initWydarzenia()` w `main.js`, kontener `#lista-wydarzen` w sekcji `#wydarzenia` |
 | Panel redakcyjny | `tools/panel/` — lokalnie `serwer.py` na `127.0.0.1` bez hasła, na produkcji `wsgi.py` za Basic Auth (`PANEL_UZYTKOWNIK`, `PANEL_HASLO_HASH`) |
 | Testy | `tools/test-*.py` — routing, wydarzenia, ścieżka cennika, uwierzytelnianie panelu, serwowanie na prawdziwym Flasku |

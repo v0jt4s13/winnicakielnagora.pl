@@ -1,5 +1,23 @@
 # Strona bez sklepu online, bez degustacji, z noclegami
 
+## Stan aktualny (2026-10-02)
+
+Ta specyfikacja opisuje pivot oferty z 2026-09-06/07; poniższa lista to jej **obowiązujący stan**
+(rozbicie strony na osobne pliki: SPEC-011).
+
+- **Sklep:** tryb „Cennik" — `SKLEP_WLACZONY = true`, `KOSZYK_WLACZONY = false`. Cennik żyje na osobnej
+  stronie `sklep.html` („Nasze wina"); na `index.html` nie ma `#sklep` ani koszyka, a w jego miejscu stoi
+  zakomentowana zaślepka `#promocje`.
+- **Odmiany:** sekcja z kartami odmian to strona `odmiany-winogron.html`; `#nasze-wina` z `index.html` usunięte.
+- **Noclegi:** sekcja `#noclegi` na `index.html` ma karuzelę pokoi (SPEC-010), ofertę i działający formularz
+  Booking — nie ma już nieaktywnego przycisku „Rezerwacja wkrótce". Strona `noclegi.html` istnieje, ale menu
+  tymczasowo linkuje do `index.html#noclegi`.
+- **Menu (nagłówek desktop i mobile, stopka):** O Nas · Nasze wina (`sklep.html`) · Wydarzenia · Noclegi ·
+  Odmiany winogron (`odmiany-winogron.html`) · Kontakt. Kopie na każdej stronie: `.ai/standards/content/menu-i-stopka.md`.
+- **Hero:** „Poznaj nasze wina" → `sklep.html`, „Noclegi w winnicy" → `#noclegi`.
+- **`wina/*.html`:** to samo menu; ceny odmiany nadal z `data/wina.json`, CTA „Napisz do nas" → `#kontakt`.
+- **Degustacje** zdjęte z treści, karta „Co się u nas dzieje" w `#wydarzenia` — bez zmian względem tej specyfikacji.
+
 ## Overview
 
 Właściciel koryguje ofertę winnicy na start:
@@ -49,16 +67,15 @@ Nie zna się na technologii, wchodzi z telefonu, przegląda stronę od góry do 
 
    ```text
    ┌───────────────────────────────────────────────────────────────┐
-   │ Winnica Kielna Góra   O Nas  Nasze Wina  Wydarzenia  Noclegi  │
-   │                                                   Kontakt  ☰  │
+   │ Winnica Kielna Góra  O Nas  Nasze wina  Wydarzenia  Noclegi   │
+   │                              Odmiany winogron  Kontakt  ☰     │
    └───────────────────────────────────────────────────────────────┘
    ```
 
-   > **Zmiana vs. stan obecny:** dziś menu ma sześć pozycji:
-   > `O Nas · Nasze Wina · Sklep · Degustacje · Wydarzenia · Kontakt` (desktop w ~w. 138–143,
-   > mobile ~w. 194–199). Po zmianie zostają cztery: **Sklep** i **Degustacje** znikają,
-   > dochodzi **Noclegi** przed „Kontakt". Ikona koszyka w nagłówku (`#cart-button`,
-   > ~w. 182) też znika (`hidden`).
+   > **Zmiana vs. stan sprzed pivotu:** menu miało sześć pozycji
+   > (`O Nas · Nasze Wina · Sklep · Degustacje · Wydarzenia · Kontakt`). Obecnie: **Degustacje** zniknęły,
+   > „Sklep" to **Nasze wina** (`sklep.html`), doszły **Noclegi** i **Odmiany winogron** (`odmiany-winogron.html`).
+   > Ikona koszyka w nagłówku (`#cart-button`) jest `hidden`.
 
 2. W sekcji hero widzi zdjęcie i jedno wezwanie do działania:
 
@@ -66,7 +83,7 @@ Nie zna się na technologii, wchodzi z telefonu, przegląda stronę od góry do 
    ┌───────────────────────────────────────────────┐
    │            Winnica Kielna Góra                 │
    │        Tradycyjne wina z … stoków              │
-   │        [ Poznaj nasze wina ]                   │
+   │   [ Poznaj nasze wina ] [ Noclegi w winnicy ]  │
    └───────────────────────────────────────────────┘
    ```
 
@@ -74,9 +91,9 @@ Nie zna się na technologii, wchodzi z telefonu, przegląda stronę od góry do 
    `initNavigation()` w `main.js` — brak elementu docelowego = klik nic nie robi
    (`if (el)` już jest).
 
-   > **Zmiana vs. stan obecny:** dziś hero ma dwa przyciski: „Przejdź do sklepu"
-   > (`data-scroll="#sklep"`) i „Degustacje" (`data-scroll="#degustacje"`, ~w. 218–219).
-   > Po zmianie jeden przycisk „Poznaj nasze wina" → `data-scroll="#nasze-wina"`.
+   > **Zmiana vs. stan sprzed pivotu:** hero miało „Przejdź do sklepu" (`#sklep`) i „Degustacje"
+   > (`#degustacje`). Obecnie dwa przyciski: „Poznaj nasze wina" → `./sklep.html` (zwykły link)
+   > i „Noclegi w winnicy" → `data-scroll="#noclegi"`.
    > Tekst „Tradycyjne wina z bieszczadzkich stoków" zostaje bez zmian w tym zadaniu —
    > poprawi go Właściciel (i/lub przełącznik `?slowo=` z quick-spec 004).
 
@@ -98,7 +115,9 @@ Nie zna się na technologii, wchodzi z telefonu, przegląda stronę od góry do 
    `<a>` wizualnie wyszarzony z `aria-disabled="true"`, `href="#noclegi"` (kotwica do samej
    siebie, nie przewija). Zero JavaScriptu.
 
-   > **Zmiana vs. stan obecny:** sekcji `#noclegi` dziś nie ma. To nowy blok treści.
+   > **Stan aktualny sekcji:** wersja ze szkicu wyżej (statyczna, przycisk „Rezerwacja wkrótce") została
+   > rozbudowana — `#noclegi` ma dziś karuzelę zdjęć pokoi (`#pokoje-karuzela`, `initPokojeKaruzela()`,
+   > SPEC-010), prezentację pokoi i udogodnień oraz formularz `Szukaj na Booking` z datami i liczbą gości.
 
 4. Wraca na stronę po tygodniu — Właściciel podmienił link. Przycisk „Zarezerwuj na
    Booking" jest teraz aktywny i otwiera ofertę winnicy na Booking.com w nowej karcie.
@@ -111,8 +130,8 @@ Nie zna się na technologii, wchodzi z telefonu, przegląda stronę od góry do 
 **Persona:** Tomasz — był na pikniku w winnicy, chce zamówić skrzynkę. Szuka na stronie
 przycisku „kup".
 
-1. Wchodzi, klika „Nasze Wina", trafia do sekcji `#nasze-wina` (bez zmian) i dalej na
-   podstronę odmiany, np. `wina/dornfelder.html`.
+1. Wchodzi, klika „Odmiany winogron", trafia na stronę `odmiany-winogron.html` i dalej na
+   podstronę odmiany, np. `wina/dornfelder.html`. Ceny wszystkich win ma pod „Nasze wina" (`sklep.html`).
 
    ```text
    ┌───────────────────────────────────────────────┐
@@ -223,14 +242,14 @@ Sklep wyłącza **jedna flaga w `main.js`** plus **atrybut `hidden`** na czterec
 
 | Element | Kotwica | Zmiana |
 |---|---|---|
-| Sekcja sklepu | `<section id="sklep" class="py-20">` | dodać `hidden` |
+| Sekcja sklepu | `<section id="sklep">` | przeniesiona na `sklep.html`; z `index.html` usunięta |
 | Przycisk koszyka | `<button id="cart-button" …>` | dodać `hidden` |
 | Overlay koszyka | `<div id="cart-overlay" …>` | dodać `hidden` |
 | Panel koszyka | `<aside id="cart-panel" …>` | dodać `hidden` |
 | Menu desktop | `data-scroll="#sklep"` i `data-scroll="#degustacje"` | usunąć oba `<button>` |
 | Menu mobile | jw. w `#mobile-menu` | usunąć oba `<button>` |
-| Hero | dwa `<button class="btn-ghost">` | zastąpić jednym „Poznaj nasze wina" → `#nasze-wina` |
-| Stopka „Szybkie Linki" | `<li>` z `data-scroll="#sklep"` | usunąć; dodać `<li>` „Noclegi" → `#noclegi` |
+| Hero | dwa `<button class="btn-ghost">` | dwa linki: „Poznaj nasze wina" → `sklep.html`, „Noclegi w winnicy" → `#noclegi` |
+| Stopka „Szybkie Linki" | `<li>` z `data-scroll="#sklep"` | O Nas · Nasze wina · Wydarzenia · Noclegi · Odmiany winogron |
 
 `openCart()` w `main.js` używa klasy `.open`, nie zdejmuje `hidden`. **Sprawdzone:**
 wszystkie odwołania do `openCart()` i `#cart-button` (~w. 631, 637, 668) siedzą wewnątrz
@@ -376,17 +395,17 @@ komentarzem). `/data/wina.json`, `/data/wydarzenia.json`, panel — bez zmian.
 
 ## UI/UX
 
-- **Nawigacja** — cztery pozycje: `O Nas · Nasze Wina · Wydarzenia · Noclegi · Kontakt`
-  (pięć etykiet; „Nasze Wina" i „Wydarzenia" zostają). Desktop `flex`, mobile menu
-  rozwijane — obie listy w `index.html` trzymać w parytecie.
-- **Hero** — jeden przycisk `btn-ghost` „Poznaj nasze wina". `initNavigation()` bez zmian.
-- **Sekcja `#sklep`** — `hidden`, całkowicie poza widokiem i poza kolejnością tabulacji.
+- **Nawigacja** — sześć pozycji: `O Nas · Nasze wina · Wydarzenia · Noclegi · Odmiany winogron · Kontakt`.
+  Desktop `flex`, mobile menu rozwijane — obie listy oraz stopkę trzymać w parytecie na wszystkich
+  stronach (`.ai/standards/content/menu-i-stopka.md`).
+- **Hero** — dwa przyciski `btn-ghost`: „Poznaj nasze wina" → `sklep.html`, „Noclegi w winnicy" → `#noclegi`.
+- **Cennik** — strona `sklep.html` („Nasze wina i ceny"), karty bez przycisku „Dodaj"; na `index.html` nie
+  ma `#sklep`.
 - **Koszyk** — `#cart-button`, `#cart-overlay`, `#cart-panel` `hidden`.
 - **Sekcja `#wydarzenia`** — nagłówek „Wydarzenia", pod listą wpisów karta „Co się u nas
   dzieje" (dwie kolumny, zdjęcie + tekst + `btn-primary` do `#kontakt`).
-- **Sekcja `#noclegi`** — nagłówek wyśrodkowany, zajawka, przycisk wyśrodkowany + podpis
-  „Rezerwacja wkrótce". Przycisk wyszarzony, nieklikalny. Bez zdjęć na start; gdy dojdą
-  kadry pokoi — rząd `grid md:grid-cols-3` (na telefonie jedna kolumna) nad przyciskiem.
+- **Sekcja `#noclegi`** — nagłówek, opis, karuzela zdjęć pokoi (SPEC-010), karty pokoju i udogodnień,
+  formularz `Szukaj na Booking`.
 - **Podstrony `wina/*.html`** — header bez „Sklep"; blok `#oferta-odmiany` kieruje do
   `#kontakt`. `soki.html`: `<h2>` „Soki w naszym sklepie" → „Soki z naszej winnicy".
 - **Motywy** — nowa sekcja `#noclegi`, karta typów wydarzeń i ewentualna klasa
@@ -406,7 +425,7 @@ nie przez przełącznik dla użytkownika.
 
 **Sklep i koszyk**
 
-- Sekcja `#sklep` nie jest widoczna ani osiągalna tabulacją na stronie głównej.
+- Strona główna nie zawiera `#sklep` ani koszyka; cennik jest na `sklep.html`.
 - Ikona koszyka i panel koszyka nie są widoczne.
 - W konsoli przeglądarki brak błędów przy `SKLEP_WLACZONY = false` (żaden `initX` sklepowy
   nie odwołuje się do nieistniejącego węzła).
@@ -416,13 +435,10 @@ nie przez przełącznik dla użytkownika.
 
 **Nawigacja**
 
-- Menu desktop i mobile: `O Nas · Nasze Wina · Wydarzenia · Noclegi · Kontakt`. Brak
-  „Sklep" i „Degustacje".
-- Stopka „Szybkie Linki": `O Nas · Nasze Wina · Wydarzenia · Noclegi`.
-- `grep -n '#degustacje' index.html` → 0 trafień. `grep -n '#sklep' index.html` → 0
-  (poza ewentualnym zakomentowanym kodem, którego tu nie ma — sekcja jest `hidden`, nie
-  usunięta, ale `data-scroll="#sklep"` znika).
-- Hero: jeden przycisk „Poznaj nasze wina" → przewija do `#nasze-wina`.
+- Menu desktop i mobile oraz stopka: `O Nas · Nasze wina · Wydarzenia · Noclegi · Odmiany winogron`
+  (+ „Kontakt" w menu). Brak „Sklep" i „Degustacje".
+- `grep -n '#degustacje' index.html` → 0 trafień. `grep -n '#sklep' index.html` → 0.
+- Hero: „Poznaj nasze wina" → `sklep.html`, „Noclegi w winnicy" → `#noclegi`.
 
 **Degustacje**
 
@@ -434,13 +450,11 @@ nie przez przełącznik dla użytkownika.
 
 **Noclegi**
 
-- Sekcja `#noclegi` jest między `#wydarzenia` a `#kontakt`, widoczna, z nagłówkiem,
-  zajawką i przyciskiem. **Bez rzędu zdjęć** (brak kadrów pokoi w zasobach — dojdą osobno).
-- Przycisk „Zarezerwuj na Booking" jest wyszarzony, `aria-disabled="true"`, nie przewija
-  strony ani nigdzie nie prowadzi. Pod nim podpis „Rezerwacja wkrótce".
-- **W repozytorium nie ma zmyślonego adresu Booking** — `href` wskazuje `#noclegi`
-  albo element to `<span>`.
-- Sekcja czytelna w czterech motywach i na szerokości telefonu.
+- Sekcja `#noclegi` jest między `#wydarzenia` a `#kontakt`, z karuzelą pokoi, opisem i formularzem
+  `Szukaj na Booking` (SPEC-010).
+- **W repozytorium nie ma zmyślonego adresu rezerwacji** — formularz wysyła na Booking.com z parametrami
+  wybranymi przez gościa.
+- Sekcja czytelna w dostępnych motywach (`classic`, `dark`) i na szerokości telefonu.
 
 **Podstrony odmian**
 
@@ -544,6 +558,12 @@ podglądzie zmian CSS trzeba wymuszać przeładowanie (`?v=` albo świeży port)
 `wsgi.py` daje CSS `no-cache` + ETag, więc problem tam nie istnieje (TODO #35).
 
 ## Changelog
+
+### 2026-10-02
+
+- Stan aktualny spisany na górze specyfikacji. Sklep („Nasze wina"), odmiany winogron i (docelowo)
+  noclegi przeniesione na osobne strony, `#sklep` i `#nasze-wina` usunięte z `index.html`, zaślepka
+  `#promocje`, nowe menu i hero. Szczegóły i decyzje: SPEC-011.
 
 ### 2026-09-07
 
