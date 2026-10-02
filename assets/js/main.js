@@ -392,6 +392,30 @@ function initHeroImage() {
   if (!wymuszona) window.setInterval(updateImage, 60_000);
 }
 
+/** Wejście na stronę z kotwicą (np. z podstrony na index.html#wydarzenia).
+ *
+ * Przeglądarka skacze do kotwicy zanim dojdą zdjęcia i treść doładowywana skryptami (galeria,
+ * karuzela pokoi, wydarzenia), więc wysokość strony nad celem rośnie i sekcja ląduje pod ekranem.
+ * Przez kilka sekund korygujemy pozycję przy każdej zmianie układu — do pierwszego ruchu
+ * użytkownika. `behavior: "instant"`, bo `scroll-behavior: smooth` na :root animowałby korektę.
+ */
+function initKotwicaPoZaladowaniu() {
+  if (!location.hash) return;
+  let cel = null;
+  try { cel = qs(location.hash); } catch (_) { return; }
+  if (!cel) return;
+
+  const koniec = () => {
+    obserwator.disconnect();
+    ["wheel", "touchstart", "keydown", "pointerdown"].forEach((z) => window.removeEventListener(z, koniec));
+    window.clearTimeout(limit);
+  };
+  const obserwator = new ResizeObserver(() => cel.scrollIntoView({ behavior: "instant", block: "start" }));
+  obserwator.observe(document.body);
+  ["wheel", "touchstart", "keydown", "pointerdown"].forEach((z) => window.addEventListener(z, koniec, { passive: true }));
+  const limit = window.setTimeout(koniec, 5000);
+}
+
 function initScrollReveal() {
   const root = document.documentElement;
   const blocks = qsa("[data-reveal]");
@@ -1586,6 +1610,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTimeTheme();
   initHeroImage();
   initScrollReveal();
+  initKotwicaPoZaladowaniu();
   initNavigation();
   initContactForm();
   initNoclegi();
