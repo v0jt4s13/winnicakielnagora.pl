@@ -169,8 +169,9 @@ nocleg w winnicy" (karty pokoju, „Kuchnia i jadalnia", „Dla wszystkich gośc
 Zostaje:
 - **Zdjęcia pokoi** — wgrać przez panel do `attached_assets/pokoje/` (para `-thumb` + pełne; patrz SPEC-010).
 - **Dane w prezentacji pokoi są PRZYKŁADOWE** (komentarz TODO nad `.pokoje-oferta` w `index.html`):
-  powierzchnia w m², zestaw udogodnień pokoju, czy balkon jest tylko w pokoju dwuosobowym, liczba
-  pokoi w plakietce i tekst wstępny. Wypełnia Właściciel; nie wymyślać wartości.
+  powierzchnia w m², zestaw udogodnień pokoju, czy balkon jest tylko w pokoju dwuosobowym
+  i tekst wstępny. Wypełnia Właściciel; nie wymyślać wartości. (Liczba pokoi w plakietce
+  poprawiona 2026-10-05: „3 pokoje · 2 osoby" w `index.html` i `noclegi.html`.)
 - **„Cena od"** — komentowany slot w karcie `#noclegi`, wypełnia Właściciel.
 - **Ręczne potwierdzenie** — Właściciel klika raz przez formularz i sprawdza, czy Booking
   honoruje `checkin` / `checkout` / `group_adults` (WebFetch nie zweryfikuje — Booking

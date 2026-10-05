@@ -306,9 +306,8 @@ Treść robocza (Właściciel poprawi):
   - „Pikniki i dni otwarte na winnicy"
   - „Spotkania przy zbiorach (winobranie)"
 - `<button class="btn-primary" data-scroll="#kontakt">` — „Napisz do nas" (bez zmian)
-- Kolumna zdjęcia: **zostaje** `attached_assets/generated_images/sala-degustacyjna-ai.jpg`
-  z `alt="Wnętrze winiarni"`. Podmiana kadru na plenerowy jest opcjonalna i wykracza poza
-  tę zmianę (nowy wpis w `TODO.md` zamiast starego #15).
+- Kolumna zdjęcia: `attached_assets/photos/winnica-butelka-biale-01.jpg`
+  z `alt="Winnica - wydarzenia"`.
 
 Karta jest widoczna **zawsze**. Gdy panel ma aktywne wpisy, `initWydarzenia()` pokazuje je
 w `#lista-wydarzen` **nad** kartą — tak jak dziś działa z kartą degustacji (SPEC-005,
@@ -558,6 +557,12 @@ podglądzie zmian CSS trzeba wymuszać przeładowanie (`?v=` albo świeży port)
 `wsgi.py` daje CSS `no-cache` + ETag, więc problem tam nie istnieje (TODO #35).
 
 ## Changelog
+
+### 2026-10-05
+- Sali degustacyjnej nie ma (decyzja Właściciela). Karta „Co się u nas dzieje" w `#wydarzenia` nie używa
+  już `sala-degustacyjna-ai.jpg` (grafika AI) — zdjęcie to `photos/winnica-butelka-biale-01.jpg`,
+  alt „Winnica - wydarzenia". Fragment specyfikacji o zostawieniu tej grafiki jest nieaktualny.
+  Plik w `generated_images/` jest osierocony: żadna strona go nie ładuje.
 
 ### 2026-10-02
 
